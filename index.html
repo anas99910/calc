@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="en" class=""> <!-- class="light" will be toggled here -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenso - Sleek Expense Tracker</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>%F0%9F%92%B0</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Base styles - NEW Dark/Green Theme */
+        :root {
+            --bg-primary: #121212; /* Very dark grey background */
+            --bg-secondary: #1e1e1e; /* Dark panel background */
+            --bg-tertiary: #2a2a2a; /* Lighter panel (inputs) */
+            --bg-overlay: rgba(0, 0, 0, 0.7);
+            --text-primary: #FFFFFF;
+            --text-secondary: #b3b3b3; /* Light grey */
+            --text-tertiary: #808080; /* Medium grey */
+            --border-primary: #303030; /* Subtle border */
+            --border-focus: #1DB954; /* Green accent */
+            --scroll-track: #121212;
+            --scroll-thumb: #303030;
+            --scroll-thumb-hover: #454545;
+            
+            /* --- ACCENT COLORS --- */
+            --accent-primary: #1DB954; /* Bright Green */
+            --accent-primary-hover: #1ED760;
+            --accent-primary-text: #FFFFFF;
+            --accent-primary-subtle-bg: rgba(29, 185, 84, 0.15);
+            --accent-primary-subtle-text: #1DB954;
+
+            --accent-secondary: #2a2a2a; /* Grey buttons */
+            --accent-secondary-hover: #333333;
+            --accent-secondary-text: #FFFFFF;
+            
+            --accent-danger: #E53E3E; /* Red */
+            --accent-danger-hover: #FC8181;
+            --accent-danger-subtle-bg: rgba(229, 62, 62, 0.15);
+            --accent-danger-subtle-text: #E53E3E;
+        }
+
+        /* Light Mode (Kept for toggle, but dark is default) */
+        .light {
+            --bg-primary: #F3F4F6;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #F9FAFB;
+            --bg-overlay: rgba(0, 0, 0, 0.4);
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --text-tertiary: #9CA3AF;
+            --border-primary: #E5E7EB;
+            --border-focus: #1DB954;
+            --scroll-track: #F3F4F6;
+            --scroll-thumb: #D1D5DB;
+            --scroll-thumb-hover: #9CA3AF;
+            
+            /* --- ACCENT COLORS --- */
+            --accent-primary: #1DB954;
+            --accent-primary-hover: #1ED760;
+            --accent-primary-text: #FFFFFF;
+            --accent-primary-subtle-bg: rgba(29, 185, 84, 0.15);
+            --accent-primary-subtle-text: #1DB954;
+
+            --accent-secondary: #E5E7EB;
+            --accent-secondary-hover: #D1D5DB;
+            --accent-secondary-text: #1F2937;
+            
+            --accent-danger: #E53E3E;
+            --accent-danger-hover: #FC8181;
+            --accent-danger-subtle-bg: rgba(229, 62, 62, 0.15);
+            --accent-danger-subtle-text: #E53E3E;
+        }
+
+        .light body {
+            background-color: var(--bg-primary);
+            background-attachment: fixed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary); /* Solid dark background */
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-secondary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Solid Card Style (No glass) */
+        .glass-card {
+            background: var(--bg-secondary);
+            /* REMOVED backdrop-filter */
+            border: 1px solid var(--border-primary);
+            border-radius: 1.25rem; /* 20px */
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1); /* Softer shadow */
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Solid Input Style */
+        .glass-input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        .glass-input::placeholder {
+            color: var(--text-tertiary);
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: var(--border-focus); /* Green focus */
+            box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.3); /* Green shadow */
+        }
+        
+        .light .glass-input:focus {
+             box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.3); /* Green shadow */
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--scroll-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
+
+        /* Date picker icon */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            /* Invert(1) for dark, Invert(0.2) for light */
+            filter: var(--bg-primary, #121212) = #121212 ? invert(1) : invert(0.2);
+            cursor: pointer;
+        }
+        
+        /* Modal animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal-slide-in-up { animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Bar chart animation */
+        .chart-bar { transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Budget progress bar */
+        #budget-progress-bar {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Pie chart */
+        #pie-chart {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #F9C851 0deg 90deg, #E67E22 90deg 180deg, #3498DB 180deg 270deg, #2ECC71 270deg 360deg);
+            transition: background 0.5s;
+        }
+        
+        /* Utility for hiding */
+        .hidden { display: none !important; }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+        #toast.show {
+            bottom: 30px;
+        }
+        #toast.success {
+            background-color: var(--accent-primary); /* Green */
+            color: var(--accent-primary-text); /* White */
+        }
+        #toast.error {
+            background-color: var(--accent-danger); /* Red */
+            color: var(--accent-primary-text); /* White */
+        }
+
+        /* New style for scrollable history */
+        .history-container {
+            max-height: 60vh; /* 60% of the viewport height */
+            overflow-y: auto;
+            padding-right: 6px; /* Space for scrollbar */
+        }
+
+        /* --- New styles to hide bar chart scrollbar --- */
+        #bar-chart-container {
+            /* Hide scrollbar on Firefox */
+            scrollbar-width: none; 
+        }
+        #bar-chart-container::-webkit-scrollbar {
+            /* Hide scrollbar on Webkit (Chrome, Safari) */
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased">
+
+    <!-- Password Gate Modal -->
+    <div id="password-gate" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background-color: var(--bg-primary);">
+        <div class="glass-card w-full max-w-sm p-6">
+            <h3 class="text-2xl font-semibold text-primary mb-6 text-center">Expenso</h3>
+            <form id="password-form" class="space-y-4">
+                <div>
+                    <label for="username-input" class="block text-sm font-medium text-secondary mb-2">Username</label>
+                    <input type="text" id="username-input" name="username" class="glass-input w-full rounded-lg p-3" placeholder="" required autocomplete="username">
+                </div>
+                <div>
+                    <label for="password-input" class="block text-sm font-medium text-secondary mb-2">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password-input" name="password" class="glass-input w-full rounded-lg p-3 pr-10" required maxlength="5" autocomplete="current-password">
+                        <button type="button" id="toggle-password-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-secondary hover:text-primary" title="Show/Hide Password">
+                            <!-- Eye Icon (visible by default) -->
+                            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.07.207-.141.414-.214.618m-2.06 3.095A9.002 9.002 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .07-.207-.141-.414-.214-.618m2.06-3.095l-2.06-3.095m16 0l-2.06 3.095" />
+                            </svg>
+                            <!-- Eye-Off Icon (hidden by default) -->
+                            <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .23-.62.5-1.22.814-1.78m3.95 3.95A3 3 0 018.02 14.02l-1.07-1.07m5.92-5.92A3 3 0 0115.98 9.98l1.07 1.07m-5.92 5.92l-1.07-1.07m5.92-5.92l1.07 1.07M3 3l18 18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="password-error" class="text-red-400 text-sm mt-2 hidden">Incorrect username or password. Please try again.</p>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <!-- UPDATED: Button uses accent colors -->
+                    <button type="submit" id="password-submit-btn" class="w-full font-medium py-3 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                        Unlock
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Main Application Container (HIDDEN BY DEFAULT) -->
+    <div id="app" class="max-w-6xl mx-auto p-4 md:p-8 hidden">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 gap-4">
+            <div class="flex-1 flex items-center gap-4 w-full md:w-auto">
+                <h1 class="text-3xl md:text-4xl font-bold text-primary tracking-tight">
+                    Expenso
+                </h1>
+                <select id="month-selector" class="glass-input text-sm rounded-lg py-2 px-3 focus:ring-green-500 focus:border-green-500"></select>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                <button id="theme-toggle-btn" class="p-2 rounded-full glass-input" title="Toggle Theme">
+                    <!-- Sun Icon -->
+                    <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <!-- Moon Icon -->
+                    <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                <button id="settings-btn" class="p-2 rounded-full glass-input" title="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+                <!-- Add Logout Button -->
+                <button id="logout-btn" class="p-2 rounded-full glass-input" title="Logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+                <button id="set-budget-btn" class="font-medium py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-200"
+                        style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16v2m-6-6H3m6 0H9m6 0h3m-3 0h-3m-6 0H3m6 0H9m6 0h3m-3 0h-3" />
+                    </svg>
+                    <span class="hidden sm:inline">Budget</span>
+                </button>
+                <button id="add-income-btn" class="font-medium py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-200"
+                        style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" />
+                    </svg>
+                    <span class="hidden sm:inline">Add Income</span>
+                </button>
+                <!-- UPDATED: Main "Add" button is green -->
+                <button id="add-expense-btn" class="font-medium py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-200"
+                        style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="hidden sm:inline">Add Expense</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+
+            <!-- Main Column (Summary, Chart, List) -->
+            <div class="lg:col-span-2 space-y-6 md:space-y-8">
+                
+                <!-- Total Expenses Card -->
+                <section class="glass-card p-6">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-start">
+                        <div class="mb-4 sm:mb-0">
+                            <h2 class="text-sm font-medium text-tertiary mb-2">
+                                Total This Month
+                            </h2>
+                            <div class="text-4xl md:text-5xl font-bold text-primary" id="total-expenses">
+                                0.00 MAD
+                            </div>
+                        </div>
+                        <div class="sm:text-right">
+                            <h2 class="text-sm font-medium text-tertiary mb-2">
+                                Budget
+                            </h2>
+                            <div class="text-2xl font-semibold text-primary" id="budget-display">
+                                Not Set
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Budget Progress Bar -->
+                    <div class="mt-4">
+                        <div class="w-full bg-tertiary rounded-full h-2.5">
+                            <!-- UPDATED: Progress bar uses green accent -->
+                            <div id="budget-progress-bar" class="h-2.5 rounded-full" style="width: 0%; background-color: var(--accent-primary);"></div>
+                        </div>
+                        <p id="budget-remaining-text" class="text-sm text-tertiary text-right mt-1"></p>
+                    </div>
+                </section>
+                
+                <!-- *** SECTION RESTORED *** -->
+                <!-- Monthly Breakdown Card -->
+                <section class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-primary">
+                            Monthly Breakdown
+                        </h3>
+                        <div class="flex gap-2">
+                            <!-- UPDATED: Active button style is green -->
+                            <button id="chart-toggle-bar" class="p-2 rounded-lg glass-input" title="Bar Chart"
+                                    style="background-color: var(--accent-primary-subtle-bg); color: var(--accent-primary);">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            </button>
+                            <button id="chart-toggle-pie" class="p-2 rounded-lg glass-input" title="Pie Chart">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Chart Area -->
+                    <div id="bar-chart-container" class="h-48 w-full flex items-end gap-4 p-2 sm:p-4 bg-tertiary rounded-xl overflow-x-auto">
+                        <!-- Bar chart bars will be injected here -->
+                    </div>
+                    <div id="pie-chart-container" class="h-auto sm:h-48 w-full hidden flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 p-4 bg-tertiary rounded-xl">
+                        <div id="pie-chart" class="flex-shrink-0"></div>
+                        <div id="pie-chart-legend" class="text-sm space-y-1"></div>
+                    </div>
+                    <!-- Category-specific budgets container -->
+                    <div id="category-budgets-container" class="mt-4 space-y-3">
+                        <!-- Category budgets will be injected here -->
+                    </div>
+                </section>
+                
+                <!-- *** SECTION RESTORED *** -->
+                <!-- Expense List -->
+                <section>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-2xl font-semibold text-primary">
+                                History
+                            </h2>
+                            <select id="history-type-toggle" class="glass-input text-sm rounded-lg py-1 px-2">
+                                <option value="expenses" selected>Expenses</option>
+                                <option value="income">Income</option>
+                                <option value="all">All</option>
+                            </select>
+                            <select id="filter-category" class="glass-input text-sm rounded-lg py-1 px-2">
+                                <option value="all">All Categories</option>
+                            </select>
+                            <select id="history-sort-toggle" class="glass-input text-sm rounded-lg py-1 px-2">
+                                <option value="date-desc" selected>Sort by Date (Newest)</option>
+                                <option value="date-asc">Sort by Date (Oldest)</option>
+                                <option value="amount-desc">Sort by Amount (High)</option>
+                                <option value="amount-asc">Sort by Amount (Low)</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <input type="search" id="search-bar" class="glass-input text-sm rounded-lg py-2 px-3 focus:ring-green-500 focus:border-green-500 w-full sm:w-auto" placeholder="Search or #tag...">
+                            <button id="export-excel-btn" class="p-2 rounded-lg glass-input text-tertiary hover:text-primary" title="Export to Excel (CSV)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </button>
+                            <button id="export-json-btn" class="p-2 rounded-lg glass-input text-tertiary hover:text-primary" title="Export Backup (JSON)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scrollable History Container -->
+                    <div class="history-container">
+                        <div id="expense-list" class="space-y-4 pr-1">
+                            <!-- Expenses injected here -->
+                            <div id="empty-state" class="glass-card p-6 text-center text-tertiary">
+                                <p class="text-sm">Click "Add Expense" to get started.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Right Column (Insights) -->
+            <div class="lg:col-span-1 space-y-6 md:space-y-8">
+                
+                <!-- *** SECTION RESTORED *** -->
+                <section class="glass-card p-6">
+                    <h2 class="text-lg font-semibold text-primary mb-4">
+                        Monthly Insights
+                    </h2>
+                    <div class="space-y-4">
+                        <div id="insight-savings">
+                            <h3 class="text-sm font-medium text-tertiary">MONTHLY SAVINGS</h3>
+                            <!-- UPDATED: Use green accent color -->
+                            <p class="text-xl font-semibold" style="color: var(--accent-primary);">0 DH</p>
+                        </div>
+                        <div id="insight-top-category">
+                            <h3 class="text-sm font-medium text-tertiary">TOP CATEGORY</h3>
+                            <p class="text-xl font-semibold text-primary">--</p>
+                        </div>
+                        <div id="insight-highest-expense">
+                            <h3 class="text-sm font-medium text-tertiary">HIGHEST EXPENSE</h3>
+                            <p class="text-xl font-semibold text-primary">0 DH</p>
+                            <p class="text-sm text-tertiary truncate">--</p>
+                        </div>
+                        <div id="insight-avg-spend">
+                            <h3 class="text-sm font-medium text-tertiary">AVG. DAILY SPEND</h3>
+                            <p class="text-xl font-semibold text-primary">0 DH</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- "This Week's Summary" section RE-ADDED -->
+                <section id="weekly-summary-card" class="glass-card p-6">
+                    <h2 class="text-lg font-semibold text-primary mb-4">
+                        This Week's Summary
+                    </h2>
+                    <div class="space-y-2">
+                        <div>
+                            <h3 class="text-sm font-medium text-tertiary">TOTAL SPENT (Mon-Sun)</h3>
+                            <p id="weekly-total-spend" class="text-2xl font-semibold text-primary">0 DH</p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-tertiary">TOP CATEGORY (This Week)</h3>
+                            <p id="weekly-top-category" class="text-lg font-semibold text-primary">--</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="glass-card p-6">
+                    <!-- UPDATED: Manage categories button style -->
+                    <button id="manage-categories-btn" class="w-full text-center font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+                            style="background-color: var(--accent-primary-subtle-bg); color: var(--accent-primary-subtle-text);"
+                            onmouseover="this.style.backgroundColor='rgba(29, 185, 84, 0.3)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-primary-subtle-bg)'">
+                        Manage Categories
+                    </button>
+                </section>
+            </div>
+
+        </div>
+
+        <footer class="text-center text-tertiary text-sm mt-8">
+            © 2025 Made By Anas Sba3
+        </footer>
+    </div>
+
+    <!-- Yearly Report View (Initially Hidden) -->
+    <div id="yearly-report" class="max-w-6xl mx-auto p-4 md:p-8 hidden">
+        <header class="flex justify-between items-center mb-6 md:mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-primary tracking-tight" id="yearly-report-title">
+                Yearly Report
+            </h1>
+            <!-- UPDATED: Yearly report button -->
+            <button id="close-yearly-report" class="font-medium py-2 px-4 rounded-full transition-colors duration-200"
+                    style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                    onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                    onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                Back to Monthly
+            </button>
+        </header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card p-6">
+                <h2 class="text-sm font-medium text-tertiary mb-2">Total Income</h2>
+                <p id="yearly-total-income" class="text-4xl font-bold" style="color: var(--accent-primary);">0 DH</p>
+            </div>
+            <div class="glass-card p-6">
+                <h2 class="text-sm font-medium text-tertiary mb-2">Total Expenses</h2>
+                <p id="yearly-total-expenses" class="text-4xl font-bold" style="color: var(--accent-danger);">0 DH</p>
+            </div>
+            <div class="glass-card p-6">
+                <h2 class="text-sm font-medium text-tertiary mb-2">Total Savings</h2>
+                <p id="yearly-total-savings" class="text-4xl font-bold text-primary">0 DH</p>
+            </div>
+        </div>
+        
+        <div class="glass-card p-6 mt-6">
+            <h3 class="text-lg font-semibold text-primary mb-4">Monthly Spending</h3>
+            <div id="yearly-bar-chart" class="h-64 w-full flex justify-around items-end gap-2 p-4 bg-tertiary rounded-xl">
+                <!-- Yearly bar chart will be injected here -->
+            </div>
+        </div>
+
+        <footer class="text-center text-tertiary text-sm mt-8">
+             © 2025 Made By Anas Sba3
+        </footer>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add/Edit Expense Modal -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="modal-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-md p-6 modal-slide-in-up">
+            <h3 id="modal-title" class="text-2xl font-semibold text-primary mb-6">Add New Expense</h3>
+            <form id="expense-form" class="space-y-4">
+                <input type="hidden" id="expense-id">
+                <div>
+                    <label for="expense-title" class="block text-sm font-medium text-secondary mb-2">Description</label>
+                    <input type="text" id="expense-title" class="glass-input w-full rounded-lg p-3" placeholder="e.g., Weekly Groceries">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="expense-amount" class="block text-sm font-medium text-secondary mb-2">Amount (DH)</label>
+                        <input type="number" id="expense-amount" class="glass-input w-full rounded-lg p-3" placeholder="150" min="1" step="1" required>
+                    </div>
+                    <div>
+                        <label for="expense-category" class="block text-sm font-medium text-secondary mb-2">Category</label>
+                        <select id="expense-category" class="glass-input w-full rounded-lg p-3 h-[46px]" required>
+                            <!-- Category options will be injected here -->
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="expense-date" class="block text-sm font-medium text-secondary mb-2">Date</label>
+                    <input type="date" id="expense-date" class="glass-input w-full rounded-lg p-3" required>
+                </div>
+                <div>
+                    <label for="expense-tags" class="block text-sm font-medium text-secondary mb-2">Tags <span class="text-xs">(comma separated)</span></label>
+                    <input type="text" id="expense-tags" class="glass-input w-full rounded-lg p-3" placeholder="e.g., vacation, work, gift">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label for="expense-recurring" class="flex items-center gap-2 text-sm text-secondary cursor-pointer">
+                        <input type="checkbox" id="expense-recurring" class="glass-input rounded" style="color: var(--accent-primary);">
+                        Set as recurring (monthly)
+                    </label>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancel-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                        Cancel
+                    </button>
+                    <button type="submit" id="save-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                        Save Expense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Set Budget Modal -->
+    <div id="budget-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="budget-modal-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-sm p-6 modal-slide-in-up">
+            <h3 class="text-2xl font-semibold text-primary mb-6">Set Monthly Budget</h3>
+            <form id="budget-form" class="space-y-4">
+                <div>
+                    <label for="budget-amount" class="block text-sm font-medium text-secondary mb-2">Budget Amount (DH)</label>
+                    <input type="number" id="budget-amount" class="glass-input w-full rounded-lg p-3" placeholder="5000" min="0" step="100">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="budget-cancel-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                        Cancel
+                    </button>
+                    <button type="submit" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                        Set Budget
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="delete-modal-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-sm p-6 modal-slide-in-up">
+            <h3 id="delete-modal-title" class="text-xl font-semibold text-primary mb-4">Delete Transaction</h3>
+            <p id="delete-modal-text" class="text-secondary mb-6">Are you sure? This action cannot be undone.</p>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="delete-cancel-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                        style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                    Cancel
+                </button>
+                <button type="button" id="delete-confirm-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                        style="background-color: var(--accent-danger); color: var(--accent-primary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-danger-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-danger)'">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Manage Categories Modal -->
+    <div id="category-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="category-modal-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-md p-6 modal-slide-in-up">
+            <h3 class="text-2xl font-semibold text-primary mb-6">Manage Categories</h3>
+            <form id="category-form" class="flex gap-2 mb-4">
+                <input type="text" id="category-name-input" class="glass-input w-full rounded-lg p-3" placeholder="New category name" required>
+                <button type="submit" class="font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                    Add
+                </button>
+            </form>
+            <div id="category-list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                <!-- Category list will be injected here -->
+            </div>
+            <div class="flex justify-end gap-3 pt-6">
+                <button type="button" id="category-close-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                        style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Income Modal -->
+    <div id="income-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="income-modal-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-md p-6 modal-slide-in-up">
+            <h3 id="income-modal-title" class="text-2xl font-semibold text-primary mb-6">Add Income</h3>
+            <form id="income-form" class="space-y-4">
+                <input type="hidden" id="income-id">
+                <div>
+                    <label for="income-title" class="block text-sm font-medium text-secondary mb-2">Description</label>
+                    <input type="text" id="income-title" class="glass-input w-full rounded-lg p-3" placeholder="e.g., Monthly Salary" required>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="income-amount" class="block text-sm font-medium text-secondary mb-2">Amount (DH)</label>
+                        <input type="number" id="income-amount" class="glass-input w-.full rounded-lg p-3" placeholder="10000" min="1" step="1" required>
+                    </div>
+                    <div>
+                        <label for="income-date" class="block text-sm font-medium text-secondary mb-2">Date</label>
+                        <input type="date" id="income-date" class="glass-input w-full rounded-lg p-3" required>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="income-cancel-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                        Cancel
+                    </button>
+                    <button type="submit" id="income-save-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-primary); color: var(--accent-primary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-primary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-primary)'">
+                        Save Income
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="settings-modal-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-md p-6 modal-slide-in-up">
+            <h3 class="text-2xl font-semibold text-primary mb-6">Settings</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-lg font-medium text-primary mb-2">Backup & Restore</h4>
+                    <p class="text-sm text-secondary mb-2">Export a JSON backup of all data, or restore from a backup file.</p>
+                    <input type="file" id="import-backup-input" class="glass-input w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold"
+                           style="file:background-color: var(--accent-primary-subtle-bg); file:color: var(--accent-primary-subtle-text); cursor: pointer;"
+                           onmouseover="this.style.fileBackgroundColor='rgba(29, 185, 84, 0.3)'"
+                           onmouseout="this.style.fileBackgroundColor='var(--accent-primary-subtle-bg)'"
+                           accept=".json">
+                </div>
+                
+                <!-- DANGER ZONE RE-ADDED -->
+                <div class="pt-4 border-t border-border-primary">
+                    <h4 class="text-lg font-medium text-red-400 mb-2">Danger Zone</h4>
+                    <button id="reset-data-btn" class="w-full text-left font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+                            style="background-color: var(--accent-danger-subtle-bg); color: var(--accent-danger-subtle-text);"
+                            onmouseover="this.style.backgroundColor='rgba(229, 62, 62, 0.3)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-danger-subtle-bg)'">
+                        Clear All App Data
+                    </button>
+                    <p class="text-sm text-secondary mt-1">This will permanently delete all data in this mode.</p>
+                </div>
+                
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-6">
+                <button type="button" id="settings-close-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                        style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                        onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                        onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Data Password Modal -->
+    <div id="reset-password-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-overlay backdrop-blur-sm modal-fade-in" id="reset-password-backdrop"></div>
+        <div class="glass-card z-10 w-full max-w-sm p-6 modal-slide-in-up">
+            <h3 class="text-2xl font-semibold text-primary mb-6">Admin Access</h3>
+            <form id="reset-password-form" class="space-y-4">
+                <div>
+                    <label for="reset-password-input" class="block text-sm font-medium text-secondary mb-2">Enter Admin Password to continue</label>
+                    <input type="password" id="reset-password-input" class="glass-input w-full rounded-lg p-3" required>
+                    <p id="reset-password-error" class="text-red-400 text-sm mt-2 hidden">Incorrect password.</p>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="reset-password-cancel-btn" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-secondary); color: var(--accent-secondary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-secondary-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-secondary)'">
+                        Cancel
+                    </button>
+                    <button type="submit" class="font-medium py-2 px-5 rounded-full transition-colors duration-200"
+                            style="background-color: var(--accent-danger); color: var(--accent-primary-text);"
+                            onmouseover="this.style.backgroundColor='var(--accent-danger-hover)'"
+                            onmouseout="this.style.backgroundColor='var(--accent-danger)'">
+                        Confirm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class=""></div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            updateDoc, 
+            deleteDoc, 
+            onSnapshot, 
+            collection, 
+            query, 
+            addDoc,
+            writeBatch,
+            getDocs,
+            Timestamp 
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- FIREBASE CONFIG ---
+        // We will hard-code the config you provided.
+        const firebaseConfig = {
+          apiKey: "AIzaSyC9NyVrmam2_1ABkjeCu057trLBlUMN8L8",
+          authDomain: "expenso-e317f.firebaseapp.com",
+          projectId: "expenso-e317f",
+          storageBucket: "expenso-e317f.firebasestorage.app",
+          messagingSenderId: "699583670160",
+          appId: "1:699583670160:web:9fe66f1c44675b0278f515",
+          measurementId: "G-RKEV6XWG7W"
+        };
+        
+        // This will be set by the password gate
+        let appId = "";
+
+        // --- NEW: Color palette for categories ---
+        const CATEGORY_COLORS = ['#1DB954', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#3498DB', '#E67E22', '#2ECC71', '#F9C851', '#9B59B6', '#34495E'];
+
+        // --- DEFAULT CATEGORIES (if storage is empty) ---
+        // *** MODIFIED: Added 'color' property to each category ***
+        const DEFAULT_CATEGORIES = {
+            food: { label: 'Food', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2zm0 0h18M5 7h14M5 11h7" /></svg>`, color: '#F59E0B' }, // Yellow-Orange
+            water: { label: 'Water', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.472 15.03L3 12.56C3 12.23 3.23 12 3.56 12H5.44C5.77 12 6 12.23 6 12.56L8.53 15.03C8.72 15.22 9 15.09 9 14.82V3.5C9 3.22 8.78 3 8.5 3H3.5C3.22 3 3 3.22 3 3.5V14.82C3 15.09 3.28 15.22 3.47 15.03L5.472 15.03zM18.53 15.03L21 12.56C21 12.23 20.77 12 20.44 12H18.56C18.23 12 18 12.23 18 12.56L15.47 15.03C15.28 15.22 15 15.09 15 14.82V3.5C15 3.22 15.22 3 15.5 3H20.5C20.78 3 21 3.22 21 3.5V14.82C21 15.09 20.72 15.22 20.53 15.03L18.53 15.03zM12 10.5C12.83 10.5 13.5 9.83 13.5 9C13.5 8.17 12.83 7.5 12 7.5S10.5 8.17 10.5 9C10.5 9.83 11.17 10.5 12 10.5zM12 21C15.31 21 18 18.31 18 15V12H6V15C6 18.31 8.69 21 12 21z" /></svg>`, color: '#3498DB' }, // Blue
+            electricity: { label: 'Electricity', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`, color: '#F9C851' }, // Yellow
+            rent: { label: 'Rent', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2a1 1 0 01-1-1v-4z" /></svg>`, color: '#EF4444' }, // Red
+            transport: { label: 'Transport', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>`, color: '#8B5CF6' }, // Purple
+            vecuil_expense: { label: 'Vecuil Expense', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>`, color: '#34495E' }, // Dark Blue/Grey
+            gazolin: { label: 'Gazolin', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 1112.728 0M12 21v-7" /></svg>`, color: '#E67E22' }, // Orange
+            internet: { label: 'Internet', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11.99a9.002 9.002 0 1017.89 0A9.002 9.002 0 003.054 12z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 3.53a9.003 9.003 0 010 16.94 9.003 9.003 0 010-16.94zM3.53 12.002a9.003 9.003 0 0116.94 0 9.003 9.003 0 01-16.94 0z" /></svg>`, color: '#6366F1' }, // Indigo
+            other: { label: 'Other', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12S5.477 2 11 2s10 4.477 10 10z" /></svg>`, color: '#EC4899' } // Pink
+        };
+        const GENERIC_ICON = DEFAULT_CATEGORIES.other.icon;
+
+        // --- FIREBASE GLOBALS ---
+        let app;
+        let auth;
+        let db;
+
+        // --- STATE ---
+        let expenses = [];
+        let income = [];
+        let recurringExpenses = [];
+        let categories = {};
+        let currentFilter = 'all';
+        let currentSearchTerm = '';
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let currentBudget = 0;
+        let chartType = 'bar';
+        let deleteInfo = { id: null, type: null }; // To track what to delete
+        let currentHistoryType = 'expenses';
+        let currentSortOrder = 'date-desc'; // Add this line
+        let currentUserId = null; // No longer used for path, but good for auth status
+
+        // --- DOM ELEMENTS ---
+        let docElement;
+        let addExpenseBtn;
+        let addIncomeBtn;
+        let expenseListEl;
+        let totalExpensesEl;
+        let filterCategoryEl;
+        let emptyStateEl;
+        
+        // Expense Modal
+        let modal, modalBackdrop, modalTitle, cancelBtn, expenseForm, expenseIdField, expenseTitleField, expenseAmountField, expenseCategoryField, expenseDateField, expenseTagsField, expenseRecurringCheckbox;
+
+        // Theme Toggle
+        let themeToggleBtn, themeIconLight, themeIconDark;
+        
+        // Month Selector
+        let monthSelector;
+        
+        // Budget
+        let setBudgetBtn, budgetModal, budgetModalBackdrop, budgetForm, budgetAmountField, budgetCancelBtn, budgetDisplayEl, budgetProgressBar, budgetRemainingTextEl;
+
+        // Delete Modal
+        let deleteModal, deleteModalBackdrop, deleteModalTitle, deleteModalText, deleteCancelBtn, deleteConfirmBtn;
+        
+        // Search & Export
+        let searchBar, exportJsonBtn, exportExcelBtn;
+        
+        // Insights
+        let insightSavings, insightTopCategory, insightHighestExpense, insightAvgSpend;
+        
+        // Chart
+        let chartToggleBarBtn, chartTogglePieBtn, barChartContainer, pieChartContainer, pieChartEl, pieChartLegendEl, categoryBudgetsContainer;
+        
+        // Weekly Summary (RE-ADDING)
+        let weeklyTotalSpendEl, weeklyTopCategoryEl;
+        
+        // Categories
+        let manageCategoriesBtn, categoryModal, categoryModalBackdrop, categoryCloseBtn, categoryForm, categoryNameInput, categoryListEl;
+
+        // Add Income Modal
+        let incomeModal, incomeModalBackdrop, incomeCancelBtn, incomeForm, incomeIdField, incomeTitleField, incomeAmountField, incomeDateField, incomeModalTitle;
+
+        // History Toggle
+        let historyTypeToggle;
+        let historySortToggle; // Add this line
+
+        // Yearly Report
+        let appView, yearlyReportView, closeYearlyReportBtn;
+
+        // Settings Modal
+        let settingsBtn, settingsModal, settingsModalBackdrop, settingsCloseBtn, importBackupInput, resetDataBtn;
+        
+        // Reset Password Modal (NEW)
+        let resetPasswordModal, resetPasswordBackdrop, resetPasswordForm, resetPasswordInput, resetPasswordError, resetPasswordCancelBtn;
+        
+        // Add logout button
+        let logoutBtn;
+        
+        // Toast
+        let toastEl;
+        let toastTimeout = null;
+        
+        // Firestore Unsubscribe Listeners
+        let expensesUnsub = () => {};
+        let incomeUnsub = () => {};
+        let settingsUnsub = () => {};
+        let recurringUnsub = () => {};
+
+
+        // --- HELPER FUNCTIONS ---
+        
+        const formatCurrency = (amount) => {
+            // Format the number with 0 decimal places, using 'fr-MA' for potential number grouping (e.g., spaces for thousands)
+            const numberFormatter = new Intl.NumberFormat('fr-MA', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+            return `${numberFormatter.format(amount)} DH`;
+        };
+        const formatDate = (dateString) => {
+            // dateString is "YYYY-MM-DD". new Date() interprets this as UTC.
+            const date = new Date(dateString); 
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                timeZone: 'UTC' // Tell it to format based on UTC time
+            });
+        };
+        const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+        
+        // --- THIS IS THE FIX ---
+        // Was: const getTodayString = () => new Date().toISOString().split('T')[0];
+        // This was converting local time to UTC, causing the date to roll back.
+        const getTodayString = () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            // getMonth() is 0-indexed, so add 1. Pad with '0' if needed.
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            // getDate() is 1-indexed. Pad with '0' if needed.
+            const day = today.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`; // Returns "YYYY-MM-DD" in local time
+        };
+        // --- END OF FIX ---
+
+        const getWeekRange = (date) => {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+            const mon = new Date(d.setDate(diff)).toISOString().split('T')[0];
+            const sun = new Date(d.setDate(d.getDate() + 6)).toISOString().split('T')[0];
+            return { start: mon, end: sun };
+        };
+
+        const showToast = (message, isError = false) => {
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastEl.textContent = message;
+            toastEl.className = isError ? 'error' : 'success';
+            toastEl.classList.add('show');
+            toastTimeout = setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
+        };
+
+        // --- DATA FUNCTIONS ---
+        const getExpensesForPeriod = (year, month) => {
+            return expenses.filter(expense => {
+                // Manually parse YYYY-MM-DD to avoid timezone issues
+                const dateParts = expense.date.split('-'); // ["2025", "11", "01"]
+                if (dateParts.length !== 3) return false; // Safety check
+                const expenseYear = parseInt(dateParts[0], 10);
+                const expenseMonth = parseInt(dateParts[1], 10) - 1; // JS month is 0-indexed
+                
+                return expenseYear === year && expenseMonth === month;
+            });
+        };
+        
+        const getIncomeForPeriod = (year, month) => {
+            return income.filter(inc => {
+                // Manually parse YYYY-MM-DD to avoid timezone issues
+                const dateParts = inc.date.split('-'); // ["2025", "11", "01"]
+                if (dateParts.length !== 3) return false; // Safety check
+                const incomeYear = parseInt(dateParts[0], 10);
+                const incomeMonth = parseInt(dateParts[1], 10) - 1; // JS month is 0-indexed
+                
+                return incomeYear === year && incomeMonth === month;
+            });
+        };
+        
+        const getCategoryTotals = (expenseList) => {
+            const totals = Object.keys(categories).reduce((acc, key) => {
+                acc[key] = { total: 0, label: categories[key].label, count: 0 };
+                return acc;
+            }, {});
+            
+            // Add a safety net for expenses with orphaned categories
+            totals['other'] = totals['other'] || { total: 0, label: 'Other', count: 0 };
+
+            let grandTotal = 0;
+
+            expenseList.forEach(expense => {
+                const category = expense.category;
+                if (totals[category]) {
+                    totals[category].total += parseFloat(expense.amount);
+                    totals[category].count += 1;
+                } else {
+                    // If category was deleted, assign to 'other'
+                    totals['other'].total += parseFloat(expense.amount);
+                    totals['other'].count += 1;
+                }
+                grandTotal += parseFloat(expense.amount);
+            });
+            return { totals, grandTotal };
+        };
+
+        // --- RENDER FUNCTIONS (THE BIG ONES) ---
+        
+        /** Main render function, triggers all sub-renders */
+        const render = () => {
+            const periodExpenses = getExpensesForPeriod(currentYear, currentMonth);
+            const periodIncome = getIncomeForPeriod(currentYear, currentMonth);
+            
+            renderHistoryList(periodExpenses, periodIncome);
+            renderSummary(periodExpenses);
+            renderChart(periodExpenses);
+            renderCategoryBudgets(periodExpenses);
+            renderInsights(periodExpenses, periodIncome);
+            renderWeeklySummary(); // RE-ADDED
+        };
+
+        /** Renders the summary (total + budget) */
+        const renderSummary = (periodExpenses) => {
+            const total = periodExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+            
+            // --- USER REQUEST: Make total red and add a minus ---
+            if (total > 0) {
+                totalExpensesEl.textContent = "- " + formatCurrency(total);
+                totalExpensesEl.className = "text-4xl md:text-5xl font-bold text-red-500"; // Red text
+            } else {
+                totalExpensesEl.textContent = formatCurrency(total);
+                totalExpensesEl.className = "text-4xl md:text-5xl font-bold text-primary"; // Back to default
+            }
+            
+            if (currentBudget > 0) {
+                budgetDisplayEl.textContent = formatCurrency(currentBudget);
+                const percentage = Math.min((total / currentBudget) * 100, 100);
+                budgetProgressBar.style.width = `${percentage}%`;
+                
+                // Change color based on percentage
+                if (percentage > 90) budgetProgressBar.style.backgroundColor = 'var(--accent-danger)';
+                else if (percentage > 70) budgetProgressBar.style.backgroundColor = '#F59E0B'; // Yellow
+                else budgetProgressBar.style.backgroundColor = 'var(--accent-primary)'; // Green
+                
+                const remaining = currentBudget - total;
+                
+                // --- USER REQUEST: Make "remaining" text blue, bigger, and more visible ---
+                if (remaining >= 0) {
+                    budgetRemainingTextEl.textContent = `${formatCurrency(remaining)} remaining`;
+                    // Green, bigger, and visible (font-medium)
+                    budgetRemainingTextEl.className = "text-base font-medium text-green-400 text-right mt-1";
+                } else {
+                    budgetRemainingTextEl.textContent = `${formatCurrency(Math.abs(remaining))} over budget`;
+                    // I'll make "over budget" red, bigger, and visible, as that's more semantic
+                    budgetRemainingTextEl.className = "text-base font-medium text-red-500 text-right mt-1";
+                }
+
+            } else {
+                budgetDisplayEl.textContent = 'Not Set';
+                budgetProgressBar.style.width = '0%';
+                budgetRemainingTextEl.textContent = 'Set a budget to track spending.';
+                // Reset to default class if no budget is set
+                budgetRemainingTextEl.className = "text-sm text-tertiary text-right mt-1";
+            }
+        };
+        
+        /** Renders the chart (Bar or Pie) */
+        const renderChart = (periodExpenses) => {
+            if (chartType === 'bar') {
+                barChartContainer.classList.remove('hidden');
+                pieChartContainer.classList.add('hidden');
+                renderBarChart(periodExpenses);
+            } else {
+                barChartContainer.classList.add('hidden');
+                pieChartContainer.classList.remove('hidden');
+                renderPieChart(periodExpenses);
+            }
+        };
+        
+        /** Renders the bar chart */
+        const renderBarChart = (periodExpenses) => {
+            barChartContainer.innerHTML = '';
+            const { totals } = getCategoryTotals(periodExpenses);
+            const categoryKeys = Object.keys(categories);
+            
+            let maxTotal = Math.max(...categoryKeys.map(key => totals[key] ? totals[key].total : 0));
+            if (maxTotal === 0) maxTotal = 1; // Avoid division by zero
+
+            categoryKeys.forEach(key => {
+                const total = totals[key] ? totals[key].total : 0;
+                const heightPercentage = (total / maxTotal) * 100;
+                
+                // --- MODIFIED: Use category color ---
+                const category = categories[key];
+                const color = category ? (category.color || '#808080') : '#808080'; // Fallback to grey
+                
+                const barEl = document.createElement('div');
+                barEl.className = "flex flex-col items-center justify-end h-full"; // Removed w-full
+                barEl.style.minWidth = "40px"; // Added min-width
+                barEl.innerHTML = `
+                    <div class="chart-bar w-1/2 md:w-3/5 rounded-t-md" style="height: ${heightPercentage}%; background-color: ${color};" title="${categories[key].label}: ${formatCurrency(total)}"></div>
+                    <span class="text-xs text-tertiary mt-1 sm:mt-2">${categories[key].label}</span>
+                `;
+                barChartContainer.appendChild(barEl);
+            });
+        };
+        
+        /** Renders the pie chart */
+        const renderPieChart = (periodExpenses) => {
+            const { totals, grandTotal } = getCategoryTotals(periodExpenses);
+            if (grandTotal === 0) {
+                pieChartEl.style.background = 'var(--bg-tertiary)';
+                pieChartLegendEl.innerHTML = '<span class="text-tertiary">No data</span>';
+                return;
+            }
+
+            // --- REMOVED pieColors array, now using category colors ---
+            let gradientString = 'conic-gradient(';
+            let currentAngle = 0;
+            let legendHTML = '';
+            
+            Object.keys(totals).forEach(key => {
+                const { total, label } = totals[key];
+                if (total > 0) {
+                    const percentage = (total / grandTotal) * 100;
+                    const angle = (percentage / 100) * 360;
+                    
+                    // --- MODIFIED: Get persistent color from category object ---
+                    const category = categories[key];
+                    const color = category ? (category.color || '#808080') : '#808080'; // Fallback
+                    
+                    gradientString += `${color} ${currentAngle}deg ${currentAngle + angle}deg, `;
+                    legendHTML += `
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full" style="background-color: ${color}"></div>
+                            <span class="text-secondary">${label} (${percentage.toFixed(0)}%)</span>
+                        </div>
+                    `;
+                    
+                    currentAngle += angle;
+                    // --- REMOVED colorIndex++ ---
+                }
+            });
+            
+            gradientString = gradientString.slice(0, -2) + ')'; // Remove last comma and space
+            pieChartEl.style.background = gradientString;
+            pieChartLegendEl.innerHTML = legendHTML;
+        };
+
+        /** Renders category budget progress bars */
+        const renderCategoryBudgets = (periodExpenses) => {
+            categoryBudgetsContainer.innerHTML = '';
+            const { totals } = getCategoryTotals(periodExpenses);
+            
+            Object.keys(categories).forEach(key => {
+                const category = categories[key];
+                if (category.budget && category.budget > 0) {
+                    const totalSpent = totals[key] ? totals[key].total : 0;
+                    const percentage = Math.min((totalSpent / category.budget) * 100, 100);
+                    
+                    let barColor = 'var(--accent-primary)'; // Green
+                    if (percentage > 90) barColor = 'var(--accent-danger)'; // Red
+                    else if (percentage > 70) barColor = '#F59E0B'; // Yellow
+                    
+                    const el = document.createElement('div');
+                    el.innerHTML = `
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-tertiary">${category.label}</span>
+                            <span class="text-primary">${formatCurrency(totalSpent)} / ${formatCurrency(category.budget)}</span>
+                        </div>
+                        <div class="w-full bg-tertiary rounded-full h-1.5">
+                            <div class="h-1.5 rounded-full" style="width: ${percentage}%; background-color: ${barColor}"></div>
+                        </div>
+                    `;
+                    categoryBudgetsContainer.appendChild(el);
+                }
+            });
+        };
+
+        /** Renders the list of expenses */
+        const renderHistoryList = (periodExpenses, periodIncome) => {
+            expenseListEl.innerHTML = '';
+            
+            const expensesWithTag = periodExpenses.map(e => ({...e, type: 'expense'}));
+            const incomeWithTag = periodIncome.map(i => ({...i, type: 'income'}));
+            
+            let combinedList = [];
+            if (currentHistoryType === 'expenses') {
+                combinedList = expensesWithTag;
+                filterCategoryEl.disabled = false;
+            } else if (currentHistoryType === 'income') {
+                combinedList = incomeWithTag;
+                filterCategoryEl.disabled = true;
+            } else {
+                combinedList = [...expensesWithTag, ...incomeWithTag];
+                filterCategoryEl.disabled = true;
+            }
+
+            const filteredList = combinedList
+                .filter(item => {
+                    if (currentHistoryType === 'expenses' && (currentFilter !== 'all' && item.category !== currentFilter)) return false;
+                    
+                    const searchTerm = currentSearchTerm.toLowerCase();
+                    const titleMatch = item.title.toLowerCase().includes(searchTerm);
+                    const tagMatch = item.type === 'expense' && item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                    
+                    return currentSearchTerm === '' || titleMatch || tagMatch;
+                })
+                .sort((a, b) => {
+                    switch (currentSortOrder) {
+                        case 'date-asc':
+                            // Use string compare for YYYY-MM-DD
+                            return a.date.localeCompare(b.date);
+                        case 'amount-desc':
+                            // Ensure amounts are numbers for correct sorting
+                            return parseFloat(b.amount) - parseFloat(a.amount);
+                        case 'amount-asc':
+                            // Ensure amounts are numbers for correct sorting
+                            return parseFloat(a.amount) - parseFloat(b.amount);
+                        case 'date-desc':
+                        default:
+                            // Use string compare for YYYY-MM-DD
+                            return b.date.localeCompare(a.date);
+                    }
+                });
+            
+            emptyStateEl.classList.toggle('hidden', filteredList.length > 0);
+
+            filteredList.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'glass-card p-4 transition-all duration-200 hover:border-border-primary/50';
+                
+                if (item.type === 'expense') {
+                    const category = categories[item.category];
+                    const categoryIcon = category ? category.icon : GENERIC_ICON;
+                    
+                    el.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                            <div class="flex items-center gap-4 mb-2 sm:mb-0 clickable-area cursor-pointer" data-id="${item.id}" data-type="expense">
+                                <div class="p-3 bg-tertiary rounded-xl text-primary">
+                                    ${categoryIcon}
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-primary">${item.title}</p>
+                                    <p class="text-sm text-secondary">${formatDate(item.date)}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
+                                <p class="font-semibold text-red-500 text-lg">
+                                    - ${formatCurrency(item.amount)}
+                                </p>
+                                <div class="flex gap-2">
+                                    <button class="edit-btn p-2 text-secondary hover:text-green-400 transition-colors" data-id="${item.id}" title="Edit Expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    </button>
+                                    <button class="delete-btn p-2 text-secondary hover:text-red-400 transition-colors" data-id="${item.id}" title="Delete Expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1 mt-2 pl-0 sm:pl-16">
+                            ${(item.tags && item.tags.map(tag => `<span class="text-xs px-2 py-0.5 rounded-full" style="background-color: var(--accent-primary-subtle-bg); color: var(--accent-primary-subtle-text);">${tag}</span>`).join('')) || ''}
+                        </div>
+                    `;
+                } else { // Income
+                    el.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                            <div class="flex items-center gap-4 mb-2 sm:mb-0 clickable-area cursor-pointer" data-id="${item.id}" data-type="income">
+                                <div class="p-3 bg-tertiary rounded-xl text-green-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" /></svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-primary">${item.title}</p>
+                                    <p class="text-sm text-secondary">${formatDate(item.date)}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
+                                <p class="font-semibold text-green-400 text-lg">
+                                    + ${formatCurrency(item.amount)}
+                                </p>
+                                <div class="flex gap-2">
+                                    <button class="edit-income-btn p-2 text-secondary hover:text-green-400 transition-colors" data-id="${item.id}" title="Edit Income">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    </button>
+                                    <button class="delete-income-btn p-2 text-secondary hover:text-red-400 transition-colors" data-id="${item.id}" title="Delete Income">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                expenseListEl.appendChild(el);
+            });
+        };
+        
+        /** Renders the insights card */
+        const renderInsights = (periodExpenses, periodIncome) => {
+            // Calculate Savings
+            const totalIncome = periodIncome.reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
+            const totalExpenses = periodExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+            const savings = totalIncome - totalExpenses;
+            
+            insightSavings.innerHTML = `
+                <h3 class="text-sm font-medium text-tertiary">MONTHLY SAVINGS</h3>
+                <p class="text-xl font-semibold ${savings >= 0 ? 'text-green-400' : 'text-red-400'}">
+                    ${formatCurrency(savings)}
+                </p>
+            `;
+
+            if (periodExpenses.length === 0) {
+                insightTopCategory.innerHTML = `<h3 class="text-sm font-medium text-tertiary">TOP CATEGORY</h3><p class="text-xl font-semibold text-primary">--</p>`;
+                insightHighestExpense.innerHTML = `<h3 class="text-sm font-medium text-tertiary">HIGHEST EXPENSE</h3><p class="text-xl font-semibold text-primary">0 DH</p><p class="text-sm text-secondary truncate">--</p>`;
+                insightAvgSpend.innerHTML = `<h3 class="text-sm font-medium text-tertiary">AVG. DAILY SPEND</h3><p class="text-xl font-semibold text-primary">0 DH</p>`;
+                return;
+            }
+
+            // Top Category
+            const { totals } = getCategoryTotals(periodExpenses);
+            const topCategory = Object.keys(totals).reduce((a, b) => (totals[a] ? totals[a].total : 0) > (totals[b] ? totals[b].total : 0) ? a : b, 'other');
+            insightTopCategory.innerHTML = `
+                <h3 class="text-sm font-medium text-tertiary">TOP CATEGORY</h3>
+                <p class="text-xl font-semibold text-primary">${(totals[topCategory] && totals[topCategory].total > 0) ? categories[topCategory].label : '--'}</p>
+            `;
+            
+            // Highest Expense
+            const highest = periodExpenses.reduce((max, exp) => parseFloat(exp.amount) > max.amount ? exp : max, { amount: 0 });
+            insightHighestExpense.innerHTML = `
+                <h3 class="text-sm font-medium text-tertiary">HIGHEST EXPENSE</h3>
+                <p class="text-xl font-semibold text-primary">${formatCurrency(highest.amount)}</p>
+                <p class="text-sm text-secondary truncate">${highest.title}</p>
+            `;
+            
+            // Average Daily Spend
+            const total = periodExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+            const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+            const daysSoFar = (currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth()) ? new Date().getDate() : daysInMonth;
+            const avg = total / daysSoFar;
+            insightAvgSpend.innerHTML = `
+                <h3 class="text-sm font-medium text-tertiary">AVG. DAILY SPEND</h3>
+                <p class="text-xl font-semibold text-primary">${formatCurrency(avg)}</p>
+            `;
+        };
+        
+        /** Renders the weekly summary card (RE-ADDED) */
+        const renderWeeklySummary = () => {
+            if (!weeklyTotalSpendEl) return; // Add check in case it's not on the page
+            
+            const today = new Date();
+            const { start, end } = getWeekRange(today);
+            
+            const weeklyExpenses = expenses.filter(exp => {
+                return exp.date >= start && exp.date <= end;
+            });
+            
+            const total = weeklyExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+            weeklyTotalSpendEl.textContent = formatCurrency(total);
+            
+            if (weeklyExpenses.length > 0) {
+                const { totals } = getCategoryTotals(weeklyExpenses);
+                const topCategory = Object.keys(totals).reduce((a, b) => (totals[a] ? totals[a].total : 0) > (totals[b] ? totals[b].total : 0) ? a : b, 'other');
+                weeklyTopCategoryEl.textContent = (totals[topCategory] && totals[topCategory].total > 0) ? categories[topCategory].label : '--';
+            } else {
+                weeklyTopCategoryEl.textContent = '--';
+            }
+        };
+        
+        // --- MODAL & FORM HANDLING ---
+
+        const openModal = (expense = null) => {
+            expenseForm.reset();
+            if (expense) {
+                modalTitle.textContent = 'Edit Expense';
+                expenseIdField.value = expense.id;
+                expenseTitleField.value = expense.title;
+                expenseAmountField.value = expense.amount;
+                expenseCategoryField.value = expense.category;
+                expenseDateField.value = expense.date;
+                expenseTagsField.value = expense.tags ? expense.tags.join(', ') : '';
+                expenseRecurringCheckbox.checked = false;
+                expenseRecurringCheckbox.disabled = false;
+            } else {
+                modalTitle.textContent = 'Add New Expense';
+                expenseIdField.value = '';
+                
+                // --- MODIFIED DATE LOGIC ---
+                // Check if selected month is current real month
+                const today = new Date();
+                const todayYear = today.getFullYear();
+                const todayMonth = today.getMonth();
+                
+                if (currentYear === todayYear && currentMonth === todayMonth) {
+                    // We are in the current real month, default to today
+                    expenseDateField.value = getTodayString();
+                } else {
+                    // We are in a different month, default to the 1st of that selected month
+                    const firstDay = new Date(currentYear, currentMonth, 1);
+                    expenseDateField.value = firstDay.toISOString().split('T')[0];
+                }
+                // --- END MODIFIED DATE LOGIC ---
+                
+                expenseRecurringCheckbox.checked = false;
+                expenseRecurringCheckbox.disabled = false;
+            }
+            modal.classList.remove('hidden');
+        };
+        const closeModal = () => modal.classList.add('hidden');
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return showToast('Not authenticated', true);
+            
+            const id = expenseIdField.value;
+            const isRecurring = expenseRecurringCheckbox.checked;
+            const tags = expenseTagsField.value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            const categoryKey = expenseCategoryField.value;
+            const title = expenseTitleField.value.trim();
+
+            const expenseData = {
+                title: title.length > 0 ? title : categories[categoryKey].label, // Use category label if title is empty
+                amount: parseFloat(expenseAmountField.value),
+                category: categoryKey,
+                date: expenseDateField.value,
+                tags: tags
+                // We don't save the ID in the document itself, Firebase gives it one.
+            };
+
+            try {
+                if (id) {
+                    // We are EDITING an existing expense
+                    if (isRecurring) {
+                        // User wants to convert this one-time expense to a recurring one
+                        
+                        // 1. Add to recurring collection
+                        const recurringRef = collection(db, 'artifacts', appId, 'public', 'data', 'recurring');
+                        const recurringData = { ...expenseData }; // copy data
+                        recurringData.nextDueDate = recurringData.date; // Set first due date
+                        await addDoc(recurringRef, recurringData);
+                        
+                        // 2. Delete from one-time expenses collection
+                        const expenseRef = doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id);
+                        await deleteDoc(expenseRef);
+                        
+                        showToast('Expense converted to recurring!');
+                        
+                    } else {
+                        // Just a normal update
+                        const expenseRef = doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id);
+                        await updateDoc(expenseRef, expenseData);
+                        showToast('Expense updated!');
+                    }
+                } else if (isRecurring) {
+                    // Add to recurring list
+                    const recurringRef = collection(db, 'artifacts', appId, 'public', 'data', 'recurring');
+                    expenseData.nextDueDate = expenseData.date; // Set first due date
+                    await addDoc(recurringRef, expenseData);
+                    showToast('Recurring expense added!');
+                } else {
+                    // Add to main list
+                    const expensesRef = collection(db, 'artifacts', appId, 'public', 'data', 'expenses');
+                    await addDoc(expensesRef, expenseData);
+                    showToast('Expense added!');
+                }
+                
+                // No need to save to local array, onSnapshot will handle it.
+                closeModal();
+            } catch (err) {
+                console.error("Error saving expense: ", err);
+                showToast(`Error: ${err.message}`, true);
+            }
+        };
+        
+        const handleListClick = (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            const deleteBtn = e.target.closest('.delete-btn');
+            const editIncomeBtn = e.target.closest('.edit-income-btn');
+            const deleteIncomeBtn = e.target.closest('.delete-income-btn');
+            const clickableArea = e.target.closest('.clickable-area'); // NEW
+            
+            if (editBtn) {
+                openModal(expenses.find(exp => exp.id === editBtn.dataset.id));
+            }
+            if (deleteBtn) {
+                deleteInfo = { id: deleteBtn.dataset.id, type: 'expense' };
+                deleteModalTitle.textContent = 'Delete Expense';
+                deleteModalText.textContent = 'Are you sure you want to delete this expense?';
+                deleteModal.classList.remove('hidden');
+            }
+            if (editIncomeBtn) {
+                openIncomeModal(income.find(inc => inc.id === editIncomeBtn.dataset.id));
+            }
+            if (deleteIncomeBtn) {
+                deleteInfo = { id: deleteIncomeBtn.dataset.id, type: 'income' };
+                deleteModalTitle.textContent = 'Delete Income';
+                deleteModalText.textContent = 'Are you sure you want to delete this income record?';
+                deleteModal.classList.remove('hidden');
+            }
+            if (clickableArea) { // NEW BLOCK
+                const id = clickableArea.dataset.id;
+                const type = clickableArea.dataset.type;
+                
+                if (type === 'expense') {
+                    openModal(expenses.find(exp => exp.id === id));
+                } else if (type === 'income') {
+                    openIncomeModal(income.find(inc => inc.id === id));
+                }
+            }
+        };
+        
+        const handleDeleteConfirm = async () => {
+            if (!deleteInfo.type || !currentUserId) return; // Note: deleteInfo.id can be null for 'all-data'
+            
+            let docRef;
+            if (deleteInfo.type === 'expense') {
+                if (!deleteInfo.id) return;
+                docRef = doc(db, 'artifacts', appId, 'public', 'data', 'expenses', deleteInfo.id);
+            } else if (deleteInfo.type === 'income') {
+                if (!deleteInfo.id) return;
+                docRef = doc(db, 'artifacts', appId, 'public', 'data', 'income', deleteInfo.id);
+            } else if (deleteInfo.type === 'category') {
+                if (!deleteInfo.id) return;
+                await handleCategoryDeleteConfirm(deleteInfo.id);
+                return;
+            } else if (deleteInfo.type === 'all-data') {
+                await handleResetDataConfirm();
+                return;
+            } else {
+                return; // Unknown type
+            }
+            
+            try {
+                await deleteDoc(docRef);
+                showToast(`${deleteInfo.type} deleted!`);
+            } catch (err) {
+                console.error(`Error deleting ${deleteInfo.type}: `, err);
+                showToast(`Error: ${err.message}`, true);
+            }
+            
+            deleteInfo = { id: null, type: null };
+            deleteModal.classList.add('hidden');
+        };
+
+        // Income Modal
+        const openIncomeModal = (inc = null) => {
+            incomeForm.reset();
+            if (inc) {
+                incomeModalTitle.textContent = 'Edit Income';
+                incomeIdField.value = inc.id;
+                incomeTitleField.value = inc.title;
+                incomeAmountField.value = inc.amount;
+                incomeDateField.value = inc.date;
+            } else {
+                incomeModalTitle.textContent = 'Add Income';
+                incomeIdField.value = '';
+                incomeDateField.value = getTodayString();
+            }
+            incomeModal.classList.remove('hidden');
+        };
+        const closeIncomeModal = () => incomeModal.classList.add('hidden');
+
+        const handleIncomeSubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return showToast('Not authenticated', true);
+            
+            const id = incomeIdField.value;
+            const incomeData = {
+                title: incomeTitleField.value,
+                amount: parseFloat(incomeAmountField.value),
+                date: incomeDateField.value,
+            };
+
+            try {
+                if (id) {
+                    // Update
+                    const incomeRef = doc(db, 'artifacts', appId, 'public', 'data', 'income', id);
+                    await updateDoc(incomeRef, incomeData);
+                    showToast('Income updated!');
+                } else {
+                    // Add
+                    const incomeRef = collection(db, 'artifacts', appId, 'public', 'data', 'income');
+                    await addDoc(incomeRef, incomeData);
+                    showToast('Income added!');
+                }
+                closeIncomeModal();
+            } catch (err) {
+                console.error("Error saving income: ", err);
+                showToast(`Error: ${err.message}`, true);
+            }
+        };
+
+        // --- Logout Function ---
+        const handleLogout = async () => {
+            try {
+                await signOut(auth); // This will trigger onAuthStateChanged(null)
+                sessionStorage.removeItem('expenso_app_id');
+                location.reload(); // This is the simplest way to force a return to the gate
+            } catch (error) {
+                console.error("Error signing out: ", error);
+                showToast(`Error signing out: ${error.message}`, true);
+            }
+        };
+        
+        // --- FEATURE HANDLERS ---
+        
+        // Theme
+        const applyTheme = (theme) => {
+            if (theme === 'light') {
+                docElement.classList.add('light');
+                themeIconLight.classList.add('hidden');
+                themeIconDark.classList.remove('hidden');
+            } else {
+                docElement.classList.remove('light');
+                themeIconLight.classList.remove('hidden');
+                themeIconDark.classList.add('hidden');
+            }
+        };
+        
+        const handleThemeToggle = async () => {
+            if (!currentUserId) return; // Not signed in
+            const newTheme = docElement.classList.contains('light') ? 'dark' : 'light';
+            try {
+                const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'userSettings');
+                await setDoc(settingsRef, { theme: newTheme }, { merge: true });
+                // The onSnapshot listener will call applyTheme()
+            } catch (err) {
+                console.error("Error saving theme: ", err);
+                showToast(`Error: ${err.message}`, true);
+            }
+        };
+
+        // Month Selector
+        const populateMonthSelector = () => {
+            monthSelector.innerHTML = '';
+            const now = new Date();
+            
+            // Add Yearly option
+            const yearlyOption = document.createElement('option');
+            yearlyOption.value = `yearly-${now.getFullYear()}`;
+            yearlyOption.textContent = `Yearly View (${now.getFullYear()})`;
+            monthSelector.appendChild(yearlyOption);
+            
+            // Add past 12 months
+            for (let i = 0; i < 12; i++) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const option = document.createElement('option');
+                option.value = `${year}-${month}`;
+                option.textContent = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                monthSelector.appendChild(option);
+            }
+            monthSelector.value = `${currentYear}-${currentMonth}`;
+        };
+        const handleMonthChange = (e) => {
+            const value = e.target.value;
+            if (value.startsWith('yearly')) {
+                currentYear = parseInt(value.split('-')[1]);
+                renderYearlyReport();
+            } else {
+                appView.classList.remove('hidden');
+                yearlyReportView.classList.add('hidden');
+                const [year, month] = value.split('-').map(Number);
+                currentYear = year;
+                currentMonth = month;
+                render();
+            }
+        };
+        
+        // Budget
+        const openBudgetModal = () => {
+            budgetAmountField.value = currentBudget > 0 ? currentBudget : '';
+            budgetModal.classList.remove('hidden');
+        };
+        const closeBudgetModal = () => budgetModal.classList.add('hidden');
+        const handleBudgetSubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return showToast('Not authenticated', true);
+            
+            const newBudget = parseFloat(budgetAmountField.value) || 0;
+            try {
+                const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'userSettings');
+                await setDoc(settingsRef, { budget: newBudget }, { merge: true });
+                // onSnapshot will update currentBudget and re-render
+                closeBudgetModal();
+                showToast('Budget updated!');
+            } catch (err) {
+                console.error("Error saving budget: ", err);
+                showToast(`Error: ${err.message}`, true);
+            }
+        };
+        
+        // Search & Filter
+        const handleFilterChange = (e) => { currentFilter = e.target.value; render(); };
+        const handleSearchInput = (e) => { currentSearchTerm = e.target.value; render(); };
+
+        // Chart Toggle
+        const handleChartToggle = (type) => {
+            chartType = type;
+            if (type === 'bar') {
+                // Update Bar Button Style (Active)
+                chartToggleBarBtn.style.backgroundColor = 'var(--accent-primary-subtle-bg)';
+                chartToggleBarBtn.style.color = 'var(--accent-primary-subtle-text)';
+                // Update Pie Button Style (Inactive)
+                chartTogglePieBtn.style.backgroundColor = 'var(--bg-tertiary)';
+                chartTogglePieBtn.style.color = 'var(--text-tertiary)';
+            } else {
+                // Update Pie Button Style (Active)
+                chartTogglePieBtn.style.backgroundColor = 'var(--accent-primary-subtle-bg)';
+                chartTogglePieBtn.style.color = 'var(--accent-primary-subtle-text)';
+                // Update Bar Button Style (Inactive)
+                chartToggleBarBtn.style.backgroundColor = 'var(--bg-tertiary)';
+                chartToggleBarBtn.style.color = 'var(--text-tertiary)';
+            }
+            render();
+        };
+        
+        // Export JSON Backup
+        const handleExportBackup = () => {
+            if (!currentUserId) return showToast('Not authenticated', true);
+
+            const backupData = {
+                expenses: expenses,
+                income: income,
+                recurringExpenses: recurringExpenses,
+                settings: {
+                    budget: currentBudget,
+                    categories: categories
+                }
+            };
+            
+            const jsonString = JSON.stringify(backupData, null, 2); // Pretty print JSON
+            const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `expenso_backup_${appId}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('Backup exported!');
+        };
+        
+        // NEW: Export to Excel (CSV)
+        const handleExportExcel = () => {
+            if (!currentUserId) return showToast('Not authenticated', true);
+            
+            const periodExpenses = getExpensesForPeriod(currentYear, currentMonth);
+            const periodIncome = getIncomeForPeriod(currentYear, currentMonth);
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Date,Type,Description,Amount,Category,Tags\n"; // Header row
+
+            // Add income rows
+            periodIncome.forEach(inc => {
+                const row = [
+                    inc.date,
+                    'Income',
+                    `"${inc.title.replace(/"/g, '""')}"`, // Handle quotes
+                    inc.amount,
+                    '', // No category for income
+                    ''  // No tags for income
+                ].join(',');
+                csvContent += row + "\n";
+            });
+
+            // Add expense rows
+            periodExpenses.forEach(exp => {
+                const categoryLabel = categories[exp.category] ? categories[exp.category].label : 'Other';
+                const tags = exp.tags ? exp.tags.join('; ') : ''; // Join tags with semicolon
+                const row = [
+                    exp.date,
+                    'Expense',
+                    `"${exp.title.replace(/"/g, '""')}"`, // Handle quotes
+                    exp.amount,
+                    categoryLabel,
+                    `"${tags.replace(/"/g, '""')}"` // Handle quotes
+                ].join(',');
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.href = encodedUri;
+            const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-US', { month: 'long' });
+            link.download = `expenso_export_${currentYear}_${monthName}.csv`;
+            document.body.appendChild(link); // Required for Firefox
+            link.click();
+            document.body.removeChild(link); // Clean up
+            showToast('Exported to CSV!');
+        };
+        
+        // Recurring Expenses
+        const checkRecurringExpenses = async () => {
+            if (!currentUserId) return;
+            
+            const today = getTodayString();
+            const recurringRef = collection(db, 'artifacts', appId, 'public', 'data', 'recurring');
+            const q = query(recurringRef, where => where("nextDueDate", "<=", today));
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                const batch = writeBatch(db);
+                let expensesAdded = false;
+
+                querySnapshot.forEach(docSnap => {
+                    const rex = docSnap.data();
+                    let nextDueDate = new Date(rex.nextDueDate + 'T00:00:00');
+
+                    // Add to main expenses
+                    const newExpense = { ...rex, date: rex.nextDueDate };
+                    delete newExpense.nextDueDate;
+                    // Need to create a new doc ref in the expenses collection to add to batch
+                    const newExpenseRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'expenses'));
+                    batch.set(newExpenseRef, newExpense);
+                    
+                    // Set next due date (e.g., +1 month)
+                    const updatedDueDate = new Date(nextDueDate.setMonth(nextDueDate.getMonth() + 1)).toISOString().split('T')[0];
+                    const rexRef = doc(db, 'artifacts', appId, 'public', 'data', 'recurring', docSnap.id);
+                    batch.update(rexRef, { nextDueDate: updatedDueDate });
+                    
+                    expensesAdded = true;
+                });
+                
+                if (expensesAdded) {
+                    await batch.commit();
+                    // showToast('Recurring expenses processed.'); // REMOVE THIS LINE
+                }
+            } catch (err) {
+                console.error("Error processing recurring expenses: ", err);
+                // Don't toast this, as it runs in background
+            }
+        };
+        
+        // Category Management
+        const renderCategoryUI = () => {
+            // Populate dropdowns
+            filterCategoryEl.innerHTML = '<option value="all">All Categories</option>';
+            expenseCategoryField.innerHTML = '';
+            categoryListEl.innerHTML = '';
+            
+            Object.keys(categories).forEach(key => {
+                const category = categories[key];
+                filterCategoryEl.innerHTML += `<option value="${key}">${category.label}</option>`;
+                expenseCategoryField.innerHTML += `<option value="${key}">${category.label}</option>`;
+                
+                // Populate manage modal list
+                const isDefault = Object.keys(DEFAULT_CATEGORIES).includes(key);
+                categoryListEl.innerHTML += `
+                    <div class="flex items-center justify-between p-2 glass-input rounded-lg gap-2">
+                        <span class="text-primary truncate">${category.label}</span>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <input type="number" class="category-budget-input glass-input w-24 text-sm p-1 rounded" placeholder="Budget" data-key="${key}" value="${category.budget || ''}">
+                            ${!isDefault ? `<button class="delete-category-btn p-1 text-red-400 hover:text-red-300" data-key="${key}" title="Delete ${category.label}">&times;</button>` : '<span class="text-xs text-tertiary w-8 text-right"></span>'}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+        const openCategoryModal = () => categoryModal.classList.remove('hidden');
+        const closeCategoryModal = () => categoryModal.classList.add('hidden');
+        
+        const handleCategorySubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return showToast('Not authenticated', true);
+            
+            const name = categoryNameInput.value.trim();
+            if (name && !Object.values(categories).find(c => c.label === name)) {
+                const key = name.toLowerCase().replace(/\s+/g, '_');
+                
+                // --- MODIFIED: Assign a color to new categories ---
+                const newCategoryColor = CATEGORY_COLORS[Object.keys(categories).length % CATEGORY_COLORS.length];
+                
+                const newCategories = { 
+                    ...categories, 
+                    [key]: { label: name, icon: GENERIC_ICON, color: newCategoryColor } 
+                };
+                
+                try {
+                    const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'userSettings');
+                    await setDoc(settingsRef, { categories: newCategories }, { merge: true });
+                    // onSnapshot will re-render
+                    categoryForm.reset();
+                    showToast('Category added!');
+                } catch (err) {
+                    console.error("Error adding category: ", err);
+                    showToast(`Error: ${err.message}`, true);
+                }
+            }
+        };
+        
+        const handleCategoryDeleteClick = (e) => {
+            const btn = e.target.closest('.delete-category-btn');
+            if (btn) {
+                const key = btn.dataset.key;
+                deleteInfo = { id: key, type: 'category' };
+                deleteModalTitle.textContent = 'Delete Category';
+                deleteModalText.textContent = `Are you sure you want to delete "${categories[key].label}"?\nAll expenses in this category will be moved to "Other".`;
+                deleteModal.classList.remove('hidden');
+            }
+        };
+
+        const handleCategoryDeleteConfirm = async (key) => {
+            // New local state without the deleted category
+            const newCategories = { ...categories };
+            delete newCategories[key];
+            
+            // Re-assign expenses
+            const batch = writeBatch(db);
+            expenses.forEach(exp => {
+                if (exp.category === key) {
+                    const expRef = doc(db, 'artifacts', appId, 'public', 'data', 'expenses', exp.id);
+                    batch.update(expRef, { category: 'other' });
+                }
+            });
+            
+            // Update settings
+            const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'userSettings');
+            batch.update(settingsRef, { categories: newCategories });
+            
+            try {
+                await batch.commit();
+                showToast('Category deleted!');
+            } catch (err) {
+                console.error("Error deleting category: ", err);
+                showToast(`Error: ${err.message}`, true);
+            }
+            
+            deleteInfo = { id: null, type: null };
+            deleteModal.classList.add('hidden');
+        };
+        
+        const handleCategoryBudgetChange = async (e) => {
+            if (e.target.classList.contains('category-budget-input')) {
+                if (!currentUserId) return showToast('Not authenticated', true);
+                
+                const key = e.target.dataset.key;
+                const budget = parseFloat(e.target.value) || 0;
+                
+                if (categories[key]) {
+                    const newCategories = { ...categories };
+                    newCategories[key].budget = budget > 0 ? budget : null;
+                    
+                    try {
+                        const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'userSettings');
+                        await setDoc(settingsRef, { categories: newCategories }, { merge: true });
+                        showToast('Category budget updated!');
+                    } catch (err) {
+                        console.error("Error updating category budget: ", err);
+                        showToast(`Error: ${err.message}`, true);
+                    }
+                }
+            }
+        };
+        
+        // Yearly Report
+        const renderYearlyReport = () => {
+            appView.classList.add('hidden');
+            yearlyReportView.classList.remove('hidden');
+            
+            document.getElementById('yearly-report-title').textContent = `Yearly Report: ${currentYear}`;
+            
+            // 1. Aggregate data for the whole year (from all loaded data)
+            let yearlyIncome = 0;
+            let yearlyExpenses = 0;
+            const monthlyTotals = Array(12).fill(0);
+            
+            expenses.forEach(exp => {
+                const date = new Date(exp.date + 'T00:00:00');
+                if (date.getFullYear() === currentYear) {
+                    yearlyExpenses += parseFloat(exp.amount);
+                    monthlyTotals[date.getMonth()] += parseFloat(exp.amount);
+                }
+            });
+            
+            income.forEach(inc => {
+                const date = new Date(inc.date + 'T00:00:00');
+                if (date.getFullYear() === currentYear) {
+                    yearlyIncome += parseFloat(inc.amount);
+                }
+            });
+            
+            // 2. Update summary cards
+            document.getElementById('yearly-total-income').textContent = formatCurrency(yearlyIncome);
+            document.getElementById('yearly-total-expenses').textContent = formatCurrency(yearlyExpenses);
+            const savings = yearlyIncome - yearlyExpenses;
+            const savingsEl = document.getElementById('yearly-total-savings');
+            savingsEl.textContent = formatCurrency(savings);
+            savingsEl.className = `text-4xl font-bold ${savings >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            
+            // 3. Draw Yearly Bar Chart
+            const yearlyChartEl = yearlyReportView.querySelector('#yearly-bar-chart');
+            yearlyChartEl.innerHTML = '';
+            const maxMonthly = Math.max(...monthlyTotals) || 1;
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            monthlyTotals.forEach((total, index) => {
+                const height = (total / maxMonthly) * 100;
+                yearlyChartEl.innerHTML += `
+                    <div class="flex flex-col items-center justify-end w-full h-full">
+                        <div class="chart-bar w-1/2 md:w-3/5 rounded-t-md" style="height: ${height}%; background-color: var(--accent-primary);" title="${months[index]}: ${formatCurrency(total)}"></div>
+                        <span class="text-xs text-tertiary mt-2">${months[index]}</span>
+                    </div>
+                `;
+            });
+        };
+        
+        // Settings
+        const openSettingsModal = () => settingsModal.classList.remove('hidden');
+        const closeSettingsModal = () => settingsModal.classList.add('hidden');
+        
+        // Import JSON Backup
+        const handleImportBackup = (e) => {
+            const file = e.target.files[0];
+            if (!file || !currentUserId) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                let importedData;
+                try {
+                    importedData = JSON.parse(event.target.result);
+                    if (!importedData.settings || !importedData.expenses || !importedData.income || !importedData.recurringExpenses) {
+                        throw new Error('Invalid backup file structure.');
+                    }
+                } catch (err) {
+                    console.error("Error parsing backup file: ", err);
+                    showToast(`Error: ${err.message}`, true);
+                    importBackupInput.value = ''; // Reset input
+                    return;
+                }
+                
+                const batch = writeBatch(db);
+                const publicDataPath = `artifacts/${appId}/public/data`;
+                
+                try {
+                    // 1. Delete all existing data
+                    const expensesRef = collection(db, publicDataPath, 'expenses');
+                    const incomeRef = collection(db, publicDataPath, 'income');
+                    const recurringRef = collection(db, publicDataPath, 'recurring');
+                    
+                    const expensesSnap = await getDocs(expensesRef);
+                    expensesSnap.forEach(doc => batch.delete(doc.ref));
+                    
+                    const incomeSnap = await getDocs(incomeRef);
+                    incomeSnap.forEach(doc => batch.delete(doc.ref));
+                    
+                    const recurringSnap = await getDocs(recurringRef);
+                    recurringSnap.forEach(doc => batch.delete(doc.ref));
+
+                    // 2. Add new data from backup
+                    importedData.expenses.forEach(exp => {
+                        const newDocRef = doc(collection(db, publicDataPath, 'expenses'));
+                        // Remove 'id' if it exists from old exports
+                        delete exp.id; 
+                        batch.set(newDocRef, exp);
+                    });
+                    
+                    importedData.income.forEach(inc => {
+                        const newDocRef = doc(collection(db, publicDataPath, 'income'));
+                        delete inc.id;
+                        batch.set(newDocRef, inc);
+                    });
+                    
+                    importedData.recurringExpenses.forEach(rex => {
+                        const newDocRef = doc(collection(db, publicDataPath, 'recurring'));
+                        delete rex.id;
+                        batch.set(newDocRef, rex);
+                    });
+
+                    // 3. Set settings
+                    const settingsRef = doc(db, publicDataPath, 'settings', 'userSettings');
+                    batch.set(settingsRef, importedData.settings);
+                    
+                    // 4. Commit batch
+                    await batch.commit();
+                    showToast('Backup restored successfully!');
+                    // Data will refresh via onSnapshot listeners
+                    
+                } catch (err) {
+                    console.error("Error restoring backup: ", err);
+                    showToast(`Error: ${err.message}`, true);
+                }
+                
+                importBackupInput.value = ''; // Reset input
+            };
+            reader.readAsText(file);
+        };
+        
+        // MODIFIED: This now opens the password modal first
+        const handleResetDataClick = () => {
+            resetPasswordModal.classList.remove('hidden');
+            resetPasswordInput.value = '';
+            resetPasswordError.classList.add('hidden');
+            resetPasswordInput.focus();
+        };
+
+        // NEW: Handler for the reset password modal
+        const handleResetPasswordSubmit = (e) => {
+            e.preventDefault();
+            if (resetPasswordInput.value === "9999") {
+                // Correct password
+                resetPasswordModal.classList.add('hidden');
+                
+                // Now open the *real* delete confirmation
+                deleteInfo = { id: null, type: 'all-data' };
+                deleteModalTitle.textContent = 'Clear All App Data?';
+                deleteModalText.textContent = 'This will permanently delete all shared data. This action cannot be undone.';
+                deleteModal.classList.remove('hidden');
+            } else {
+                // Incorrect password
+                resetPasswordError.classList.remove('hidden');
+                resetPasswordInput.value = '';
+                resetPasswordInput.focus();
+            }
+        };
+
+        // This function is the FINAL confirmation after password
+        const handleResetDataConfirm = async () => {
+            if (!currentUserId) return;
+            
+            const batch = writeBatch(db);
+            
+            // Delete all collections
+            const expensesRef = collection(db, 'artifacts', appId, 'public', 'data', 'expenses');
+            const incomeRef = collection(db, 'artifacts', appId, 'public', 'data', 'income');
+            const recurringRef = collection(db, 'artifacts', appId, 'public', 'data', 'recurring');
+            
+            // Delete settings doc
+            const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'userSettings');
+            
+            try {
+                // Fetch and delete all docs in collections
+                const expensesSnap = await getDocs(expensesRef);
+                expensesSnap.forEach(doc => batch.delete(doc.ref));
+                
+                const incomeSnap = await getDocs(incomeRef);
+                incomeSnap.forEach(doc => batch.delete(doc.ref));
+                
+                const recurringSnap = await getDocs(recurringRef);
+                recurringSnap.forEach(doc => batch.delete(doc.ref));
+                
+                // Reset settings doc to default
+                batch.set(settingsRef, { budget: 0, categories: DEFAULT_CATEGORIES, theme: 'dark' });
+                
+                await batch.commit();
+                showToast('All app data has been reset.');
+            } catch (err) {
+                console.error("Error resetting data: ", err);
+                showToast(`Error: ${err.message}`, true);
+            }
+            
+            deleteInfo = { id: null, type: null };
+            deleteModal.classList.add('hidden');
+        };
+        
+        // --- DATA LISTENERS ---
+        const attachDataListeners = () => {
+            if (!currentUserId || !appId) return; // Should be signed in and have an app ID
+            
+            // Detach old listeners
+            expensesUnsub();
+            incomeUnsub();
+            settingsUnsub();
+            recurringUnsub();
+            
+            // --- PUBLIC DATA PATHS (now dynamic with appId) ---
+            const publicDataPath = `artifacts/${appId}/public/data`;
+            
+            // --- Listener for Settings (Budget & Categories) ---
+            const settingsRef = doc(db, publicDataPath, 'settings', 'userSettings');
+            settingsUnsub = onSnapshot(settingsRef, async (docSnap) => {
+                if (docSnap.exists()) {
+                    const settingsData = docSnap.data();
+                    currentBudget = settingsData.budget || 0;
+                    categories = settingsData.categories || { ...DEFAULT_CATEGORIES }; // Use spread to avoid mutation
+                    applyTheme(settingsData.theme || 'dark'); // Load theme from Firestore
+                    
+                    // --- START NEW FIX ---
+                    // Check if user's categories are missing any defaults OR COLORS
+                    let categoriesUpdated = false;
+                    const defaultKeys = Object.keys(DEFAULT_CATEGORIES);
+                    for (const key of defaultKeys) {
+                        if (!categories[key]) {
+                            // User is missing this default category, add it
+                            categories[key] = DEFAULT_CATEGORIES[key];
+                            categoriesUpdated = true;
+                        } else if (!categories[key].color) {
+                            // User has this category, but it's missing the new 'color' prop
+                            categories[key].color = DEFAULT_CATEGORIES[key].color;
+                            categoriesUpdated = true;
+                        }
+                    }
+                    
+                    if (categoriesUpdated) {
+                        // If we added missing categories, update Firestore
+                        try {
+                            // We set merge: true just in case, but we're setting the whole object
+                            await setDoc(settingsRef, { categories: categories }, { merge: true });
+                            showToast('New categories added!'); 
+                            // No need to re-render here, the function continues
+                            // and will render with the updated 'categories' variable
+                        } catch (err) {
+                            console.error("Error updating categories with defaults: ", err);
+                        }
+                    }
+                    // --- END NEW FIX ---
+                    
+                } else {
+                    // No settings doc, create one with defaults
+                    currentBudget = 0;
+                    categories = { ...DEFAULT_CATEGORIES }; // Use spread
+                    applyTheme('dark'); // Apply default theme
+                    try {
+                        await setDoc(settingsRef, { budget: currentBudget, categories: categories, theme: 'dark' });
+                    } catch (err) {
+                        console.error("Error creating default settings: ", err);
+                    }
+                }
+                // Settings are loaded, enable buttons
+                addExpenseBtn.disabled = false;
+                addIncomeBtn.disabled = false;
+                renderCategoryUI(); // Update dropdowns
+                render(); // Re-render with new settings
+            }, (err) => {
+                console.error("Error on settings snapshot: ", err);
+                showToast(`Error: ${err.message}`, true);
+                addExpenseBtn.disabled = true; // Disable on error
+                addIncomeBtn.disabled = true;
+            });
+            
+            // --- Listener for Expenses ---
+            const expensesRef = collection(db, publicDataPath, 'expenses');
+            expensesUnsub = onSnapshot(expensesRef, (querySnapshot) => {
+                expenses = [];
+                querySnapshot.forEach((doc) => {
+                    expenses.push({ id: doc.id, ...doc.data() });
+                });
+                render(); // Re-render with new data
+            }, (err) => {
+                console.error("Error on expenses snapshot: ", err);
+                showToast(`Error: ${err.message}`, true);
+            });
+            
+            // --- Listener for Income ---
+            const incomeRef = collection(db, publicDataPath, 'income');
+            incomeUnsub = onSnapshot(incomeRef, (querySnapshot) => {
+                income = [];
+                querySnapshot.forEach((doc) => {
+                    income.push({ id: doc.id, ...doc.data() });
+                });
+                render(); // Re-render with new data
+            }, (err) => {
+                console.error("Error on income snapshot: ", err);
+                showToast(`Error: ${err.message}`, true);
+            });
+            
+            // --- Listener for Recurring (we don't render this, but we need it) ---
+            const recurringRef = collection(db, publicDataPath, 'recurring');
+            recurringUnsub = onSnapshot(recurringRef, (querySnapshot) => {
+                recurringExpenses = [];
+                querySnapshot.forEach((doc) => {
+                    recurringExpenses.push({ id: doc.id, ...doc.data() });
+                });
+                // We don't need to re-render, but we can check them
+                // checkRecurringExpenses(); // DO NOT check here, this causes the loop
+            }, (err) => {
+                console.error("Error on recurring snapshot: ", err);
+            });
+        };
+
+        // --- INITIALIZATION ---
+        const init = (authenticatedAppId) => {
+            appId = authenticatedAppId; // Set the global app ID for this session
+
+            // Assign DOM Elements
+            docElement = document.documentElement;
+            addExpenseBtn = document.getElementById('add-expense-btn');
+            addIncomeBtn = document.getElementById('add-income-btn');
+            expenseListEl = document.getElementById('expense-list');
+            totalExpensesEl = document.getElementById('total-expenses');
+            filterCategoryEl = document.getElementById('filter-category');
+            emptyStateEl = document.getElementById('empty-state');
+            
+            modal = document.getElementById('modal');
+            modalBackdrop = document.getElementById('modal-backdrop');
+            modalTitle = document.getElementById('modal-title');
+            cancelBtn = document.getElementById('cancel-btn');
+            expenseForm = document.getElementById('expense-form');
+            expenseIdField = document.getElementById('expense-id');
+            expenseTitleField = document.getElementById('expense-title');
+            expenseAmountField = document.getElementById('expense-amount');
+            expenseCategoryField = document.getElementById('expense-category');
+            expenseDateField = document.getElementById('expense-date');
+            expenseTagsField = document.getElementById('expense-tags');
+            expenseRecurringCheckbox = document.getElementById('expense-recurring');
+
+            themeToggleBtn = document.getElementById('theme-toggle-btn');
+            themeIconLight = document.getElementById('theme-icon-light');
+            themeIconDark = document.getElementById('theme-icon-dark');
+            
+            monthSelector = document.getElementById('month-selector');
+            
+            setBudgetBtn = document.getElementById('set-budget-btn');
+            budgetModal = document.getElementById('budget-modal');
+            budgetModalBackdrop = document.getElementById('budget-modal-backdrop');
+            budgetForm = document.getElementById('budget-form');
+            budgetAmountField = document.getElementById('budget-amount');
+            budgetCancelBtn = document.getElementById('budget-cancel-btn');
+            budgetDisplayEl = document.getElementById('budget-display');
+            budgetProgressBar = document.getElementById('budget-progress-bar');
+            budgetRemainingTextEl = document.getElementById('budget-remaining-text');
+
+            deleteModal = document.getElementById('delete-modal');
+            deleteModalBackdrop = document.getElementById('delete-modal-backdrop');
+            deleteModalTitle = document.getElementById('delete-modal-title');
+            deleteModalText = document.getElementById('delete-modal-text');
+            deleteCancelBtn = document.getElementById('delete-cancel-btn');
+            deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+            
+            searchBar = document.getElementById('search-bar');
+            exportJsonBtn = document.getElementById('export-json-btn');
+            exportExcelBtn = document.getElementById('export-excel-btn'); // Add this line
+            
+            insightSavings = document.getElementById('insight-savings');
+            insightTopCategory = document.getElementById('insight-top-category');
+            insightHighestExpense = document.getElementById('insight-highest-expense');
+            insightAvgSpend = document.getElementById('insight-avg-spend');
+            
+            chartToggleBarBtn = document.getElementById('chart-toggle-bar');
+            chartTogglePieBtn = document.getElementById('chart-toggle-pie');
+            barChartContainer = document.getElementById('bar-chart-container');
+            pieChartContainer = document.getElementById('pie-chart-container');
+            pieChartEl = document.getElementById('pie-chart');
+            pieChartLegendEl = document.getElementById('pie-chart-legend');
+            categoryBudgetsContainer = document.getElementById('category-budgets-container');
+            
+            weeklyTotalSpendEl = document.getElementById('weekly-total-spend'); // RE-ADDED
+            weeklyTopCategoryEl = document.getElementById('weekly-top-category'); // RE-ADDED
+            
+            manageCategoriesBtn = document.getElementById('manage-categories-btn');
+            categoryModal = document.getElementById('category-modal');
+            categoryModalBackdrop = document.getElementById('category-modal-backdrop');
+            categoryCloseBtn = document.getElementById('category-close-btn');
+            categoryForm = document.getElementById('category-form');
+            categoryNameInput = document.getElementById('category-name-input');
+            categoryListEl = document.getElementById('category-list');
+
+            incomeModal = document.getElementById('income-modal');
+            incomeModalBackdrop = document.getElementById('income-modal-backdrop');
+            incomeCancelBtn = document.getElementById('income-cancel-btn');
+            incomeForm = document.getElementById('income-form');
+            incomeIdField = document.getElementById('income-id');
+            incomeTitleField = document.getElementById('income-title');
+            incomeAmountField = document.getElementById('income-amount');
+            incomeDateField = document.getElementById('income-date');
+            incomeModalTitle = document.getElementById('income-modal-title');
+
+            historyTypeToggle = document.getElementById('history-type-toggle');
+            historySortToggle = document.getElementById('history-sort-toggle'); // Add this line
+
+            appView = document.getElementById('app');
+            yearlyReportView = document.getElementById('yearly-report');
+            closeYearlyReportBtn = document.getElementById('close-yearly-report');
+
+            settingsBtn = document.getElementById('settings-btn');
+            settingsModal = document.getElementById('settings-modal');
+            settingsModalBackdrop = document.getElementById('settings-modal-backdrop');
+            settingsCloseBtn = document.getElementById('settings-close-btn');
+            importBackupInput = document.getElementById('import-backup-input');
+            resetDataBtn = document.getElementById('reset-data-btn'); // RE-ADDED
+            
+            // NEW: Reset Password Modal elements
+            resetPasswordModal = document.getElementById('reset-password-modal');
+            resetPasswordBackdrop = document.getElementById('reset-password-backdrop');
+            resetPasswordForm = document.getElementById('reset-password-form');
+            resetPasswordInput = document.getElementById('reset-password-input');
+            resetPasswordError = document.getElementById('reset-password-error');
+            resetPasswordCancelBtn = document.getElementById('reset-password-cancel-btn');
+
+            logoutBtn = document.getElementById('logout-btn'); // Assign logout button
+            
+            toastEl = document.getElementById('toast');
+
+            // --- START APP ---
+            populateMonthSelector(); // Static UI
+            addExpenseBtn.disabled = true; // Disable buttons until settings are loaded
+            addIncomeBtn.disabled = true;
+            
+            // --- FIREBASE INIT ---
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Set up Auth Listener
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        // User is signed in.
+                        console.log('User is signed in:', user.uid);
+                        currentUserId = user.uid;
+                        // User is ready, attach all data listeners
+                        // Buttons will be enabled by the settings snapshot listener
+                        attachDataListeners();
+                        checkRecurringExpenses(); // CHECK ONCE ON LOAD
+                    } else {
+                        // User is signed out.
+                        console.log('User is signed out. Attempting to sign in anonymously...');
+                        currentUserId = null;
+                        // Detach listeners
+                        expensesUnsub();
+                        incomeUnsub();
+                        settingsUnsub();
+                        recurringUnsub();
+                        // Disable buttons
+                        addExpenseBtn.disabled = true;
+                        addIncomeBtn.disabled = true;
+                        
+                        // Try to sign in anonymously
+                        signInAnonymously(auth).catch((error) => {
+                            console.error("Anonymous sign-in failed: ", error);
+                            showToast('Firebase connection failed. Please refresh.', true);
+                        });
+                    }
+                });
+                
+            } catch (err) {
+                console.error("Firebase Init Error: ", err);
+                showToast(`Firebase Init Error: ${err.message}`, true);
+            }
+            
+            // Event Listeners
+            addExpenseBtn.addEventListener('click', () => openModal(null));
+            addIncomeBtn.addEventListener('click', openIncomeModal);
+
+            modalBackdrop.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            expenseForm.addEventListener('submit', handleSubmit);
+            
+            incomeModalBackdrop.addEventListener('click', closeIncomeModal);
+            incomeCancelBtn.addEventListener('click', closeIncomeModal);
+            incomeForm.addEventListener('submit', handleIncomeSubmit);
+            
+            themeToggleBtn.addEventListener('click', handleThemeToggle);
+            monthSelector.addEventListener('change', handleMonthChange);
+            
+            setBudgetBtn.addEventListener('click', openBudgetModal);
+            budgetModalBackdrop.addEventListener('click', closeBudgetModal);
+            budgetCancelBtn.addEventListener('click', closeBudgetModal);
+            budgetForm.addEventListener('submit', handleBudgetSubmit);
+            
+            deleteModalBackdrop.addEventListener('click', () => deleteModal.classList.add('hidden'));
+            deleteCancelBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
+            deleteConfirmBtn.addEventListener('click', handleDeleteConfirm);
+            
+            filterCategoryEl.addEventListener('change', handleFilterChange);
+            searchBar.addEventListener('input', handleSearchInput);
+            exportJsonBtn.addEventListener('click', handleExportBackup);
+            exportExcelBtn.addEventListener('click', handleExportExcel); // Add this line
+            
+            chartToggleBarBtn.addEventListener('click', () => handleChartToggle('bar'));
+            chartTogglePieBtn.addEventListener('click', () => handleChartToggle('pie'));
+            
+            manageCategoriesBtn.addEventListener('click', openCategoryModal);
+            categoryModalBackdrop.addEventListener('click', closeCategoryModal);
+            categoryCloseBtn.addEventListener('click', closeCategoryModal);
+            categoryForm.addEventListener('submit', handleCategorySubmit);
+            categoryListEl.addEventListener('click', handleCategoryDeleteClick);
+            categoryListEl.addEventListener('change', handleCategoryBudgetChange);
+            
+            expenseListEl.addEventListener('click', handleListClick);
+            historyTypeToggle.addEventListener('change', (e) => {
+                currentHistoryType = e.target.value;
+                render();
+            });
+            
+            historySortToggle.addEventListener('change', (e) => { // Add this block
+                currentSortOrder = e.targe.value;
+                render();
+            });
+            
+            closeYearlyReportBtn.addEventListener('click', () => {
+                yearlyReportView.classList.add('hidden');
+                appView.classList.remove('hidden');
+                monthSelector.value = `${currentYear}-${currentMonth}`; // Reset selector
+            });
+            
+            // Settings Listeners
+            settingsBtn.addEventListener('click', openSettingsModal);
+            settingsModalBackdrop.addEventListener('click', closeSettingsModal);
+            settingsCloseBtn.addEventListener('click', closeSettingsModal);
+            importBackupInput.addEventListener('change', handleImportBackup);
+            resetDataBtn.addEventListener('click', handleResetDataClick); // RE-ADDED
+            
+            // NEW: Reset Password Modal listeners
+            resetPasswordBackdrop.addEventListener('click', () => resetPasswordModal.classList.add('hidden'));
+            resetPasswordCancelBtn.addEventListener('click', () => resetPasswordModal.classList.add('hidden'));
+            resetPasswordForm.addEventListener('submit', handleResetPasswordSubmit);
+            
+            // Only add this listener if resetDataBtn exists (it won't after we remove it)
+            /*
+            if (resetDataBtn) {
+                resetDataBtn.addEventListener('click', handleResetDataClick);
+            }
+            */
+            
+            logoutBtn.addEventListener('click', handleLogout); // Add logout listener
+        };
+
+        // --- PASSWORD GATE LOGIC ---
+        const initPasswordGate = () => {
+            const gateEl = document.getElementById('password-gate');
+            const appEl = document.getElementById('app');
+            const formEl = document.getElementById('password-form');
+            const usernameInputEl = document.getElementById('username-input'); // NEW
+            const inputEl = document.getElementById('password-input');
+            const errorEl = document.getElementById('password-error');
+            
+            // --- NEW ELEMENTS FOR EYE ICON ---
+            const toggleBtn = document.getElementById('toggle-password-btn');
+            const eyeIcon = document.getElementById('eye-icon');
+            const eyeOffIcon = document.getElementById('eye-off-icon');
+            // --- END NEW ELEMENTS ---
+            
+            // --- NEW: User definitions ---
+            // Maps a username/password combo to a specific app ID
+            const USERS = [
+                { username: "anas9910", password: "24177", appId: "expenso-e317f" },
+                { username: "user2", password: "22222", appId: "expenso-test-mode" },
+                { username: "user3", password: "3333", appId: "expenso-user-333" },
+                { username: "user4", password: "4444", appId: "expenso-user-444" },
+                { username: "user5", password: "5555", appId: "expenso-user-555" }
+            ];
+            // --- END NEW ---
+
+            // Removed the numeric-only input restriction to allow for any password
+            
+            // --- NEW LISTENER FOR EYE ICON ---
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    if (inputEl.type === 'password') {
+                        inputEl.type = 'text';
+                        eyeIcon.classList.add('hidden');
+                        eyeOffIcon.classList.remove('hidden');
+                    } else {
+                        inputEl.type = 'password';
+                        eyeIcon.classList.remove('hidden');
+                        eyeOffIcon.classList.add('hidden');
+                    }
+                    inputEl.focus(); // Keep focus on the input
+                });
+            }
+            // --- END NEW LISTENER ---
+
+            // Check session storage first
+            const authenticatedAppId = sessionStorage.getItem('expenso_app_id');
+            if (authenticatedAppId) {
+                // Already authenticated in this session
+                gateEl.classList.add('hidden'); // Hide the gate
+                appEl.classList.remove('hidden'); // Show the app
+                init(authenticatedAppId); // Initialize the main app with the stored app ID
+                return;
+            }
+
+            // If not authenticated, show the gate (it's shown by default)
+            // and add the form listener.
+            formEl.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const enteredUsername = usernameInputEl.value.trim().toLowerCase();
+                const enteredPassword = inputEl.value;
+                
+                // Find user by username and password
+                const foundUser = USERS.find(user => 
+                    user.username === enteredUsername && 
+                    user.password === enteredPassword
+                );
+
+                if (foundUser) {
+                    // Success
+                    sessionStorage.setItem('expenso_app_id', foundUser.appId); // Save the specific app ID
+                    gateEl.classList.add('hidden'); // Hide the gate
+                    appEl.classList.remove('hidden'); // Show the app
+                    
+                    // --- APP INITIALIZATION (MOVED HERE) ---
+                    // Now we initialize the main app and Firebase
+                    init(foundUser.appId); 
+
+                } else {
+                    // Failure
+                    errorEl.classList.remove('hidden');
+                    usernameInputEl.value = '';
+                    inputEl.value = '';
+                    usernameInputEl.focus();
+                }
+            });
+            
+            // Focus the username field on load
+            usernameInputEl.focus();
+        };
+
+        // We only call the password gate init on DOM load
+        document.addEventListener('DOMContentLoaded', initPasswordGate);
+    </script>
+</body>
+</html>
