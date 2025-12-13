@@ -49,26 +49,30 @@ function showView(viewName) {
     const navCalendar = document.getElementById('nav-calendar');
     const navDashboard = document.getElementById('nav-dashboard');
 
+    // Classes for active/inactive states
+    const activeClasses = ['bg-blue-600', 'text-white', 'shadow-sm'];
+    const inactiveClasses = ['text-gray-500', 'dark:text-gray-400', 'hover:text-gray-900', 'dark:hover:text-white', 'hover:bg-gray-200', 'dark:hover:bg-gray-700'];
+
     if (viewName === 'calendar') {
         calendarView.classList.remove('hidden');
         dashboardView.classList.add('hidden');
 
-        navCalendar.classList.add('bg-blue-600', 'text-white');
-        navCalendar.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-700');
+        navCalendar.classList.add(...activeClasses);
+        navCalendar.classList.remove(...inactiveClasses);
 
-        navDashboard.classList.remove('bg-blue-600', 'text-white');
-        navDashboard.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-700');
+        navDashboard.classList.add(...inactiveClasses);
+        navDashboard.classList.remove(...activeClasses);
 
         renderCalendar();
     } else {
         calendarView.classList.add('hidden');
         dashboardView.classList.remove('hidden');
 
-        navDashboard.classList.add('bg-blue-600', 'text-white');
-        navDashboard.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-700');
+        navDashboard.classList.add(...activeClasses);
+        navDashboard.classList.remove(...inactiveClasses);
 
-        navCalendar.classList.remove('bg-blue-600', 'text-white');
-        navCalendar.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-700');
+        navCalendar.classList.add(...inactiveClasses);
+        navCalendar.classList.remove(...activeClasses);
 
         renderDashboard();
     }
@@ -119,10 +123,20 @@ function setupEventListeners() {
     document.getElementById('btn-toggle-dark-mode')?.addEventListener('click', toggleDarkMode);
 
     // Search
-    document.getElementById('search-input')?.addEventListener('input', (e) => {
-        store.searchFilter = e.target.value.toLowerCase();
+    // Search (Desktop & Mobile)
+    const handleSearch = (e) => {
+        const query = e.target.value.toLowerCase();
+        store.searchFilter = query;
+        // Sync inputs
+        const desktopInput = document.getElementById('search-input-desktop');
+        const mobileInput = document.getElementById('search-input-mobile');
+        if (desktopInput && desktopInput !== e.target) desktopInput.value = e.target.value;
+        if (mobileInput && mobileInput !== e.target) mobileInput.value = e.target.value;
+
         renderCalendar();
-    });
+    };
+    document.getElementById('search-input-desktop')?.addEventListener('input', handleSearch);
+    document.getElementById('search-input-mobile')?.addEventListener('input', handleSearch);
 
     // Modals Close
     document.querySelectorAll('.btn-close-modal').forEach(btn => {

@@ -39,58 +39,76 @@
 
         <!-- Header -->
         <header
-            class="flex flex-col md:flex-row md:items-center md:justify-between pb-4 bg-white dark:bg-gray-900 shadow-md rounded-xl transition-colors duration-200">
-            <!-- Title -->
-            <div class="flex items-center gap-3 px-6 py-2">
-                <svg class="w-10 h-10 text-blue-500" viewBox="0 0 24 24" fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M12 2.24615C12 2.24615 18 8.68269 18 13.9385C18 19.1942 15.3137 22.2308 12 22.2308C8.68629 22.2308 6 19.1942 6 13.9385C6 8.68269 12 2.24615 12 2.24615Z" />
-                </svg>
-                <h1 class="text-3xl font-logo text-blue-600">Speedyex Filtre</h1>
-            </div>
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 bg-white dark:bg-gray-900 shadow-md rounded-2xl transition-colors duration-200 px-4 md:px-6">
 
-            <!-- View Navigation -->
-            <div class="flex bg-gray-800 rounded-lg p-1 mx-4">
-                <button id="nav-calendar"
-                    class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
-                    Calendar
-                </button>
-                <button id="nav-dashboard"
-                    class="px-4 py-2 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
-                    Dashboard
-                </button>
-            </div>
-
-            <div class="flex items-center gap-2 mt-4 md:mt-0 px-2 md:px-6 flex-wrap justify-center w-full md:w-auto">
-                <!-- Search Input -->
-                <div class="relative w-full md:w-auto mb-2 md:mb-0">
-                    <input type="text" id="search-input" placeholder="Search..."
-                        class="w-full md:w-64 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg py-2 px-4 pl-10 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+            <!-- Left Section: Logo & View Nav -->
+            <div class="flex items-center gap-6 justify-between md:justify-start w-full md:w-auto">
+                <!-- Title -->
+                <div class="flex items-center gap-3">
+                    <svg class="w-10 h-10 text-blue-500" viewBox="0 0 24 24" fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12 2.24615C12 2.24615 18 8.68269 18 13.9385C18 19.1942 15.3137 22.2308 12 22.2308C8.68629 22.2308 6 19.1942 6 13.9385C6 8.68269 12 2.24615 12 2.24615Z" />
+                    </svg>
+                    <h1 class="text-3xl font-logo text-blue-600 hidden lg:block">Speedyex Filtre</h1>
                 </div>
 
-                <!-- Buttons Group -->
-                <div class="flex items-center gap-2">
+                <!-- View Navigation (Pill) -->
+                <div class="flex bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
+                    <button id="nav-calendar"
+                        class="px-5 py-2 rounded-full text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
+                        Calendar
+                    </button>
+                    <button id="nav-dashboard"
+                        class="px-5 py-2 rounded-full text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                        Dashboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Center Section: Search Bar (Desktop) -->
+            <div class="hidden md:flex flex-1 justify-center max-w-xl mx-auto px-4">
+                <div class="relative w-full">
+                    <input type="text" id="search-input-desktop" placeholder="Search clients or events..."
+                        class="w-full bg-gray-100 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-full py-2.5 px-5 pl-11 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+                </div>
+            </div>
+
+            <!-- Right Section: Actions -->
+            <div class="flex items-center gap-3 justify-end w-full md:w-auto flex-wrap md:flex-nowrap">
+
+                <!-- Mobile Search (Visible only on small screens) -->
+                <div class="relative w-full md:hidden mb-2">
+                    <div class="relative">
+                        <input type="text" id="search-input-mobile" placeholder="Search..."
+                            class="w-full bg-gray-100 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-full py-2.5 px-5 pl-11 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <i data-lucide="search"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 md:gap-3 ml-auto md:ml-0">
                     <button id="btn-view-reminders" title="View Reminders"
-                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-view-inventory" title="Manage Inventory"
-                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="package" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-view-clients" title="View All Clients"
-                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="users" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-new-client" title="New Client"
-                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="user-plus" class="w-5 h-5"></i>
                     </button>
-                    <!-- New Modern Dark Mode Toggle -->
+
+                    <!-- Dark Mode Toggle -->
                     <button id="btn-toggle-dark-mode"
-                        class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
                         title="Toggle Theme">
                         <div
                             class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-200 dark:translate-x-6 flex items-center justify-center pointer-events-none">
@@ -98,8 +116,9 @@
                             <i data-lucide="moon" class="w-4 h-4 text-blue-500 hidden dark:block"></i>
                         </div>
                     </button>
+
                     <button id="btn-new-event"
-                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors whitespace-nowrap">
+                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-6 rounded-full transition-colors whitespace-nowrap shadow-lg shadow-blue-500/30">
                         <i data-lucide="plus" class="w-5 h-5"></i>
                         <span class="hidden sm:inline">New Event</span>
                         <span class="sm:hidden">New</span>
