@@ -1,0 +1,139 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Main calendar grid layout */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 1px; /* Creates the thin border effect */
+}
+
+/* Calendar cell styling */
+.calendar-day-cell {
+    position: relative;
+    min-height: 120px; /* Taller cells for event space */
+    transition: background-color 0.2s;
+}
+
+/* Today's date highlight */
+.calendar-day-cell.today .day-number {
+    background-color: #3B82F6; /* Blue-600 */
+    color: white;
+    border-radius: 9999px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+
+/* Faded numbers for non-current month days */
+.calendar-day-cell.other-month {
+    opacity: 0.7; /* Reverted to dark-mode style */
+}
+
+/* Modal transitions */
+.modal-backdrop {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 40;
+    /* Dark theme backdrop */
+    background-color: rgba(17, 24, 39, 0.8); /* gray-900 opacity 80 */
+}
+.modal-backdrop.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-content {
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 50;
+}
+.modal-backdrop.visible .modal-content {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* Custom scrollbar for modal content (dark theme) */
+.modal-scroll-content::-webkit-scrollbar {
+    width: 8px;
+}
+.modal-scroll-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05); /* dark */
+    border-radius: 10px;
+}
+.modal-scroll-content::-webkit-scrollbar-thumb {
+    background: #4B5563; /* gray-600 */
+    border-radius: 10px;
+}
+.modal-scroll-content::-webkit-scrollbar-thumb:hover {
+    background: #6B7280; /* gray-500 */
+}
+
+/* Toast notification (Kept dark for contrast) */
+#toast-notification {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: bottom 0.5s ease-in-out;
+    z-index: 100;
+    background-color: #374151; /* gray-700 */
+    color: white;
+}
+#toast-notification.show {
+    bottom: 30px;
+}
+
+/* Simple loading spinner (dark theme) */
+.spinner {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: inline-block;
+    /* White top border */
+    border-top: 4px solid #FFF; 
+    border-right: 4px solid transparent;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Styling for event pill icons */
+.event-pill .status-icon {
+    width: 0.75rem; /* 12px */
+    height: 0.75rem;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+/* Responsive calendar for mobile */
+@media (max-width: 768px) {
+    .calendar-day-cell {
+        min-height: 80px; /* Shorter cells on mobile */
+        padding: 4px;
+    }
+    .day-number {
+        font-size: 0.8rem;
+    }
+    .event-pill {
+        font-size: 0.7rem;
+        padding: 2px 4px;
+        margin-top: 2px;
+    }
+    .calendar-weekdays {
+        font-size: 0.75rem;
+    }
+}
