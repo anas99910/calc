@@ -1,0 +1,214 @@
+import { store } from './store.js';
+import { saveEvents, saveClients, saveInventory } from './api.js'; // Imports purely for dependency, though actions happen in app.js mainly? Or should we move actions here?
+// Ideally, event handlers should be separate or imported. For now, let's keep modal OPENING logic here, and maybe form handling logic.
+// To avoid circular dependencies, we might need a separate 'actions.js' or keep core logic in `app.js` passing callbacks?
+// Let's try to make `modals.js` manage the UI state of modals.
+
+import { getEventTypeColors } from './utils.js';
+
+/**
+ * Opens a modal.
+ */
+export function openModal(modal) {
+    if (!modal) return;
+    modal.classList.add('visible');
+}
+
+/**
+ * Closes a modal.
+ */
+export function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('visible');
+}
+
+/**
+ * Opens the Confirmation Modal.
+ */
+export function openConfirmationModal(message, onConfirm) {
+    document.getElementById('confirmation-message').textContent = message;
+    store.confirmCallback = onConfirm;
+    openModal(document.getElementById('confirmation-modal'));
+}
+
+/**
+ * Opens the Event Modal (UI Logic).
+ */
+export function openEventModal(event = null, date = null) {
+    const modal = document.getElementById('event-modal');
+    const form = document.getElementById('event-form');
+    form.reset();
+
+    store.selectedEventId = null;
+
+    if (event) {
+        // Edit existing
+        document.getElementById('event-modal-title').textContent = 'Edit Appointment';
+        document.getElementById('event-id').value = event.id;
+        document.getElementById('event-type').value = event.type;
+        document.getElementById('event-client-id').value = event.clientId || "";
+        document.getElementById('event-title').value = event.title || "";
+        document.getElementById('event-date').value = event.date;
+        document.getElementById('event-time').value = event.time;
+        document.getElementById('event-technician').value = event.technician || "";
+        document.getElementById('event-cost').value = event.cost || "";
+        document.getElementById('event-notes').value = event.notes || "";
+
+        // Status fields
+        document.getElementById('event-status').value = event.status || "Scheduled";
+        document.getElementById('event-payment-status').value = event.paymentStatus || "Not Invoiced";
+        document.getElementById('event-filter-used').value = event.filterUsed || "";
+
+        // Store old values
+        document.getElementById('event-old-status').value = event.status || "Scheduled";
+        document.getElementById('event-old-filter-used').value = event.filterUsed || "";
+
+        store.selectedEventId = event.id;
+        document.getElementById('btn-delete-event').style.display = 'block';
+        document.getElementById('btn-generate-invoice').classList.remove('hidden');
+
+    } else {
+        // New event
+        document.getElementById('event-modal-title').textContent = 'New Appointment';
+        document.getElementById('event-id').value = '';
+        if (date) {
+            document.getElementById('event-date').value = date.toISOString().split('T')[0];
+        }
+        document.getElementById('event-status').value = "Scheduled";
+        document.getElementById('event-payment-status').value = "Not Invoiced";
+        document.getElementById('event-old-status').value = "Scheduled";
+
+        document.getElementById('btn-delete-event').style.display = 'none';
+        document.getElementById('btn-generate-invoice').classList.add('hidden');
+    }
+
+    toggleEventFormFields();
+    openModal(modal);
+}
+
+/**
+ * Adjusts event form fields based on type.
+ */
+export function toggleEventFormFields() {
+    const eventType = document.getElementById('event-type').value;
+    const eventStatus = document.getElementById('event-status').value;
+
+    const clientSection = document.getElementById('client-section');
+    const titleSection = document.getElementById('title-section');
+    const smartReminderSection = document.getElementById('smart-reminder-section');
+    const filterUsedSection = document.getElementById('filter-used-section');
+    const billingSection = document.getElementById('billing-section');
+
+    if (eventType === 'General') {
+        clientSection.style.display = 'none';
+        titleSection.style.display = 'block';
+        smartReminderSection.style.display = 'none';
+        filterUsedSection.style.display = 'none';
+    } else {
+        clientSection.style.display = 'block';
+        titleSection.style.display = 'none';
+
+        if (eventType === 'Installation' || eventType === 'Filter Change') {
+            filterUsedSection.style.display = 'block';
+        } else {
+            filterUsedSection.style.display = 'none';
+        }
+
+        const isNewEvent = !document.getElementById('event-id').value;
+        if (eventType === 'Installation' && isNewEvent) {
+            smartReminderSection.style.display = 'block';
+            const clientId = document.getElementById('event-client-id').value;
+            const client = store.clients.find(c => c.id === clientId);
+            if (client) {
+                document.getElementById('filter-lifespan').value = client.filterLifespanDays || 180;
+            }
+        } else {
+            smartReminderSection.style.display = 'none';
+        }
+    }
+
+    if (eventStatus === 'Completed') {
+        billingSection.style.display = 'block';
+    } else {
+        billingSection.style.display = 'none';
+        document.getElementById('event-payment-status').value = 'Not Invoiced';
+    }
+}
+
+/**
+ * Opens Client Modal.
+ */
+export function openClientModal(client = null, fromEventModal = false) {
+    const modal = document.getElementById('client-modal');
+    const form = document.getElementById('client-form');
+    form.reset();
+
+    store.selectedClientId = null;
+    const historySection = document.getElementById('client-history-section');
+
+    // Populate filter dropdowns handled by logic elsewhere, or call helper?
+    // Ideally we export populateInventoryDropdowns from somewhere accessbile. 
+    // For now assuming it's called or handled.
+
+    if (client) {
+        document.getElementById('client-modal-title').textContent = 'Edit Client';
+        document.getElementById('client-id').value = client.id;
+        document.getElementById('client-name').value = client.name;
+        document.getElementById('client-phone').value = client.phone || "";
+        document.getElementById('client-address').value = client.address || "";
+        document.getElementById('client-filter-type').value = client.defaultFilterType || "";
+        document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
+        document.getElementById('client-notes').value = client.notes || "";
+
+        store.selectedClientId = client.id;
+        document.getElementById('btn-delete-client').style.display = 'block';
+        historySection.style.display = 'block';
+
+        renderClientHistory(client.id);
+
+    } else {
+        document.getElementById('client-modal-title').textContent = 'New Client';
+        document.getElementById('client-id').value = '';
+        document.getElementById('client-filter-lifespan').value = 180;
+        document.getElementById('btn-delete-client').style.display = 'none';
+        historySection.style.display = 'none';
+    }
+
+    modal.dataset.fromEventModal = fromEventModal ? 'true' : 'false';
+    openModal(modal);
+}
+
+function renderClientHistory(clientId) {
+    const historyList = document.getElementById('client-history-list');
+    historyList.innerHTML = '<p class="text-sm text-gray-400">Loading history...</p>';
+
+    const historyEvents = store.events
+        .filter(event => event.clientId === clientId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (historyEvents.length === 0) {
+        historyList.innerHTML = '<p class="text-sm text-gray-400">No history found for this client.</p>';
+        return;
+    }
+
+    historyList.innerHTML = '';
+    historyEvents.forEach(event => {
+        const colors = getEventTypeColors(event.type, event.status);
+        let statusText = event.status || 'Scheduled';
+        if (event.paymentStatus === 'Paid') statusText = 'Paid';
+        else if (event.paymentStatus === 'Invoiced') statusText = 'Invoiced';
+
+        const item = document.createElement('div');
+        // Adaptive class
+        item.className = 'p-3 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg';
+        item.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">${event.date} @ ${event.time}</span>
+                <span class="text-xs font-medium px-2 py-0.5 rounded-md ${colors.bg} ${colors.text}">${event.type}</span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">${event.notes || 'No notes.'}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Status: ${statusText}</p>
+        `;
+        historyList.appendChild(item);
+    });
+}

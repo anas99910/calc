@@ -6,42 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speedyex Filtre</title>
 
-    <!-- 1. Tailwind CSS -->
+    <!-- 1. Tailwind CSS (Must load first) -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 3. Chart.js & jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Configuration for Tailwind -->
+    <script type="module" src="js/tailwind-config.js"></script>
 
     <!-- 2. Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Configuration for Tailwind dark mode and theme -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class', // Enable class-based dark mode
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        // Add custom font for logo
-                        logo: ['Pacifico', 'cursive'],
-                    },
-                    colors: {
-                        'gray-950': '#0A0A0A',
-                        'gray-900': '#121212',
-                        'gray-800': '#1E1E1E',
-                        'gray-700': '#2C2C2C',
-                        'gray-600': '#3A3A3A',
-                    },
-                    borderRadius: {
-                        'xl': '0.75rem',
-                        '2xl': '1.0rem',
-                        '3xl': '1.5rem',
-                    },
-                    boxShadow: {
-                        'hard': '0 0 0 1px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.05)',
-                    }
-                }
-            }
-        }
-    </script>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
@@ -63,7 +39,7 @@
 
         <!-- Header -->
         <header
-            class="flex flex-col md:flex-row md:items-center md:justify-between pb-4 bg-gray-900 dark:bg-gray-900 shadow-md rounded-xl">
+            class="flex flex-col md:flex-row md:items-center md:justify-between pb-4 bg-white dark:bg-gray-900 shadow-md rounded-xl transition-colors duration-200">
             <!-- Title -->
             <div class="flex items-center gap-3 px-6 py-2">
                 <svg class="w-10 h-10 text-blue-500" viewBox="0 0 24 24" fill="currentColor"
@@ -74,36 +50,52 @@
                 <h1 class="text-3xl font-logo text-blue-600">Speedyex Filtre</h1>
             </div>
 
+            <!-- View Navigation -->
+            <div class="flex bg-gray-800 rounded-lg p-1 mx-4">
+                <button id="nav-calendar"
+                    class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
+                    Calendar
+                </button>
+                <button id="nav-dashboard"
+                    class="px-4 py-2 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+                    Dashboard
+                </button>
+            </div>
+
             <div class="flex items-center gap-2 mt-4 md:mt-0 px-6">
                 <!-- Search Input -->
                 <div class="relative">
                     <input type="text" id="search-input" placeholder="Search clients or events..."
-                        class="w-full md:w-64 bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 pl-10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full md:w-64 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg py-2 px-4 pl-10 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
                     <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
                 </div>
 
                 <!-- Buttons -->
                 <button id="btn-view-reminders" title="View Reminders"
-                    class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
+                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <i data-lucide="bell" class="w-5 h-5"></i>
                 </button>
                 <button id="btn-view-inventory" title="Manage Inventory"
-                    class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
+                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <i data-lucide="package" class="w-5 h-5"></i>
                 </button>
                 <button id="btn-view-clients" title="View All Clients"
-                    class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
+                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <i data-lucide="users" class="w-5 h-5"></i>
                 </button>
                 <button id="btn-new-client" title="New Client"
-                    class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
+                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <i data-lucide="user-plus" class="w-5 h-5"></i>
                 </button>
-                <!-- Dark mode toggle -->
-                <button id="btn-toggle-dark-mode" title="Toggle theme"
-                    class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
-                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                <!-- New Modern Dark Mode Toggle -->
+                <button id="btn-toggle-dark-mode"
+                    class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    title="Toggle Theme">
+                    <div
+                        class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-200 dark:translate-x-6 flex items-center justify-center pointer-events-none">
+                        <i data-lucide="sun" class="w-4 h-4 text-yellow-500 dark:hidden"></i>
+                        <i data-lucide="moon" class="w-4 h-4 text-blue-500 hidden dark:block"></i>
+                    </div>
                 </button>
                 <button id="btn-new-event"
                     class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
@@ -113,63 +105,144 @@
             </div>
         </header>
 
-        <!-- Main Content: Calendar -->
-        <main class="flex-1 mt-6 flex flex-col">
-            <!-- Calendar Controls -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                <!-- Month Navigation -->
-                <div class="flex items-center gap-4">
-                    <button id="btn-prev-month"
-                        class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
-                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                    </button>
-                    <h2 id="month-year-header" class="text-2xl font-semibold text-white w-48 text-center">...</h2>
-                    <button id="btn-next-month"
-                        class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
-                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                    </button>
-                    <button id="btn-today"
-                        class="bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors text-sm px-3 py-2">
-                        Today
-                    </button>
+        <!-- Main Content -->
+        <main class="flex-1 mt-6 flex flex-col relative overflow-hidden">
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="hidden absolute inset-0 flex-col overflow-y-auto pb-20 fade-in">
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Revenue -->
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-2" id="dash-revenue">
+                                    $0.00</h3>
+                            </div>
+                            <div
+                                class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Jobs -->
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Jobs Completed</p>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-2" id="dash-completed">0
+                                </h3>
+                            </div>
+                            <div
+                                class="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl text-green-600 dark:text-green-400">
+                                <i data-lucide="check-circle" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Clients -->
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Clients</p>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-2" id="dash-clients">0
+                                </h3>
+                            </div>
+                            <div
+                                class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Legend -->
-                <div class="flex flex-wrap gap-2 md:gap-4 mt-4 md:mt-0 text-xs text-gray-400">
-                    <div class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-blue-500"></span>Installation</div>
-                    <div class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-green-500"></span>Maintenance</div>
-                    <div class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-yellow-500"></span>Filter Change</div>
-                    <div class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-purple-500"></span>General</div>
-                    <div class="flex items-center gap-1.5"><i data-lucide="dollar-sign"
-                            class="w-3 h-3 text-green-500"></i>Paid</div>
-                    <div class="flex items-center gap-1.5"><i data-lucide="check-circle"
-                            class="w-3 h-3 text-green-500"></i>Completed</div>
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Monthly Revenue</h4>
+                        <div class="h-64"><canvas id="chart-revenue"></canvas></div>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Services Breakdown</h4>
+                        <div class="h-64"><canvas id="chart-services"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Inventory -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Inventory Status</h4>
+                    <div id="dash-inventory-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <!-- Calendar Grid -->
-            <div class="flex-1 flex flex-col bg-gray-700 rounded-2xl shadow-hard overflow-hidden">
-                <!-- Weekday Headers -->
-                <div class="calendar-weekdays grid grid-cols-7 bg-gray-800 border-b border-gray-700">
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Sun</div>
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Mon</div>
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Tue</div>
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Wed</div>
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Thu</div>
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Fri</div>
-                    <div class="text-center text-sm font-medium text-gray-400 p-3">Sat</div>
+            <!-- Calendar View (Default) -->
+            <div id="calendar-view" class="flex-1 flex flex-col h-full fade-in">
+                <!-- Calendar Controls -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                    <!-- Month Navigation -->
+                    <div class="flex items-center gap-4">
+                        <button id="btn-prev-month"
+                            class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <h2 id="month-year-header"
+                            class="text-2xl font-semibold text-gray-900 dark:text-white w-48 text-center transition-colors duration-200">
+                            ...</h2>
+                        <button id="btn-next-month"
+                            class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                        <button id="btn-today"
+                            class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm px-3 py-2">
+                            Today
+                        </button>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex flex-wrap gap-2 md:gap-4 mt-4 md:mt-0 text-xs text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-1.5"><span
+                                class="w-3 h-3 rounded-full bg-blue-500"></span>Installation</div>
+                        <div class="flex items-center gap-1.5"><span
+                                class="w-3 h-3 rounded-full bg-green-500"></span>Maintenance</div>
+                        <div class="flex items-center gap-1.5"><span
+                                class="w-3 h-3 rounded-full bg-yellow-500"></span>Filter Change</div>
+                        <div class="flex items-center gap-1.5"><span
+                                class="w-3 h-3 rounded-full bg-purple-500"></span>General</div>
+                        <div class="flex items-center gap-1.5"><i data-lucide="dollar-sign"
+                                class="w-3 h-3 text-green-500"></i>Paid</div>
+                        <div class="flex items-center gap-1.5"><i data-lucide="check-circle"
+                                class="w-3 h-3 text-green-500"></i>Completed</div>
+                    </div>
                 </div>
 
-                <!-- Day Cells -->
-                <div id="calendar-grid" class="calendar-grid flex-1">
-                    <!-- Calendar cells will be dynamically generated here -->
+                <!-- Calendar Grid -->
+                <div class="flex-1 flex flex-col bg-white dark:bg-gray-700 rounded-2xl shadow-hard overflow-hidden">
+                    <!-- Weekday Headers -->
+                    <div
+                        class="calendar-weekdays grid grid-cols-7 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Sun</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Mon</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Tue</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Wed</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Thu</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Fri</div>
+                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Sat</div>
+                    </div>
+
+                    <!-- Day Cells -->
+                    <div id="calendar-grid" class="calendar-grid flex-1">
+                        <!-- Calendar cells will be dynamically generated here -->
+                    </div>
                 </div>
-            </div>
-        </main>
+            </div> <!-- End .shadow-hard -->
+    </div> <!-- End #calendar-view -->
+    </main>
     </div>
 
     <!-- Modals -->
@@ -326,6 +399,10 @@
                 <button type="button" id="btn-delete-event"
                     class="text-red-500 hover:text-red-400 font-medium px-4 py-2.5 rounded-lg hover:bg-red-900/30 transition-colors text-sm">
                     Delete Event
+                </button>
+                <button type="button" id="btn-generate-invoice"
+                    class="text-blue-400 hover:text-blue-300 font-medium px-4 py-2.5 rounded-lg hover:bg-blue-900/30 transition-colors text-sm hidden">
+                    <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>Invoice
                 </button>
                 <div class="flex gap-3">
                     <button type="button"
@@ -570,7 +647,7 @@
     </div>
 
     <!-- Main Application Script -->
-    <script type="module" src="app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 
 </html>
