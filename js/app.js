@@ -5,7 +5,7 @@ import { initTheme, toggleDarkMode } from './theme.js';
 import { renderCalendar, changeMonth } from './calendar.js';
 import { renderDashboard } from './dashboard.js';
 import { openEventModal, openClientModal, openConfirmationModal, closeModal, toggleEventFormFields } from './modals.js';
-import { getEventTypeColors } from './utils.js';
+import { getEventTypeColors, generateId } from './utils.js';
 import { generateInvoice } from './invoice.js';
 
 // --- Global Scope Exposure (for HTML buttons) ---
@@ -174,88 +174,107 @@ function setupEventListeners() {
 
 async function handleEventFormSubmit(e) {
     e.preventDefault();
-    // Gather data
-    const id = document.getElementById('event-id').value || crypto.randomUUID();
-    const type = document.getElementById('event-type').value;
-    const clientId = document.getElementById('event-client-id').value;
-    const status = document.getElementById('event-status').value;
+    try {
+        const id = document.getElementById('event-id').value || generateId();
+        const type = document.getElementById('event-type').value;
+        const clientId = document.getElementById('event-client-id').value;
+        const status = document.getElementById('event-status').value;
 
-    // ... (Extraction of form values) ...
-    const newEvent = {
-        id,
-        type,
-        clientId,
-        status,
-        title: document.getElementById('event-title').value,
-        date: document.getElementById('event-date').value,
-        time: document.getElementById('event-time').value,
-        technician: document.getElementById('event-technician').value,
-        cost: parseFloat(document.getElementById('event-cost').value) || 0,
-        notes: document.getElementById('event-notes').value,
-        paymentStatus: document.getElementById('event-payment-status').value,
-        filterUsed: document.getElementById('event-filter-used').value || null,
-        clientName: clientId ? store.clients.find(c => c.id === clientId)?.name : null
-    };
+        // ... (Extraction of form values) ...
+        const newEvent = {
+            id,
+            type,
+            clientId,
+            status,
+            title: document.getElementById('event-title').value,
+            date: document.getElementById('event-date').value,
+            time: document.getElementById('event-time').value,
+            technician: document.getElementById('event-technician').value,
+            cost: parseFloat(document.getElementById('event-cost').value) || 0,
+            notes: document.getElementById('event-notes').value,
+            paymentStatus: document.getElementById('event-payment-status').value,
+            filterUsed: document.getElementById('event-filter-used').value || null,
+            clientName: clientId ? store.clients.find(c => c.id === clientId)?.name : null
+        };
 
-    if (store.selectedEventId) {
-        // Update existing
-        const index = store.events.findIndex(e => e.id === store.selectedEventId);
-        if (index !== -1) store.events[index] = newEvent;
-    } else {
-        store.events.push(newEvent);
+        if (store.selectedEventId) {
+            // Update existing
+            const index = store.events.findIndex(e => e.id === store.selectedEventId);
+            if (index !== -1) store.events[index] = newEvent;
+        } else {
+            store.events.push(newEvent);
+        }
+
+        await saveEvents();
+        closeModal(document.getElementById('event-modal'));
+    } catch (error) {
+        console.error("Error saving event:", error);
+        alert("Failed to save event: " + error.message);
     }
-
-    await saveEvents();
-    closeModal(document.getElementById('event-modal'));
-
     // Handle re-opening logic if needed
 }
 
 async function deleteSelectedEvent() {
     if (!store.selectedEventId) return;
     openConfirmationModal("Are you sure you want to delete this event?", async () => {
-        store.events = store.events.filter(e => e.id !== store.selectedEventId);
-        await saveEvents();
-        closeModal(document.getElementById('event-modal'));
+        try {
+            store.events = store.events.filter(e => e.id !== store.selectedEventId);
+            await saveEvents();
+            closeModal(document.getElementById('event-modal'));
+        } catch (error) {
+            console.error("Error deleting event:", error);
+            alert("Failed to delete event: " + error.message);
+        }
     });
 }
 
 // ... (Client handlers similar to above) ...
+
 async function handleClientFormSubmit(e) {
     e.preventDefault();
-    const id = document.getElementById('client-id').value || crypto.randomUUID();
-    const newClient = {
-        id,
-        name: document.getElementById('client-name').value,
-        phone: document.getElementById('client-phone').value,
-        address: document.getElementById('client-address').value,
-        defaultFilterType: document.getElementById('client-filter-type').value,
-        filterLifespanDays: parseInt(document.getElementById('client-filter-lifespan').value) || 180,
-        notes: document.getElementById('client-notes').value
-    };
+    try {
+        const id = document.getElementById('client-id').value || generateId();
+        const newClient = {
+            id,
+            name: document.getElementById('client-name').value,
+            phone: document.getElementById('client-phone').value,
+            address: document.getElementById('client-address').value,
+            defaultFilterType: document.getElementById('client-filter-type').value,
+            filterLifespanDays: parseInt(document.getElementById('client-filter-lifespan').value) || 180,
+            notes: document.getElementById('client-notes').value
+        };
 
-    if (store.selectedClientId) {
-        const index = store.clients.findIndex(c => c.id === store.selectedClientId);
-        if (index !== -1) store.clients[index] = newClient;
-    } else {
-        store.clients.push(newClient);
-    }
+        if (store.selectedClientId) {
+            const index = store.clients.findIndex(c => c.id === store.selectedClientId);
+            if (index !== -1) store.clients[index] = newClient;
+        } else {
+            store.clients.push(newClient);
+        }
 
-    await saveClients();
+        await saveClients();
 
-    const modal = document.getElementById('client-modal');
-    closeModal(modal);
-    if (modal.dataset.fromEventModal === 'true') {
-        openEventModal();
+        const modal = document.getElementById('client-modal');
+        closeModal(modal);
+        if (modal.dataset.fromEventModal === 'true') {
+            openEventModal();
+        }
+    } catch (error) {
+        console.error("Error saving client:", error);
+        alert("Failed to save client: " + error.message);
     }
 }
 
 async function deleteSelectedClient() {
     if (!store.selectedClientId) return;
     openConfirmationModal("Delete this client?", async () => {
-        store.clients = store.clients.filter(c => c.id !== store.selectedClientId);
-        await saveClients();
-        closeModal(document.getElementById('client-modal'));
+        try {
+            store.clients = store.clients.filter(c => c.id !== store.selectedClientId);
+            await saveClients();
+            closeModal(document.getElementById('client-modal'));
+        } catch (error) {
+            console.error("Error deleting client:", error);
+            alert("Failed to delete client: " + error.message);
+        }
     });
 }
 
@@ -308,7 +327,7 @@ async function handleNewFilterForm(e) {
     e.preventDefault();
     const name = document.getElementById('new-filter-name').value;
     const qty = parseInt(document.getElementById('new-filter-quantity').value) || 0;
-    store.inventory.push({ id: crypto.randomUUID(), name, quantity: qty });
+    store.inventory.push({ id: generateId(), name, quantity: qty });
     await saveInventory();
     renderInventoryList();
     e.target.reset();
@@ -318,15 +337,47 @@ function renderClientListModal() {
     const list = document.getElementById('client-list-container');
     if (!list) return;
     list.innerHTML = '';
-    store.clients.forEach(c => {
+
+    // Filter if search
+    const searchTerm = document.getElementById('client-list-search')?.value.toLowerCase() || "";
+    const filteredClients = store.clients.filter(c => c.name.toLowerCase().includes(searchTerm));
+
+    filteredClients.forEach(c => {
         const div = document.createElement('div');
-        div.className = "p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-800";
-        div.textContent = c.name;
-        div.onclick = () => {
+        div.className = "flex justify-between items-center p-3 border-b border-gray-700 hover:bg-gray-800 transition-colors";
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = c.name;
+        nameSpan.className = "cursor-pointer flex-grow font-medium";
+        nameSpan.onclick = () => {
             closeModal(document.getElementById('client-list-modal'));
             openClientModal(c);
         };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = `<i data-lucide="x" class="w-4 h-4 text-red-400 hover:text-red-300"></i>`;
+        deleteBtn.className = "p-2 rounded-full hover:bg-red-900/20 transition-colors ml-2";
+        deleteBtn.title = "Delete Client";
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            openConfirmationModal(`Are you sure you want to delete ${c.name}?`, async () => {
+                try {
+                    store.clients = store.clients.filter(client => client.id !== c.id);
+                    await saveClients();
+                    renderClientListModal(); // Re-render list
+                    // If we were editing this client, close that modal too if open, but this is list view.
+                } catch (error) {
+                    console.error("Error deleting client:", error);
+                    alert("Failed to delete client: " + error.message);
+                }
+            });
+        };
+
+        div.appendChild(nameSpan);
+        div.appendChild(deleteBtn);
         list.appendChild(div);
     });
+
+    if (window.lucide) lucide.createIcons();
     document.getElementById('client-list-modal').classList.add('visible');
 }

@@ -1,6 +1,18 @@
 /**
  * Returns Tailwind color classes for an event type. (Adaptive)
  */
+// Utility ID generator
+export function generateId() {
+    if (crypto && crypto.randomUUID) {
+        try {
+            return crypto.randomUUID();
+        } catch (e) {
+            console.warn("crypto.randomUUID failed, falling back to manual ID");
+        }
+    }
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
 export function getEventTypeColors(type, status = 'Scheduled') {
     // If cancelled, always return grey
     if (status === 'Cancelled') {

@@ -24,7 +24,7 @@
 </head>
 <!-- Dark theme body -->
 
-<body class="bg-gray-950 text-gray-200">
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-200 transition-colors duration-200">
 
     <!-- Loading Overlay (dark theme) -->
     <div id="loading-overlay"
@@ -62,46 +62,49 @@
                 </button>
             </div>
 
-            <div class="flex items-center gap-2 mt-4 md:mt-0 px-6">
+            <div class="flex items-center gap-2 mt-4 md:mt-0 px-2 md:px-6 flex-wrap justify-center w-full md:w-auto">
                 <!-- Search Input -->
-                <div class="relative">
-                    <input type="text" id="search-input" placeholder="Search clients or events..."
+                <div class="relative w-full md:w-auto mb-2 md:mb-0">
+                    <input type="text" id="search-input" placeholder="Search..."
                         class="w-full md:w-64 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg py-2 px-4 pl-10 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
                     <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
                 </div>
 
-                <!-- Buttons -->
-                <button id="btn-view-reminders" title="View Reminders"
-                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                </button>
-                <button id="btn-view-inventory" title="Manage Inventory"
-                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i data-lucide="package" class="w-5 h-5"></i>
-                </button>
-                <button id="btn-view-clients" title="View All Clients"
-                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                </button>
-                <button id="btn-new-client" title="New Client"
-                    class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i data-lucide="user-plus" class="w-5 h-5"></i>
-                </button>
-                <!-- New Modern Dark Mode Toggle -->
-                <button id="btn-toggle-dark-mode"
-                    class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    title="Toggle Theme">
-                    <div
-                        class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-200 dark:translate-x-6 flex items-center justify-center pointer-events-none">
-                        <i data-lucide="sun" class="w-4 h-4 text-yellow-500 dark:hidden"></i>
-                        <i data-lucide="moon" class="w-4 h-4 text-blue-500 hidden dark:block"></i>
-                    </div>
-                </button>
-                <button id="btn-new-event"
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-                    <i data-lucide="plus" class="w-5 h-5"></i>
-                    <span>New Event</span>
-                </button>
+                <!-- Buttons Group -->
+                <div class="flex items-center gap-2">
+                    <button id="btn-view-reminders" title="View Reminders"
+                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </button>
+                    <button id="btn-view-inventory" title="Manage Inventory"
+                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="package" class="w-5 h-5"></i>
+                    </button>
+                    <button id="btn-view-clients" title="View All Clients"
+                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </button>
+                    <button id="btn-new-client" title="New Client"
+                        class="p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    </button>
+                    <!-- New Modern Dark Mode Toggle -->
+                    <button id="btn-toggle-dark-mode"
+                        class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        title="Toggle Theme">
+                        <div
+                            class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-200 dark:translate-x-6 flex items-center justify-center pointer-events-none">
+                            <i data-lucide="sun" class="w-4 h-4 text-yellow-500 dark:hidden"></i>
+                            <i data-lucide="moon" class="w-4 h-4 text-blue-500 hidden dark:block"></i>
+                        </div>
+                    </button>
+                    <button id="btn-new-event"
+                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors whitespace-nowrap">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span class="hidden sm:inline">New Event</span>
+                        <span class="sm:hidden">New</span>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -222,17 +225,32 @@
                 </div>
 
                 <!-- Calendar Grid -->
-                <div class="flex-1 flex flex-col bg-white dark:bg-gray-700 rounded-2xl shadow-hard overflow-hidden">
+                <div
+                    class="flex-1 flex flex-col bg-white dark:bg-gray-700 rounded-2xl shadow-hard overflow-y-auto md:overflow-hidden">
                     <!-- Weekday Headers -->
                     <div
                         class="calendar-weekdays grid grid-cols-7 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Sun</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Mon</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Tue</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Wed</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Thu</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Fri</div>
-                        <div class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 p-3">Sat</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Sun</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Mon</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Tue</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Wed</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Thu</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Fri</div>
+                        <div
+                            class="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 p-1 md:p-3">
+                            Sat</div>
                     </div>
 
                     <!-- Day Cells -->
@@ -250,7 +268,7 @@
     <!-- Event Modal (Add/Edit) -->
     <div id="event-modal" class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
         <div
-            class="modal-content w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]">
+            class="modal-content w-[95%] md:w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-5 border-b border-gray-700">
                 <h3 id="event-modal-title" class="text-xl font-semibold text-white">New Appointment</h3>
@@ -421,7 +439,7 @@
     <!-- Client Modal (Add/Edit) -->
     <div id="client-modal" class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
         <div
-            class="modal-content w-full max-w-3xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]">
+            class="modal-content w-[95%] md:w-full max-w-3xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-5 border-b border-gray-700">
                 <h3 id="client-modal-title" class="text-xl font-semibold text-white">New Client</h3>
@@ -515,7 +533,7 @@
     <div id="reminders-modal"
         class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
         <div
-            class="modal-content w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[70vh]">
+            class="modal-content w-[95%] md:w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[70vh]">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-5 border-b border-gray-700">
                 <h3 class="text-xl font-semibold text-white">Upcoming Events & Reminders</h3>
@@ -544,7 +562,7 @@
     <div id="inventory-modal"
         class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
         <div
-            class="modal-content w-full max-w-xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[70vh]">
+            class="modal-content w-[95%] md:w-full max-w-xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[70vh]">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-5 border-b border-gray-700">
                 <h3 class="text-xl font-semibold text-white">Filter Inventory</h3>
@@ -585,7 +603,7 @@
     <div id="client-list-modal"
         class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
         <div
-            class="modal-content w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[70vh]">
+            class="modal-content w-[95%] md:w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[70vh]">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-5 border-b border-gray-700">
                 <h3 class="text-xl font-semibold text-white">All Clients</h3>
