@@ -470,11 +470,11 @@ function renderClientListModal() {
 
     filteredClients.forEach(c => {
         const div = document.createElement('div');
-        div.className = "flex justify-between items-center p-3 border-b border-gray-700 hover:bg-gray-800 transition-colors";
+        div.className = "flex justify-between items-center p-3 border-b border-gray-700 hover:bg-gray-700 transition-colors";
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = c.name;
-        nameSpan.className = "cursor-pointer flex-grow font-medium";
+        nameSpan.className = "cursor-pointer flex-grow font-medium text-gray-200 hover:text-white";
         nameSpan.onclick = () => {
             closeModal(document.getElementById('client-list-modal'));
             openClientModal(c);

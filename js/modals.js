@@ -41,6 +41,18 @@ export function openEventModal(event = null, date = null) {
 
     store.selectedEventId = null;
 
+    // Populate Client Dropdown
+    const clientSelect = document.getElementById('event-client-id');
+    if (clientSelect) {
+        clientSelect.innerHTML = '<option value="">Select an existing client</option>';
+        store.clients.forEach(client => {
+            const option = document.createElement('option');
+            option.value = client.id;
+            option.textContent = client.name;
+            clientSelect.appendChild(option);
+        });
+    }
+
     if (event) {
         // Edit existing
         document.getElementById('event-modal-title').textContent = 'Edit Appointment';
@@ -78,6 +90,7 @@ export function openEventModal(event = null, date = null) {
         document.getElementById('event-payment-status').value = "Not Invoiced";
         document.getElementById('event-old-status').value = "Scheduled";
 
+        document.getElementById('event-client-id').value = ""; // Reset select
         document.getElementById('btn-delete-event').style.display = 'none';
         document.getElementById('btn-generate-invoice').classList.add('hidden');
     }
