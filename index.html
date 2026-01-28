@@ -39,22 +39,17 @@
 
         <!-- Header -->
         <header
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 bg-white dark:bg-gray-900 shadow-md rounded-2xl transition-colors duration-200 px-4 md:px-6">
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 bg-white dark:bg-gray-900 shadow-md rounded-2xl transition-colors duration-200 px-4 md:px-6">
 
             <!-- Left Section: Logo & View Nav -->
             <div class="flex items-center gap-6 justify-between md:justify-start w-full md:w-auto">
                 <!-- Title -->
                 <div class="flex items-center gap-3">
-                    <svg class="w-10 h-10 text-blue-500" viewBox="0 0 24 24" fill="currentColor"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M12 2.24615C12 2.24615 18 8.68269 18 13.9385C18 19.1942 15.3137 22.2308 12 22.2308C8.68629 22.2308 6 19.1942 6 13.9385C6 8.68269 12 2.24615 12 2.24615Z" />
-                    </svg>
-                    <h1 class="text-3xl font-logo text-blue-600 hidden lg:block">Speedyex Filtre</h1>
+                    <img src="logo.png" alt="Speedyex Filtre Logo" class="h-12 w-auto object-contain">
                 </div>
 
                 <!-- View Navigation (Pill) -->
-                <div class="flex bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
                     <button id="nav-calendar"
                         class="px-5 py-2 rounded-full text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
                         Calendar
@@ -67,7 +62,7 @@
             </div>
 
             <!-- Center Section: Search Bar (Desktop) -->
-            <div class="hidden md:flex flex-1 justify-center max-w-xl mx-auto px-4">
+            <div class="hidden md:flex items-center flex-1 justify-center max-w-xl mx-auto px-4">
                 <div class="relative w-full">
                     <input type="text" id="search-input-desktop" placeholder="Search clients or events..."
                         class="w-full bg-gray-100 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-full py-2.5 px-5 pl-11 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">

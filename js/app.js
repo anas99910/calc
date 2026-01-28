@@ -193,8 +193,60 @@ async function handleEventFormSubmit(e) {
         const type = document.getElementById('event-type').value;
         const clientId = document.getElementById('event-client-id').value;
         const status = document.getElementById('event-status').value;
+        const filterUsed = document.getElementById('event-filter-used').value || null;
 
-        // ... (Extraction of form values) ...
+        // Old values for stock adjustment
+        const oldStatus = document.getElementById('event-old-status').value;
+        const oldFilterUsed = document.getElementById('event-old-filter-used').value;
+
+        // --- Auto-Stock Deduction Logic ---
+        let inventoryChanged = false;
+
+        // 1. If becoming COMPLETED (and wasn't before) -> Deduct stock
+        if (status === 'Completed' && oldStatus !== 'Completed') {
+            if (filterUsed) {
+                const item = store.inventory.find(i => i.name === filterUsed);
+                if (item && item.quantity > 0) {
+                    item.quantity--;
+                    inventoryChanged = true;
+                } else if (item && item.quantity <= 0) {
+                    // Optional: Warn user but still allow? Or block?
+                    console.warn(`Stock low for ${filterUsed}`); // Proceed with negative or zero? Let's allow negative for now.
+                    item.quantity--;
+                    inventoryChanged = true;
+                }
+            }
+        }
+        // 2. If WAS Completed and now is NOT -> Revert stock (add back)
+        else if (status !== 'Completed' && oldStatus === 'Completed') {
+            if (oldFilterUsed) {
+                const item = store.inventory.find(i => i.name === oldFilterUsed);
+                if (item) {
+                    item.quantity++;
+                    inventoryChanged = true;
+                }
+            }
+        }
+        // 3. If BOTH are Completed but filter changed -> Swap stock
+        else if (status === 'Completed' && oldStatus === 'Completed' && filterUsed !== oldFilterUsed) {
+            // Revert old
+            if (oldFilterUsed) {
+                const oldItem = store.inventory.find(i => i.name === oldFilterUsed);
+                if (oldItem) { oldItem.quantity++; inventoryChanged = true; }
+            }
+            // Deduct new
+            if (filterUsed) {
+                const newItem = store.inventory.find(i => i.name === filterUsed);
+                if (newItem) { newItem.quantity--; inventoryChanged = true; }
+            }
+        }
+
+        if (inventoryChanged) {
+            await saveInventory();
+            // If dashboard is open, it might need refresh, but store is updated so next render is fine.
+            // If inventory modal is open? likely not.
+        }
+
         const newEvent = {
             id,
             type,
@@ -207,7 +259,7 @@ async function handleEventFormSubmit(e) {
             cost: parseFloat(document.getElementById('event-cost').value) || 0,
             notes: document.getElementById('event-notes').value,
             paymentStatus: document.getElementById('event-payment-status').value,
-            filterUsed: document.getElementById('event-filter-used').value || null,
+            filterUsed: filterUsed,
             clientName: clientId ? store.clients.find(c => c.id === clientId)?.name : null
         };
 
@@ -221,11 +273,11 @@ async function handleEventFormSubmit(e) {
 
         await saveEvents();
         closeModal(document.getElementById('event-modal'));
+        renderCalendar(); // Refresh view
     } catch (error) {
         console.error("Error saving event:", error);
         alert("Failed to save event: " + error.message);
     }
-    // Handle re-opening logic if needed
 }
 
 async function deleteSelectedEvent() {
@@ -308,15 +360,75 @@ function populateRemindersModal() {
     const list = document.getElementById('reminders-list');
     if (!list) return;
     list.innerHTML = '';
-    const upcoming = store.events.filter(e => new Date(e.date) >= new Date()).slice(0, 10);
-    if (upcoming.length === 0) { list.innerHTML = '<p class="text-gray-400">No upcoming events.</p>'; return; }
+
+    const today = new Date(); // now
+    const nextMonth = new Date();
+    nextMonth.setDate(today.getDate() + 30);
+
+    // 1. Find "Due Soon" (Filter Changes in next 30 days)
+    const dueSoon = store.events.filter(e => {
+        const d = new Date(e.date);
+        return d >= today && d <= nextMonth && e.type === 'Filter Change' && e.status !== 'Completed';
+    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // 2. Find other upcoming events
+    const upcoming = store.events.filter(e => {
+        const d = new Date(e.date);
+        return d >= today && !dueSoon.includes(e);
+    }).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 10);
+
+    // --- Render Due Soon Section ---
+    if (dueSoon.length > 0) {
+        const dueHeader = document.createElement('h4');
+        dueHeader.className = "text-red-400 font-bold mb-2 uppercase text-xs tracking-wider";
+        dueHeader.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i> Due Next 30 Days`;
+        list.appendChild(dueHeader);
+
+        dueSoon.forEach(event => {
+            const div = document.createElement('div');
+            // Highlighting red border for urgency
+            div.className = "p-3 bg-red-900/20 border border-red-500/50 rounded mb-3 flex justify-between items-center cursor-pointer hover:bg-red-900/30 transition-colors";
+            div.innerHTML = `
+                <div>
+                    <div class="font-bold text-red-200">${event.clientName || event.title}</div>
+                    <div class="text-xs text-red-300">Due: ${event.date}</div>
+                </div>
+                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">Book</button>
+            `;
+            div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
+            list.appendChild(div);
+        });
+
+        list.appendChild(document.createElement('hr'));
+        const spacer = document.createElement('div'); spacer.className = "h-4"; list.appendChild(spacer);
+    }
+
+    // --- Render Upcoming Section ---
+    const upcomingHeader = document.createElement('h4');
+    upcomingHeader.className = "text-gray-400 font-bold mb-2 uppercase text-xs tracking-wider";
+    upcomingHeader.innerText = "Upcoming Events";
+    list.appendChild(upcomingHeader);
+
+    if (upcoming.length === 0 && dueSoon.length === 0) {
+        list.innerHTML = '<p class="text-gray-400">No upcoming events or due maintenance.</p>';
+        return;
+    }
 
     upcoming.forEach(event => {
         const div = document.createElement('div');
-        div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2"; // Simplified style
-        div.textContent = `${event.date} - ${event.clientName || event.title}`;
+        div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
+        div.innerHTML = `
+            <div class="flex justify-between">
+                <span class="font-medium text-gray-900 dark:text-gray-200">${event.clientName || event.title}</span>
+                <span class="text-xs text-blue-400 font-mono">${event.date}</span>
+            </div>
+            <div class="text-xs text-gray-500">${event.type}</div>
+        `;
+        div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
         list.appendChild(div);
     });
+
+    if (window.lucide) lucide.createIcons();
     document.getElementById('reminders-modal').classList.add('visible');
 }
 
