@@ -7,6 +7,7 @@ import { renderDashboard } from './dashboard.js';
 import { openEventModal, openClientModal, openConfirmationModal, closeModal, toggleEventFormFields } from './modals.js';
 import { getEventTypeColors, generateId } from './utils.js';
 import { generateInvoice } from './invoice.js';
+import { initSettings } from './settings.js';
 
 // --- Global Scope Exposure (for HTML buttons) ---
 window.toggleDarkMode = toggleDarkMode;
@@ -17,6 +18,9 @@ try {
 
     // Initialize Theme
     initTheme();
+
+    // Initialize Settings (Language & Export)
+    initSettings();
 
     // Setup Listeners
     setupEventListeners();

@@ -12,6 +12,7 @@
     <!-- 3. Chart.js & jsPDF -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <!-- Configuration for Tailwind -->
     <script type="module" src="js/tailwind-config.js"></script>
@@ -50,11 +51,11 @@
 
                 <!-- View Navigation (Pill) -->
                 <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
-                    <button id="nav-calendar"
+                    <button id="nav-calendar" data-i18n="nav.calendar"
                         class="px-5 py-2 rounded-full text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
                         Calendar
                     </button>
-                    <button id="nav-dashboard"
+                    <button id="nav-dashboard" data-i18n="nav.dashboard"
                         class="px-5 py-2 rounded-full text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
                         Dashboard
                     </button>
@@ -62,9 +63,10 @@
             </div>
 
             <!-- Center Section: Search Bar (Desktop) -->
-            <div class="hidden md:flex items-center flex-1 justify-center max-w-xl mx-auto px-4">
+            <div class="hidden md:flex items-center flex-1 justify-center max-w-xl mx-auto px-4 min-w-[200px]">
                 <div class="relative w-full">
-                    <input type="text" id="search-input-desktop" placeholder="Search clients or events..."
+                    <input type="text" id="search-input-desktop" data-i18n-placeholder="header.search_placeholder"
+                        placeholder="Search clients or events..."
                         class="w-full bg-gray-100 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-full py-2.5 px-5 pl-11 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
                     <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
                 </div>
@@ -101,6 +103,12 @@
                         <i data-lucide="user-plus" class="w-5 h-5"></i>
                     </button>
 
+                    <!-- Settings Button -->
+                    <button id="btn-settings" title="Settings"
+                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+
                     <!-- Dark Mode Toggle -->
                     <button id="btn-toggle-dark-mode"
                         class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
@@ -115,7 +123,7 @@
                     <button id="btn-new-event"
                         class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-6 rounded-full transition-colors whitespace-nowrap shadow-lg shadow-blue-500/30">
                         <i data-lucide="plus" class="w-5 h-5"></i>
-                        <span class="hidden sm:inline">New Event</span>
+                        <span class="hidden sm:inline" data-i18n="btn.new_event">New Event</span>
                         <span class="sm:hidden">New</span>
                     </button>
                 </div>
@@ -652,6 +660,54 @@
     <div id="toast-notification" class="bg-gray-700 text-white py-3 px-5 rounded-lg shadow-lg flex items-center gap-4">
         <span id="toast-message">Event deleted.</span>
         <button id="toast-undo-btn" class="font-bold text-blue-400 hover:text-blue-300">Undo</button>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
+        <div
+            class="modal-content w-[90%] max-w-md bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-5 border-b border-gray-700">
+                <h3 class="text-xl font-semibold text-white" data-i18n="modal.settings.title">Settings</h3>
+                <button class="btn-close-modal p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-6">
+                <!-- Language Section -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3"
+                        data-i18n="settings.language">Language</h4>
+                    <div class="flex gap-2">
+                        <button id="btn-lang-en"
+                            class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-medium transition-colors">
+                            English
+                        </button>
+                        <button id="btn-lang-fr"
+                            class="flex-1 py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 font-medium transition-colors">
+                            Français
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Section -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3"
+                        data-i18n="settings.data">Data Management</h4>
+                    <div class="bg-gray-700/50 p-4 rounded-xl border border-gray-700">
+                        <p class="text-sm text-gray-300 mb-4" data-i18n="settings.export_desc">Download a backup of all
+                            clients, events, and inventory.</p>
+                        <button id="btn-export-excel"
+                            class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            <span data-i18n="btn.export_data">Export Data to Excel</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Confirmation Modal -->
