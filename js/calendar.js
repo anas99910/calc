@@ -1,6 +1,6 @@
 import { store } from './store.js';
 import { getEventTypeColors } from './utils.js';
-import { openEventModal } from './modals.js';
+import { openEventModal, openDayViewModal } from './modals.js';
 import { saveEvents } from './api.js';
 
 let draggedEventId = null;
@@ -119,7 +119,8 @@ export function renderCalendar() {
 
         // Add click listener to day cell
         cell.addEventListener('click', () => {
-            openEventModal(null, dateObj);
+            // openEventModal(null, dateObj); <-- OLD
+            openDayViewModal(dateObj); // NEW
         });
 
         grid.appendChild(cell);

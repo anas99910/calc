@@ -34,6 +34,83 @@ export function openConfirmationModal(message, onConfirm) {
 /**
  * Opens the Event Modal (UI Logic).
  */
+export function openDayViewModal(dateObj) {
+    const modal = document.getElementById('day-view-modal');
+    if (!modal) return;
+
+    // Set Date Title
+    const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('day-view-date').textContent = dateStr;
+
+    // Filter Events
+    const isoDate = dateObj.toISOString().split('T')[0];
+    const dayEvents = store.events.filter(e => e.date === isoDate).sort((a, b) => a.time.localeCompare(b.time));
+
+    // Render List
+    const list = document.getElementById('day-view-list');
+    list.innerHTML = '';
+
+    if (dayEvents.length === 0) {
+        list.innerHTML = '<p class="text-gray-400 text-center py-4">No events for this day.</p>';
+    } else {
+        dayEvents.forEach(event => {
+            const div = document.createElement('div');
+            const colors = getEventTypeColors(event.type, event.status);
+            div.className = `p-3 rounded-lg border flex items-center justify-between ${colors.bg} ${colors.text} border-gray-700/50`;
+
+            div.innerHTML = `
+                <div class="flex-1 cursor-pointer">
+                    <div class="font-bold text-sm">${event.clientName || event.title}</div>
+                    <div class="text-xs opacity-80">${event.time} • ${event.type} • ${event.status}</div>
+                </div>
+                <button class="btn-delete-event-day p-2 hover:bg-black/20 rounded-full text-red-400 hover:text-red-300 transition-colors" title="Delete Event">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+
+            // Click to Edit
+            div.querySelector('div').onclick = () => {
+                closeModal(modal);
+                openEventModal(event);
+            };
+
+            // Click to Delete
+            div.querySelector('button').onclick = (e) => {
+                e.stopPropagation();
+                openConfirmationModal("Are you sure you want to delete this event?", async () => {
+                    store.events = store.events.filter(ev => ev.id !== event.id);
+                    await import('./api.js').then(m => m.saveEvents()); // Dynamic import to avoid circular dep if needed, or ensuring api is imported
+                    renderDayViewList(dateObj); // Refresh list
+                    const { renderCalendar } = await import('./calendar.js');
+                    renderCalendar();
+                });
+            };
+
+            list.appendChild(div);
+        });
+    }
+
+    // Bind "Add New" button
+    const btnAdd = document.getElementById('btn-add-event-day-view');
+    btnAdd.onclick = () => {
+        closeModal(modal);
+        openEventModal(null, dateObj); // Pass date to new event
+    };
+
+    if (window.lucide) lucide.createIcons();
+    openModal(modal);
+}
+
+// Helper to refresh list after delete
+function renderDayViewList(dateObj) {
+    // Re-run logic (or separate render function, simplified here by calling open essentially again or refactoring)
+    // For simplicity, just re-call open logic effectively
+    openDayViewModal(dateObj);
+}
+
+/**
+ * Opens the Event Modal (UI Logic).
+ */
 export function openEventModal(event = null, date = null) {
     const modal = document.getElementById('event-modal');
     const form = document.getElementById('event-form');
