@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedyex Filtre</title>
+    <title>Speedyex - Calculateur de Filtres</title>
 
     <!-- 1. Tailwind CSS (Must load first) -->
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- 3. Chart.js & jsPDF -->
@@ -713,10 +715,20 @@
                     </div>
                 </div>
 
-                <!-- Data Section -->
-                <div>
-                    <h4 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3"
-                        data-i18n="settings.data">Data Management</h4>
+                <!-- Install App Button (Always Visible) -->
+                <div id="install-container" class="my-4 p-4 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                    <p class="text-sm text-gray-300 mb-3" data-i18n="modal.settings.install_desc">Install this app on
+                        your device for quick access and offline use.</p>
+                    <button id="btn-install-app"
+                        class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        <span data-i18n="modal.settings.install_btn">Install App</span>
+                    </button>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4"
+                        data-i18n="modal.settings.export">Data Management</h4>
                     <div class="bg-gray-700/50 p-4 rounded-xl border border-gray-700">
                         <p class="text-sm text-gray-300 mb-4" data-i18n="settings.export_desc">Download a backup of all
                             clients, events, and inventory.</p>
@@ -786,6 +798,19 @@
 
     <!-- Main Application Script -->
     <script type="module" src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>

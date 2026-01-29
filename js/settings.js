@@ -2,6 +2,8 @@ import { store } from './store.js';
 import { translations } from './translations.js';
 import { openModal, closeModal } from './modals.js';
 
+let deferredPrompt; // Store the prompt event
+
 // --- Language Logic ---
 
 let currentLang = localStorage.getItem('app_language') || 'en';
@@ -26,6 +28,47 @@ export function initSettings() {
     // Bind Export Button
     const btnExport = document.getElementById('btn-export-excel');
     if (btnExport) btnExport.onclick = exportToExcel;
+
+    // --- PWA Install Logic ---
+    const installContainer = document.getElementById('install-container');
+    const installBtn = document.getElementById('btn-install-app');
+
+    // 1. Capture event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Already visible by default now
+    });
+
+    // 2. Handle Click
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                // Fallback instructions if browser hasn't fired the event yet (or already installed)
+                if (window.showToast) {
+                    showToast("To install: Click the 'Share' icon (iOS) or 'Menu' (Android/PC) > 'Add to Home Screen'.", "info");
+                } else {
+                    alert("To install: Click the browser menu (three dots) -> 'Install App' or 'Add to Home Screen'.");
+                }
+                return;
+            }
+
+            // Show prompt
+            deferredPrompt.prompt();
+
+            // Wait for choice
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to install prompt: ${outcome}`);
+
+            deferredPrompt = null;
+        });
+    }
+
+    // 3. Check if already installed (optional clean up)
+    window.addEventListener('appinstalled', () => {
+        if (installContainer) installContainer.classList.add('hidden');
+        console.log('App installed successfully');
+    });
 }
 
 export function setLanguage(lang) {
