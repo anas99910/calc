@@ -1,4 +1,4 @@
-const CACHE_NAME = 'speedyex-v2';
+const CACHE_NAME = 'speedyex-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -7,6 +7,9 @@ const ASSETS_TO_CACHE = [
     './pwa-icon.png',
     './favicon.ico',
     './manifest.json',
+    './check_icon.ps1', // Keeping strictly relevant files, but user had this in dir
+
+    // JS Modules
     './js/app.js',
     './js/api.js',
     './js/calendar.js',
@@ -20,23 +23,40 @@ const ASSETS_TO_CACHE = [
     './js/toast.js',
     './js/translations.js',
     './js/utils.js',
-    // External libs (ideally vendor them, but for now cache the CDN links if used, or let them fail offline if not critical. 
-    // Note: Cross-origin requests might be opaque. Better to cache local files.)
-    // We are relying on some CDNs (Firebase, Lucide, Tailwind script). 
-    // A robust PWA should have these local. For this "quick PWA" we focus on app shell.
+    './js/firebase-config.js',
+    './js/tailwind-config.js',
+
+    // External Libraries (CDNs) - CRITICAL for Offline
+    'https://cdn.tailwindcss.com',
+    'https://cdn.jsdelivr.net/npm/chart.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+    'https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js',
+    'https://unpkg.com/lucide@latest',
+
+    // Firebase SDKs (Attempts to cache entry points)
+    'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js',
+    'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js',
 ];
 
 // Install Event
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('[Service Worker] Caching all: app shell and content');
-            return cache.addAll(ASSETS_TO_CACHE);
+            console.log('[Service Worker] Caching app shell and external libs');
+            // We use map to catch individual failures so one bad link doesn't break everything
+            return Promise.all(
+                ASSETS_TO_CACHE.map(url => {
+                    return cache.add(url).catch(err => {
+                        console.warn('[Service Worker] Failed to cache:', url, err);
+                    });
+                })
+            );
         })
     );
+    self.skipWaiting();
 });
 
-// Activate Event (Cleanup old caches)
+// Activate Event
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keyList) => {
@@ -47,17 +67,31 @@ self.addEventListener('activate', (event) => {
             }));
         })
     );
+    self.clients.claim();
 });
 
-// Fetch Event (Network First, then Cache)
-// Strategy: Network First ensures fresh data (especially for Firebase interaction scripts which are external).
-// Actually, for static assets "StaleWhileRevalidate" is better, but simple "Cache First" or "Network First" is easier to write without Workbox.
-// Let's use "StaleWhileRevalidate" logic manually for static, and Network Only for others?
-// Simple approach: Try Network -> Fallback to Cache.
+// Fetch Event
 self.addEventListener('fetch', (event) => {
+    // Strategy: Stale-While-Revalidate for most things, but we simplify to:
+    // Try Network -> If fail, return Cache.
+    // For CDNs/Libs (immutable-ish), we could prefer Cache, but Network fallback is safer for "latest" tags.
+
     event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
-        })
+        fetch(event.request)
+            .then(networkResponse => {
+                // Clone response to put in cache (Stale-While-Revalidate logic)
+                // Only cache valid responses
+                if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+                return networkResponse;
+            })
+            .catch(() => {
+                // Network failed, try cache
+                return caches.match(event.request);
+            })
     );
 });

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC9NyVrmam2_1ABkjeCu057trLBlUMN8L8",
@@ -14,3 +14,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
+// Enable Offline Persistence
+enableIndexedDbPersistence(db)
+    .catch((err) => {
+        if (err.code == 'failed-precondition') {
+            console.warn('Persistence failed: Multiple tabs open.');
+        } else if (err.code == 'unimplemented') {
+            console.warn('Persistence failed: Browser not supported.');
+        } else {
+            console.error("Persistence error:", err);
+        }
+    });
