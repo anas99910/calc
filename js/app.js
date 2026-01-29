@@ -4,10 +4,11 @@ import { loadDataFromFirebase, saveEvents, saveClients, saveInventory } from './
 import { initTheme, toggleDarkMode } from './theme.js';
 import { renderCalendar, changeMonth } from './calendar.js';
 import { renderDashboard } from './dashboard.js';
-import { openEventModal, openClientModal, openConfirmationModal, closeModal, toggleEventFormFields } from './modals.js';
+import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields } from './modals.js';
 import { getEventTypeColors, generateId } from './utils.js';
 import { generateInvoice } from './invoice.js';
 import { initSettings } from './settings.js';
+import { checkFilterStatus, updateNotificationBadge, sendSystemNotification } from './reminders.js';
 
 // --- Global Scope Exposure (for HTML buttons) ---
 window.toggleDarkMode = toggleDarkMode;
@@ -34,6 +35,26 @@ try {
     // Hide loading
     const loader = document.getElementById('loading-overlay');
     if (loader) loader.style.display = 'none';
+
+    // --- Check Reminders ---
+    // 1. Expiring Filters (Calculated from history)
+    const expiring = checkFilterStatus(store.clients, store.events);
+
+    // 2. Scheduled Events (Next 3 days)
+    const today = new Date();
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(today.getDate() + 3);
+    const todayStr = today.toISOString().split('T')[0];
+    const limitStr = threeDaysFromNow.toISOString().split('T')[0];
+
+    const upcomingScheduled = store.events.filter(e => {
+        return e.status !== 'Completed' && e.date >= todayStr && e.date <= limitStr;
+    });
+
+    // Update Badge with Total
+    const totalCount = expiring.length + upcomingScheduled.length;
+    updateNotificationBadge(totalCount);
+    sendSystemNotification(totalCount);
 
     // Icons
     if (window.lucide) lucide.createIcons();
@@ -190,6 +211,39 @@ function setupEventListeners() {
         if (store.confirmCallback) store.confirmCallback();
         closeModal(document.getElementById('confirmation-modal'));
     });
+
+    // QoL: Duplicate Event
+    document.getElementById('btn-duplicate-event')?.addEventListener('click', () => {
+        closeModal(document.getElementById('event-modal'));
+        // Slight delay to allow modal close
+        setTimeout(() => {
+            duplicateEvent(store.selectedEventId);
+        }, 100);
+    });
+
+    // QoL: Quick Dates
+    document.getElementById('btn-date-today')?.addEventListener('click', () => setQuickDate(0));
+    document.getElementById('btn-date-tomorrow')?.addEventListener('click', () => setQuickDate(1));
+    document.getElementById('btn-date-next-week')?.addEventListener('click', () => setQuickDate(7));
+}
+
+function setQuickDate(daysToAdd) {
+    const d = new Date();
+    d.setDate(d.getDate() + daysToAdd);
+    const isoDate = d.toISOString().split('T')[0];
+    document.getElementById('event-date').value = isoDate;
+}
+
+function duplicateEvent(eventId) {
+    const event = store.events.find(e => e.id === eventId);
+    if (!event) return;
+
+    // Create a copy without ID
+    const newEvent = { ...event, id: null };
+
+    // Open modal as if new, but pre-filled
+    openEventModal(newEvent);
+    showToast('Event duplicated. Please check date and save.', 'success');
 }
 
 // --- Form Handlers & Missing Logic (Remaining parts of monolithic app.js) ---
@@ -282,9 +336,10 @@ async function handleEventFormSubmit(e) {
         await saveEvents();
         closeModal(document.getElementById('event-modal'));
         renderCalendar(); // Refresh view
+        showToast('Event saved successfully!', 'success');
     } catch (error) {
         console.error("Error saving event:", error);
-        alert("Failed to save event: " + error.message);
+        showToast("Failed to save event: " + error.message, "error");
     }
 }
 
@@ -295,9 +350,10 @@ async function deleteSelectedEvent() {
             store.events = store.events.filter(e => e.id !== store.selectedEventId);
             await saveEvents();
             closeModal(document.getElementById('event-modal'));
+            showToast('Event deleted successfully', 'success');
         } catch (error) {
             console.error("Error deleting event:", error);
-            alert("Failed to delete event: " + error.message);
+            showToast("Failed to delete event: " + error.message, "error");
         }
     });
 }
@@ -367,77 +423,118 @@ function handleClientSelectChange(e) {
 function populateRemindersModal() {
     const list = document.getElementById('reminders-list');
     if (!list) return;
-    list.innerHTML = '';
+    try {
+        list.innerHTML = '';
 
-    const today = new Date(); // now
-    const nextMonth = new Date();
-    nextMonth.setDate(today.getDate() + 30);
+        const today = new Date(); // now
+        const nextMonth = new Date();
+        nextMonth.setDate(today.getDate() + 30);
 
-    // 1. Find "Due Soon" (Filter Changes in next 30 days)
-    const dueSoon = store.events.filter(e => {
-        const d = new Date(e.date);
-        return d >= today && d <= nextMonth && e.type === 'Filter Change' && e.status !== 'Completed';
-    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+        // 1. Find "Due Soon" (Filter Changes in next 30 days)
+        const dueSoon = store.events.filter(e => {
+            const d = new Date(e.date);
+            return d >= today && d <= nextMonth && e.type === 'Filter Change' && e.status !== 'Completed';
+        }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // 2. Find other upcoming events
-    const upcoming = store.events.filter(e => {
-        const d = new Date(e.date);
-        return d >= today && !dueSoon.includes(e);
-    }).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 10);
+        // 2. Find other upcoming events
+        const upcoming = store.events.filter(e => {
+            const d = new Date(e.date);
+            return d >= today && !dueSoon.includes(e);
+        }).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 10);
 
-    // --- Render Due Soon Section ---
-    if (dueSoon.length > 0) {
-        const dueHeader = document.createElement('h4');
-        dueHeader.className = "text-red-400 font-bold mb-2 uppercase text-xs tracking-wider";
-        dueHeader.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i> Due Next 30 Days`;
-        list.appendChild(dueHeader);
+        // --- Render Due Soon Section (Scheduled Events) ---
+        // Merge with "Expiring Filters" (Not scheduled yet)
+        const expiringFilters = checkFilterStatus(store.clients, store.events);
 
-        dueSoon.forEach(event => {
-            const div = document.createElement('div');
-            // Highlighting red border for urgency
-            div.className = "p-3 bg-red-900/20 border border-red-500/50 rounded mb-3 flex justify-between items-center cursor-pointer hover:bg-red-900/30 transition-colors";
-            div.innerHTML = `
+        if (expiringFilters.length > 0) {
+            const expiringHeader = document.createElement('h4');
+            expiringHeader.className = "text-red-500 font-bold mb-2 uppercase text-xs tracking-wider border-b border-red-500/30 pb-1 mt-4";
+            expiringHeader.innerHTML = `<i data-lucide="bell-ring" class="w-3 h-3 inline mr-1"></i> Filters Expiring Soon (Action Needed)`;
+            list.appendChild(expiringHeader);
+
+            expiringFilters.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-red-900/10 border border-red-500/30 rounded mb-3 flex justify-between items-center";
+                div.innerHTML = `
+                <div>
+                    <div class="font-bold text-red-300">${item.client.name}</div>
+                    <div class="text-xs text-red-400">Due: ${item.dueDate} (${item.daysRemaining} days left)</div>
+                </div>
+                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full btn-schedule-filter" data-client-id="${item.client.id}">Schedule</button>
+            `;
+                // Bind schedule button
+                div.querySelector('.btn-schedule-filter').onclick = () => {
+                    closeModal(document.getElementById('reminders-modal'));
+                    // Open new event modal pre-filled
+                    openEventModal({
+                        id: null,
+                        clientId: item.client.id,
+                        type: 'Filter Change',
+                        status: 'Scheduled',
+                        clientName: item.client.name,
+                        date: item.dueDate // Suggest the due date
+                    });
+                };
+                list.appendChild(div);
+            });
+        }
+
+        if (dueSoon.length > 0) {
+            const dueHeader = document.createElement('h4');
+            dueHeader.className = "text-red-400 font-bold mb-2 uppercase text-xs tracking-wider";
+            dueHeader.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i> Due Next 30 Days`;
+            list.appendChild(dueHeader);
+
+            dueSoon.forEach(event => {
+                const div = document.createElement('div');
+                // Highlighting red border for urgency
+                div.className = "p-3 bg-red-900/20 border border-red-500/50 rounded mb-3 flex justify-between items-center cursor-pointer hover:bg-red-900/30 transition-colors";
+                div.innerHTML = `
                 <div>
                     <div class="font-bold text-red-200">${event.clientName || event.title}</div>
                     <div class="text-xs text-red-300">Due: ${event.date}</div>
                 </div>
                 <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">Book</button>
             `;
-            div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
-            list.appendChild(div);
-        });
+                div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
+                list.appendChild(div);
+            });
 
-        list.appendChild(document.createElement('hr'));
-        const spacer = document.createElement('div'); spacer.className = "h-4"; list.appendChild(spacer);
-    }
+            list.appendChild(document.createElement('hr'));
+            const spacer = document.createElement('div'); spacer.className = "h-4"; list.appendChild(spacer);
+        }
 
-    // --- Render Upcoming Section ---
-    const upcomingHeader = document.createElement('h4');
-    upcomingHeader.className = "text-gray-400 font-bold mb-2 uppercase text-xs tracking-wider";
-    upcomingHeader.innerText = "Upcoming Events";
-    list.appendChild(upcomingHeader);
+        // --- Render Upcoming Section ---
+        const upcomingHeader = document.createElement('h4');
+        upcomingHeader.className = "text-gray-400 font-bold mb-2 uppercase text-xs tracking-wider";
+        upcomingHeader.innerText = "Upcoming Events";
+        list.appendChild(upcomingHeader);
 
-    if (upcoming.length === 0 && dueSoon.length === 0) {
-        list.innerHTML = '<p class="text-gray-400">No upcoming events or due maintenance.</p>';
-        return;
-    }
+        if (upcoming.length === 0 && dueSoon.length === 0) {
+            list.innerHTML = '<p class="text-gray-400">No upcoming events or due maintenance.</p>';
+            return;
+        }
 
-    upcoming.forEach(event => {
-        const div = document.createElement('div');
-        div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
-        div.innerHTML = `
+        upcoming.forEach(event => {
+            const div = document.createElement('div');
+            div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
+            div.innerHTML = `
             <div class="flex justify-between">
                 <span class="font-medium text-gray-900 dark:text-gray-200">${event.clientName || event.title}</span>
                 <span class="text-xs text-blue-400 font-mono">${event.date}</span>
             </div>
             <div class="text-xs text-gray-500">${event.type}</div>
         `;
-        div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
-        list.appendChild(div);
-    });
+            div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
+            list.appendChild(div);
+        });
 
-    if (window.lucide) lucide.createIcons();
-    document.getElementById('reminders-modal').classList.add('visible');
+        if (window.lucide) lucide.createIcons();
+        document.getElementById('reminders-modal').classList.add('visible');
+    } catch (error) {
+        console.error("Error in populateRemindersModal:", error);
+        showToast("Error opening reminders: " + error.message, "error");
+    }
 }
 
 function openInventoryModal() {

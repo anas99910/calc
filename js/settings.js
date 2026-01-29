@@ -79,60 +79,83 @@ function updateLangButtonState() {
 
 function exportToExcel() {
     try {
-        // 1. Prepare Data
-        const clientsData = store.clients.map(c => ({
-            ID: c.id,
-            Name: c.name,
-            Phone: c.phone,
-            Address: c.address,
-            DefaultClient: c.defaultFilterType,
-            Notes: c.notes
-        }));
+        // 1. Prepare Data (Custom "Rapport" Structure)
+        const exportData = store.events.map(e => {
+            const client = store.clients.find(c => c.id === e.clientId);
+            let ville = "CASABLANCA"; // Default
+            let address = "";
+            let clientName = e.clientName || (client ? client.name : "Inconnu");
+            let formattedDate = "";
 
-        const eventsData = store.events.map(e => ({
-            ID: e.id,
-            Date: e.date,
-            Time: e.time,
-            Client: e.clientName || 'N/A',
-            Type: e.type,
-            Status: e.status,
-            Technician: e.technician,
-            Cost: e.cost,
-            Payment: e.paymentStatus,
-            FilterUsed: e.filterUsed,
-            Notes: e.notes
-        }));
+            // Format Date (YYYY-MM-DD -> DD/MM/YYYY)
+            if (e.date) {
+                const parts = e.date.split('-');
+                if (parts.length === 3) formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
 
-        const inventoryData = store.inventory.map(i => ({
-            Item: i.name,
-            Quantity: i.quantity,
-            MinQuantity: i.minQuantity
-        }));
+            // Address & City Logic
+            if (client && client.address) {
+                address = client.address.replace(/\n/g, ", ");
+                const addrUpper = address.toUpperCase();
+
+                // Simple City Heurisitc
+                if (addrUpper.includes("BOUSKOURA")) ville = "BOUSKOURA";
+                else if (addrUpper.includes("DAR BOUAAZA")) ville = "DAR BOUAAZA";
+                else if (addrUpper.includes("MOHAMMEDIA")) ville = "MOHAMMEDIA";
+                else if (addrUpper.includes("BERRECHID")) ville = "BERRECHID";
+                else if (addrUpper.includes("TIT MELLIL")) ville = "TIT MELLIL";
+                else if (addrUpper.includes("NOUACEUR")) ville = "NOUACEUR";
+                else if (addrUpper.includes("SIDI RAHAL")) ville = "SIDI RAHAL";
+                // Add more as needed or rely on address splitting
+            }
+
+            return {
+                "NOM DE CLIENT": clientName.toUpperCase(),
+                "ADRESSE": address.toUpperCase(),
+                "DATE DE CHANGEMENT": formattedDate,
+                "PRIX": e.cost ? `${e.cost} DH` : "",
+                "VILLE": ville,
+                "TYPE DE FILTRE": (e.filterUsed || e.type || "").toUpperCase()
+            };
+        });
 
         // 2. Create Workbook
         const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
 
-        const wsClients = XLSX.utils.json_to_sheet(clientsData);
-        XLSX.utils.book_append_sheet(wb, wsClients, "Clients");
+        // Column Widths
+        ws['!cols'] = [
+            { wch: 30 }, // Name
+            { wch: 40 }, // Address
+            { wch: 20 }, // Date
+            { wch: 15 }, // Prix
+            { wch: 20 }, // Ville
+            { wch: 25 }  // Type
+        ];
 
-        const wsEvents = XLSX.utils.json_to_sheet(eventsData);
-        XLSX.utils.book_append_sheet(wb, wsEvents, "Events");
-
-        const wsInventory = XLSX.utils.json_to_sheet(inventoryData);
-        XLSX.utils.book_append_sheet(wb, wsInventory, "Inventory");
+        XLSX.utils.book_append_sheet(wb, ws, "Rapport Speedyex");
 
         // 3. Generate File Name
         const dateStr = new Date().toISOString().split('T')[0];
-        const fileName = `Speedyex_Backup_${dateStr}.xlsx`;
+        const fileName = `Rapport_Speedyex_${dateStr}.xlsx`;
 
         // 4. Download
         XLSX.writeFile(wb, fileName);
 
+        if (window.showToast) {
+            showToast("Rapport Excel téléchargé avec succès !", "success");
+        } else {
+            alert("Rapport downloaded successfully!");
+        }
+
         closeModal(document.getElementById('settings-modal'));
-        alert("Backup downloaded successfully!");
 
     } catch (error) {
         console.error("Export failed:", error);
-        alert("Failed to export data. See console for details.");
+        if (window.showToast) {
+            showToast("Erreur lors de l'export: " + error.message, "error");
+        } else {
+            alert("Export failed: " + error.message);
+        }
     }
 }

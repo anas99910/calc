@@ -153,7 +153,9 @@ export function openEventModal(event = null, date = null) {
         document.getElementById('event-old-filter-used').value = event.filterUsed || "";
 
         store.selectedEventId = event.id;
-        document.getElementById('btn-delete-event').style.display = 'block';
+        store.selectedEventId = event.id;
+        document.getElementById('btn-delete-event').classList.remove('hidden');
+        document.getElementById('btn-duplicate-event').classList.remove('hidden');
         document.getElementById('btn-generate-invoice').classList.remove('hidden');
 
     } else {
@@ -168,7 +170,9 @@ export function openEventModal(event = null, date = null) {
         document.getElementById('event-old-status').value = "Scheduled";
 
         document.getElementById('event-client-id').value = ""; // Reset select
-        document.getElementById('btn-delete-event').style.display = 'none';
+        document.getElementById('event-client-id').value = ""; // Reset select
+        document.getElementById('btn-delete-event').classList.add('hidden');
+        document.getElementById('btn-duplicate-event').classList.add('hidden');
         document.getElementById('btn-generate-invoice').classList.add('hidden');
     }
 

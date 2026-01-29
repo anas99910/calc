@@ -21,12 +21,17 @@
     <!-- 2. Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- 4. Global Toast System -->
+    <script type="module" src="js/toast.js"></script>
+
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <!-- Dark theme body -->
 
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-200 transition-colors duration-200">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Loading Overlay (dark theme) -->
     <div id="loading-overlay"
@@ -374,6 +379,16 @@
                         <label for="event-date" class="text-sm font-medium text-gray-300 mb-2 block">Date</label>
                         <input type="date" id="event-date"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none">
+                        <!-- Quick Date Buttons -->
+                        <div class="flex gap-2 mt-2">
+                            <button type="button" id="btn-date-today"
+                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition">Today</button>
+                            <button type="button" id="btn-date-tomorrow"
+                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition">Tmrw</button>
+                            <button type="button" id="btn-date-next-week"
+                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition">+7
+                                Days</button>
+                        </div>
                     </div>
                     <div>
                         <label for="event-time" class="text-sm font-medium text-gray-300 mb-2 block">Time</label>
@@ -441,6 +456,10 @@
                 <button type="button" id="btn-delete-event"
                     class="text-red-500 hover:text-red-400 font-medium px-4 py-2.5 rounded-lg hover:bg-red-900/30 transition-colors text-sm">
                     Delete Event
+                </button>
+                <button type="button" id="btn-duplicate-event"
+                    class="hidden text-yellow-500 hover:text-yellow-400 font-medium px-4 py-2.5 rounded-lg hover:bg-yellow-900/30 transition-colors text-sm mr-2">
+                    Duplicate
                 </button>
                 <button type="button" id="btn-generate-invoice"
                     class="text-blue-400 hover:text-blue-300 font-medium px-4 py-2.5 rounded-lg hover:bg-blue-900/30 transition-colors text-sm hidden">
