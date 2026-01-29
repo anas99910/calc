@@ -2,7 +2,6 @@ import { store } from './store.js';
 import { translations } from './translations.js';
 import { openModal, closeModal } from './modals.js';
 
-let deferredPrompt; // Store the prompt event
 
 // --- Language Logic ---
 
@@ -33,18 +32,17 @@ export function initSettings() {
     const installContainer = document.getElementById('install-container');
     const installBtn = document.getElementById('btn-install-app');
 
-    // 1. Capture event
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // Already visible by default now
-    });
+    // 1. Check if event was already captured in index.html
+    if (window.deferredPrompt) {
+        console.log("PWA: Found existing deferredPrompt from index.html");
+    }
 
     // 2. Handle Click
     if (installBtn) {
         installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) {
-                // Fallback instructions if browser hasn't fired the event yet (or already installed)
+            const promptEvent = window.deferredPrompt;
+            if (!promptEvent) {
+                // Fallback instructions
                 if (window.showToast) {
                     showToast("To install: Click the 'Share' icon (iOS) or 'Menu' (Android/PC) > 'Add to Home Screen'.", "info");
                 } else {
@@ -54,13 +52,13 @@ export function initSettings() {
             }
 
             // Show prompt
-            deferredPrompt.prompt();
+            promptEvent.prompt();
 
             // Wait for choice
-            const { outcome } = await deferredPrompt.userChoice;
+            const { outcome } = await promptEvent.userChoice;
             console.log(`User response to install prompt: ${outcome}`);
 
-            deferredPrompt = null;
+            window.deferredPrompt = null;
         });
     }
 

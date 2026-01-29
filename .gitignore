@@ -1,0 +1,6 @@
+node_modules/
+package-lock.json
+package.json
+verify_pwa.js
+check_icon.ps1
+.vscode/

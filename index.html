@@ -799,6 +799,17 @@
     <!-- Main Application Script -->
     <script type="module" src="js/app.js"></script>
     <script>
+        // PWA Install Prompt Capture (Must be early)
+        window.deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log("PWA: beforeinstallprompt CAPTURED in index.html");
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            window.deferredPrompt = e;
+            // Update UI if settings module is already loaded (optional, usually settings reads this on click)
+        });
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -806,9 +817,11 @@
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
                     .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
+                        console.error('ServiceWorker registration failed: ', err);
                     });
             });
+        } else {
+            console.warn("Service Worker not supported in this browser.");
         }
     </script>
 </body>
