@@ -85,21 +85,22 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 md:gap-3 ml-auto md:ml-0">
+                <div
+                    class="flex items-center gap-2 md:gap-3 ml-auto md:ml-0 overflow-x-auto max-w-full no-scrollbar pb-1">
                     <button id="btn-view-reminders" title="View Reminders"
-                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-view-inventory" title="Manage Inventory"
-                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="package" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-view-clients" title="View All Clients"
-                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="users" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-new-client" title="New Client"
-                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="user-plus" class="w-5 h-5"></i>
                     </button>
 
@@ -168,8 +169,8 @@
                         </div>
                     </div>
                     <!-- Clients -->
-                    <div
-                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div id="card-dash-clients"
+                        class="cursor-pointer hover:scale-105 transition-transform bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Clients</p>
@@ -199,8 +200,8 @@
                 </div>
 
                 <!-- Inventory -->
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <div id="card-dash-inventory"
+                    class="cursor-pointer hover:scale-105 transition-transform bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Inventory Status</h4>
                     <div id="dash-inventory-list" class="space-y-3"></div>
                 </div>

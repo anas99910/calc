@@ -90,7 +90,14 @@ export function renderCalendar() {
                 statusIcon = `<i data-lucide="x-circle" class="status-icon w-3 h-3 text-red-500 mr-1"></i>`;
             }
 
-            eventPill.innerHTML = `${statusIcon}<span>${event.clientName || event.title}</span>`;
+            // Resolve Name dynamically to avoid empty pills
+            const client = store.clients.find(c => c.id === event.clientId);
+            const displayName = client ? client.name : (event.clientName || event.title || event.type || 'Event');
+
+            // Format: "23:38 • Name • Status" (Truncated via CSS)
+            const label = `${event.time} • ${displayName} • ${event.status}`;
+
+            eventPill.innerHTML = `${statusIcon}<span class="truncate">${label}</span>`;
 
             const colors = getEventTypeColors(event.type, event.status);
             // apply dynamic colors

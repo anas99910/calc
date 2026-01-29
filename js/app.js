@@ -127,6 +127,10 @@ function setupEventListeners() {
     document.getElementById('btn-toggle-dark-mode')?.addEventListener('click', toggleDarkMode);
 
     // Search
+    // Dashboard Cards Shortcuts (Mobile)
+    document.getElementById('card-dash-clients')?.addEventListener('click', renderClientListModal);
+    document.getElementById('card-dash-inventory')?.addEventListener('click', openInventoryModal);
+
     // Search (Desktop & Mobile)
     const handleSearch = (e) => {
         const query = e.target.value.toLowerCase();
