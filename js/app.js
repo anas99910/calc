@@ -542,15 +542,116 @@ function openInventoryModal() {
     document.getElementById('inventory-modal').classList.add('visible');
 }
 
+// --- Extended Inventory Logic ---
+
+let editingInventoryId = null;
+
 function renderInventoryList() {
     const list = document.getElementById('inventory-list');
     if (!list) return;
     list.innerHTML = '';
+
+    if (store.inventory.length === 0) {
+        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">No inventory items found.</p>';
+        return;
+    }
+
     store.inventory.forEach(item => {
         const div = document.createElement('div');
-        div.className = "flex justify-between p-2 border-b border-gray-700";
-        div.innerHTML = `<span>${item.name}</span><span>${item.quantity}</span>`;
+        div.className = "p-3 border-b border-gray-700 hover:bg-gray-700/30 transition-colors rounded-lg";
+
+        if (editingInventoryId === item.id) {
+            // EDIT MODE
+            div.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="text" id="edit-inv-name-${item.id}" value="${item.name}" 
+                        class="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="number" id="edit-inv-qty-${item.id}" value="${item.quantity}" 
+                        class="w-20 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button class="btn-save-edit text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded transition-colors">Save</button>
+                    <button class="btn-cancel-edit text-xs bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded transition-colors">Cancel</button>
+                </div>
+            `;
+            
+            // Bind Edit Events
+            div.querySelector('.btn-save-edit').onclick = () => saveInventoryItem(item.id);
+            div.querySelector('.btn-cancel-edit').onclick = () => { editingInventoryId = null; renderInventoryList(); };
+
+        } else {
+            // VIEW MODE
+            div.className += " flex justify-between items-center";
+            div.innerHTML = `
+                <div class="flex-1">
+                    <div class="font-medium text-gray-200">${item.name}</div>
+                    <div class="text-xs ${item.quantity < 10 ? 'text-red-400 font-bold' : 'text-gray-400'}">
+                        Stock: ${item.quantity}
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn-edit-inv p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-full transition-colors" title="Edit">
+                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                    </button>
+                    <button class="btn-delete-inv p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-full transition-colors" title="Delete">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+
+            // Bind View Events
+            div.querySelector('.btn-edit-inv').onclick = () => { editingInventoryId = item.id; renderInventoryList(); };
+            div.querySelector('.btn-delete-inv').onclick = () => deleteInventoryItem(item.id, item.name);
+        }
+
         list.appendChild(div);
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+async function savedInventoryItem(id) {
+    const nameInput = document.getElementById(`edit-inv-name-${id}`);
+    const qtyInput = document.getElementById(`edit-inv-qty-${id}`);
+    
+    if (!nameInput || !qtyInput) return;
+
+    const newName = nameInput.value.trim();
+    const newQty = parseInt(qtyInput.value);
+
+    if (!newName) {
+        showToast("Name cannot be empty", "error");
+        return;
+    }
+
+    const item = store.inventory.find(i => i.id === id);
+    if (item) {
+        item.name = newName;
+        item.quantity = newQty;
+        await saveInventory();
+        editingInventoryId = null;
+        renderInventoryList();
+        showToast("Inventory updated", "success");
+    }
+}
+
+// Fixed function name typo in call
+async function saveInventoryItem(id) {
+    return savedInventoryItem(id);
+}
+
+function deleteInventoryItem(id, name) {
+    openConfirmationModal(`Delete "${name}" from inventory?`, async () => {
+        try {
+            store.inventory = store.inventory.filter(i => i.id !== id);
+            await saveInventory();
+            renderInventoryList();
+            showToast("Item deleted", "success");
+            closeModal(document.getElementById('confirmation-modal'));
+        } catch (error) {
+            console.error("Error deleting item:", error);
+            showToast("Failed to delete item", "error");
+        }
     });
 }
 
