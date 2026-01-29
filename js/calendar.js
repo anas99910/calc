@@ -35,7 +35,7 @@ export function renderCalendar() {
     for (let i = 0; i < 42; i++) {
         const cell = document.createElement('div');
         // Adaptive Dark/Light class
-        cell.className = 'calendar-day-cell bg-white dark:bg-gray-900 border-t border-l border-gray-200 dark:border-gray-700 p-2 overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors drop-zone';
+        cell.className = 'calendar-day-cell bg-white dark:bg-gray-900 border-t border-l border-gray-200 dark:border-gray-700 p-2 overflow-hidden hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors drop-zone cursor-pointer';
 
         let dayNum, dateObj, dateStr;
 
