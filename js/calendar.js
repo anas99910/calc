@@ -6,8 +6,14 @@ import { saveEvents } from './api.js';
 let draggedEventId = null;
 
 /**
- * Renders the main calendar grid for the `currentDate`.
+ * Renders the main calendar grid for the`currentDate`.
  */
+function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+}
+
 export function renderCalendar() {
     const grid = document.getElementById('calendar-grid');
     if (!grid) return;
@@ -49,7 +55,7 @@ export function renderCalendar() {
             dayNum = i - firstDayOfMonth + 1;
             dateObj = new Date(year, month, dayNum);
             cell.classList.add('text-gray-900', 'dark:text-gray-300'); // Default text color
-            if (dateObj.toISOString().split('T')[0] === todayStr) {
+            if (isSameDay(dateObj, new Date())) {
                 cell.classList.add('today', 'bg-blue-50', 'dark:bg-blue-900/20');
             }
         } else {
@@ -59,7 +65,8 @@ export function renderCalendar() {
             cell.classList.add('other-month', 'text-gray-400', 'dark:text-gray-600', 'bg-gray-50', 'dark:bg-gray-800/50');
         }
 
-        dateStr = dateObj.toISOString().split('T')[0];
+        // Fix: Serialize using local time, NOT UTC/ISO
+        dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
         cell.dataset.date = dateStr;
 
         // NEW: Drop Listeners

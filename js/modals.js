@@ -42,8 +42,8 @@ export function openDayViewModal(dateObj) {
     const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     document.getElementById('day-view-date').textContent = dateStr;
 
-    // Filter Events
-    const isoDate = dateObj.toISOString().split('T')[0];
+    // Filter Events (Use Local Date String to match Calendar)
+    const isoDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
     const dayEvents = store.events.filter(e => e.date === isoDate).sort((a, b) => a.time.localeCompare(b.time));
 
     // Render List
@@ -163,7 +163,7 @@ export function openEventModal(event = null, date = null) {
         document.getElementById('event-modal-title').textContent = 'New Appointment';
         document.getElementById('event-id').value = '';
         if (date) {
-            document.getElementById('event-date').value = date.toISOString().split('T')[0];
+            document.getElementById('event-date').value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
         document.getElementById('event-status').value = "Scheduled";
         document.getElementById('event-payment-status').value = "Not Invoiced";
