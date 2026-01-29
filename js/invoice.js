@@ -86,7 +86,7 @@ export async function generateInvoice(event) {
     const cost = parseFloat(event.cost || 0).toFixed(2);
 
     doc.text(description, margin + 5, y);
-    doc.text(`$${cost}`, pageWidth - margin - 5, y, { align: 'right' });
+    doc.text(`${cost} MAD`, pageWidth - margin - 5, y, { align: 'right' });
 
     y += 6;
     doc.setFontSize(9);
@@ -109,7 +109,7 @@ export async function generateInvoice(event) {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0);
     doc.text("Total:", pageWidth - margin - 40, y);
-    doc.text(`$${cost}`, pageWidth - margin - 5, y, { align: 'right' });
+    doc.text(`${cost} MAD`, pageWidth - margin - 5, y, { align: 'right' });
 
     // -- Footer
     y = doc.internal.pageSize.getHeight() - 20;

@@ -154,7 +154,7 @@ function exportToExcel() {
                 "NOM DE CLIENT": clientName.toUpperCase(),
                 "ADRESSE": address.toUpperCase(),
                 "DATE DE CHANGEMENT": formattedDate,
-                "PRIX": e.cost ? `${e.cost} DH` : "",
+                "PRIX": e.cost ? `${e.cost} MAD` : "",
                 "VILLE": ville,
                 "TYPE DE FILTRE": (e.filterUsed || e.type || "").toUpperCase()
             };

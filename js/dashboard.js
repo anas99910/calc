@@ -17,7 +17,7 @@ function updateStats() {
         .filter(e => e.paymentStatus === 'Paid')
         .reduce((sum, e) => sum + (parseFloat(e.cost) || 0), 0);
 
-    document.getElementById('dash-revenue').textContent = `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    document.getElementById('dash-revenue').textContent = `${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })} MAD`;
 
     // 2. Completed Jobs
     const completedCount = store.events.filter(e => e.status === 'Completed').length;
@@ -57,7 +57,7 @@ function renderCharts() {
         data: {
             labels: Object.keys(months),
             datasets: [{
-                label: 'Revenue ($)',
+                label: 'Revenue (MAD)',
                 data: Object.values(months),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
