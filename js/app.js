@@ -14,6 +14,8 @@ import { checkFilterStatus, updateNotificationBadge, sendSystemNotification } fr
 window.toggleDarkMode = toggleDarkMode;
 
 // --- App Initialization ---
+let editingInventoryId = null;
+
 try {
     console.log("App Initializing locally for appId:", store.appId);
 
@@ -28,15 +30,40 @@ try {
 
     // Load Data
     await loadDataFromFirebase();
+    renderDashboard();
+    renderCalendar();
+    renderInventoryList();
+    checkReminders();
 
-    // Check for sample data logic (simplified here or imported if complex)
-    await addSampleDataIfNeeded();
+    // Responsive Calendar Resize
+    window.addEventListener('resize', () => {
+        if (document.getElementById('calendar-view').classList.contains('active')) {
+            renderCalendar();
+        }
+    });
 
-    // Hide loading
+    // Request Notification Permission
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
     const loader = document.getElementById('loading-overlay');
     if (loader) loader.style.display = 'none';
 
-    // --- Check Reminders ---
+    checkReminders();
+
+    // Icons
+    if (window.lucide) lucide.createIcons();
+
+    // Initial View
+    showView('calendar');
+
+} catch (error) {
+    console.error("Failed to initialize app:", error);
+    showLoadingError("Failed to initialize application: " + error.message);
+}
+
+// --- Reminder Logic ---
+function checkReminders() {
     // 1. Expiring Filters (Calculated from history)
     const expiring = checkFilterStatus(store.clients, store.events);
 
@@ -55,16 +82,6 @@ try {
     const totalCount = expiring.length + upcomingScheduled.length;
     updateNotificationBadge(totalCount);
     sendSystemNotification(totalCount);
-
-    // Icons
-    if (window.lucide) lucide.createIcons();
-
-    // Initial View
-    showView('calendar');
-
-} catch (error) {
-    console.error("Failed to initialize app:", error);
-    showLoadingError("Failed to initialize application: " + error.message);
 }
 
 // --- View Navigation ---
@@ -544,7 +561,7 @@ function openInventoryModal() {
 
 // --- Extended Inventory Logic ---
 
-let editingInventoryId = null;
+// function renderInventoryList() starts here
 
 function renderInventoryList() {
     const list = document.getElementById('inventory-list');
@@ -574,7 +591,7 @@ function renderInventoryList() {
                     <button class="btn-cancel-edit text-xs bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded transition-colors">Cancel</button>
                 </div>
             `;
-            
+
             // Bind Edit Events
             div.querySelector('.btn-save-edit').onclick = () => saveInventoryItem(item.id);
             div.querySelector('.btn-cancel-edit').onclick = () => { editingInventoryId = null; renderInventoryList(); };
@@ -613,7 +630,7 @@ function renderInventoryList() {
 async function savedInventoryItem(id) {
     const nameInput = document.getElementById(`edit-inv-name-${id}`);
     const qtyInput = document.getElementById(`edit-inv-qty-${id}`);
-    
+
     if (!nameInput || !qtyInput) return;
 
     const newName = nameInput.value.trim();

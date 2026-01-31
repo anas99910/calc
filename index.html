@@ -44,11 +44,11 @@
     </div>
 
     <!-- App Wrapper -->
-    <div id="app-wrapper" class="flex flex-col h-screen max-w-7xl mx-auto p-4 md:p-8">
+    <div id="app-wrapper" class="flex flex-col h-screen max-w-7xl mx-auto p-0 md:p-8">
 
         <!-- Header -->
         <header
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 bg-white dark:bg-gray-900 shadow-md rounded-2xl transition-colors duration-200 px-4 md:px-6">
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 bg-white dark:bg-gray-900 shadow-md rounded-none md:rounded-2xl transition-colors duration-200 px-4 md:px-6 border-b border-gray-200 dark:border-gray-800 md:border-none">
 
             <!-- Left Section: Logo & View Nav -->
             <div class="flex items-center gap-6 justify-between md:justify-start w-full md:w-auto">
@@ -96,7 +96,7 @@
                 <div
                     class="flex items-center gap-2 md:gap-3 ml-auto md:ml-0 overflow-x-auto max-w-full no-scrollbar pb-1">
                     <button id="btn-view-reminders" title="View Reminders"
-                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                     </button>
                     <button id="btn-view-inventory" title="Manage Inventory"
@@ -140,10 +140,10 @@
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 mt-6 flex flex-col relative overflow-hidden">
+        <main class="flex-1 mt-0 md:mt-6 flex flex-col relative overflow-hidden">
 
             <!-- Dashboard View -->
-            <div id="dashboard-view" class="hidden absolute inset-0 flex-col overflow-y-auto pb-20 fade-in">
+            <div id="dashboard-view" class="hidden absolute inset-0 flex-col overflow-y-auto pb-20 fade-in p-4 md:p-0">
                 <!-- Stats Row -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <!-- Revenue -->
@@ -218,7 +218,8 @@
             <!-- Calendar View (Default) -->
             <div id="calendar-view" class="flex-1 flex flex-col h-full fade-in">
                 <!-- Calendar Controls -->
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                <div
+                    class="flex flex-col md:flex-row md:items-center md:justify-between mb-2 md:mb-4 px-4 md:px-0 pt-4 md:pt-0">
                     <!-- Month Navigation -->
                     <div class="flex items-center gap-4">
                         <button id="btn-prev-month"
@@ -257,7 +258,7 @@
 
                 <!-- Calendar Grid -->
                 <div
-                    class="flex-1 flex flex-col bg-white dark:bg-gray-700 rounded-2xl shadow-hard overflow-y-auto md:overflow-hidden">
+                    class="flex-1 flex flex-col bg-white dark:bg-gray-700 rounded-none md:rounded-2xl shadow-hard overflow-y-auto md:overflow-hidden">
                     <!-- Weekday Headers -->
                     <div
                         class="calendar-weekdays grid grid-cols-7 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">

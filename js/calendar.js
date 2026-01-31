@@ -85,26 +85,34 @@ export function renderCalendar() {
             const eventPill = document.createElement('div');
             // Add Draggable
             eventPill.draggable = true;
-            eventPill.className = 'event-pill text-xs font-medium px-2 py-0.5 rounded-md cursor-pointer truncate flex items-center shadow-sm hover:opacity-80 transition-opacity';
+            eventPill.className = 'event-pill text-xs font-medium px-0.5 md:px-2 py-0.5 rounded-md cursor-pointer truncate flex items-center shadow-sm hover:opacity-80 transition-opacity';
 
             // Status icons
             let statusIcon = '';
             if (event.paymentStatus === 'Paid') {
-                statusIcon = `<i data-lucide="dollar-sign" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-1"></i>`;
+                statusIcon = `<i data-lucide="dollar-sign" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-0.5 md:mr-1"></i>`;
             } else if (event.status === 'Completed') {
-                statusIcon = `<i data-lucide="check-circle" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-1"></i>`;
+                statusIcon = `<i data-lucide="check-circle" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-0.5 md:mr-1"></i>`;
             } else if (event.status === 'Cancelled') {
-                statusIcon = `<i data-lucide="x-circle" class="status-icon w-3 h-3 text-red-500 mr-1"></i>`;
+                statusIcon = `<i data-lucide="x-circle" class="status-icon w-3 h-3 text-red-500 mr-0.5 md:mr-1"></i>`;
             }
 
             // Resolve Name dynamically to avoid empty pills
             const client = store.clients.find(c => c.id === event.clientId);
             const displayName = client ? client.name : (event.clientName || event.title || event.type || 'Event');
 
-            // Format: "23:38 • Name • Status" (Truncated via CSS)
-            const label = `${event.time} • ${displayName} • ${event.status}`;
+            // Format: Responsive via CSS
+            // Mobile: [Icon] Name (Clipped, no ellipsis to show more text)
+            // Desktop: [Icon] Time • Name • Status
 
-            eventPill.innerHTML = `${statusIcon}<span class="truncate">${label}</span>`;
+            eventPill.innerHTML = `
+                ${statusIcon}
+                <div class="truncate flex items-center gap-0.5 md:gap-1 w-full">
+                    <span class="hidden md:inline text-[10px] opacity-80 whitespace-nowrap">${event.time} •</span>
+                    <span class="text-[10px] md:text-xs font-medium whitespace-nowrap overflow-hidden" style="text-overflow: clip;">${displayName}</span>
+                    <span class="hidden md:inline text-[10px] opacity-80 whitespace-nowrap">• ${event.status}</span>
+                </div>
+            `;
 
             const colors = getEventTypeColors(event.type, event.status);
             // apply dynamic colors
