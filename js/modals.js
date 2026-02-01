@@ -1,4 +1,5 @@
 import { store } from './store.js';
+import { getText } from './settings.js';
 import { saveEvents, saveClients, saveInventory } from './api.js'; // Imports purely for dependency, though actions happen in app.js mainly? Or should we move actions here?
 // Ideally, event handlers should be separate or imported. For now, let's keep modal OPENING logic here, and maybe form handling logic.
 // To avoid circular dependencies, we might need a separate 'actions.js' or keep core logic in `app.js` passing callbacks?
@@ -132,7 +133,7 @@ export function openEventModal(event = null, date = null) {
 
     if (event) {
         // Edit existing
-        document.getElementById('event-modal-title').textContent = 'Edit Appointment';
+        document.getElementById('event-modal-title').textContent = getText('modal.edit_event.title');
         document.getElementById('event-id').value = event.id;
         document.getElementById('event-type').value = event.type;
         document.getElementById('event-client-id').value = event.clientId || "";
@@ -160,7 +161,7 @@ export function openEventModal(event = null, date = null) {
 
     } else {
         // New event
-        document.getElementById('event-modal-title').textContent = 'New Appointment';
+        document.getElementById('event-modal-title').textContent = getText('modal.new_event.title');
         document.getElementById('event-id').value = '';
         if (date) {
             document.getElementById('event-date').value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -245,7 +246,7 @@ export function openClientModal(client = null, fromEventModal = false) {
     // For now assuming it's called or handled.
 
     if (client) {
-        document.getElementById('client-modal-title').textContent = 'Edit Client';
+        document.getElementById('client-modal-title').textContent = getText('modal.edit_client.title');
         document.getElementById('client-id').value = client.id;
         document.getElementById('client-name').value = client.name;
         document.getElementById('client-phone').value = client.phone || "";
@@ -261,7 +262,7 @@ export function openClientModal(client = null, fromEventModal = false) {
         renderClientHistory(client.id);
 
     } else {
-        document.getElementById('client-modal-title').textContent = 'New Client';
+        document.getElementById('client-modal-title').textContent = getText('modal.new_client.title');
         document.getElementById('client-id').value = '';
         document.getElementById('client-filter-lifespan').value = 180;
         document.getElementById('btn-delete-client').style.display = 'none';

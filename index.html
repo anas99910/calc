@@ -389,22 +389,27 @@
                 <!-- Date & Time -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="event-date" class="text-sm font-medium text-gray-300 mb-2 block">Date</label>
+                        <label for="event-date" class="text-sm font-medium text-gray-300 mb-2 block"
+                            data-i18n="label.date">Date</label>
                         <input type="date" id="event-date"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none">
                         <!-- Quick Date Buttons -->
                         <div class="flex gap-2 mt-2">
                             <button type="button" id="btn-date-today"
-                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition">Today</button>
+                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition"
+                                data-i18n="btn.date_today">Today</button>
                             <button type="button" id="btn-date-tomorrow"
-                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition">Tmrw</button>
+                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition"
+                                data-i18n="btn.date_tomorrow">Tmrw</button>
                             <button type="button" id="btn-date-next-week"
-                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition">+7
+                                class="flex-1 py-1 text-xs bg-gray-600 text-gray-300 rounded hover:bg-gray-500 hover:text-white transition"
+                                data-i18n="btn.date_week">+7
                                 Days</button>
                         </div>
                     </div>
                     <div>
-                        <label for="event-time" class="text-sm font-medium text-gray-300 mb-2 block">Time</label>
+                        <label for="event-time" class="text-sm font-medium text-gray-300 mb-2 block"
+                            data-i18n="label.time">Time</label>
                         <input type="time" id="event-time"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none">
                     </div>
@@ -412,11 +417,12 @@
 
                 <!-- Filter Used (for auto-inventory) -->
                 <div id="filter-used-section" class="hidden">
-                    <label for="event-filter-used" class="text-sm font-medium text-gray-300 mb-2 block">Filter Used (for
+                    <label for="event-filter-used" class="text-sm font-medium text-gray-300 mb-2 block"
+                        data-i18n="label.filter_used">Filter Used (for
                         Inventory)</label>
                     <select id="event-filter-used"
                         class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">None</option>
+                        <option value="" data-i18n="label.none">None</option>
                         <!-- Filter options added dynamically from inventory -->
                     </select>
                 </div>
@@ -424,13 +430,16 @@
                 <!-- Technician & Cost -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="event-technician" class="text-sm font-medium text-gray-300 mb-2 block">Assigned
+                        <label for="event-technician" class="text-sm font-medium text-gray-300 mb-2 block"
+                            data-i18n="label.technician">Assigned
                             Technician</label>
                         <input type="text" id="event-technician" placeholder="e.g., John D."
+                            data-i18n-placeholder="placeholder.technician"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
-                        <label for="event-cost" class="text-sm font-medium text-gray-300 mb-2 block">Cost (e.g.,
+                        <label for="event-cost" class="text-sm font-medium text-gray-300 mb-2 block"
+                            data-i18n="label.cost">Cost (e.g.,
                             150.00)</label>
                         <input type="number" id="event-cost" step="0.01" placeholder="150.00"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -461,8 +470,10 @@
 
                 <!-- Notes -->
                 <div>
-                    <label for="event-notes" class="text-sm font-medium text-gray-300 mb-2 block">Notes</label>
+                    <label for="event-notes" class="text-sm font-medium text-gray-300 mb-2 block"
+                        data-i18n="label.notes">Notes</label>
                     <textarea id="event-notes" rows="3" placeholder="Add any relevant details..."
+                        data-i18n-placeholder="placeholder.notes"
                         class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
                 </div>
             </form>
@@ -483,11 +494,13 @@
                 </button>
                 <div class="flex gap-3">
                     <button type="button"
-                        class="btn-close-modal bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+                        class="btn-close-modal bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors"
+                        data-i18n="btn.cancel">
                         Cancel
                     </button>
                     <button type="submit" form="event-form"
-                        class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+                        class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors"
+                        data-i18n="btn.save_event">
                         Save Event
                     </button>
                 </div>

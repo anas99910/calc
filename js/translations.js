@@ -132,7 +132,11 @@ export const translations = {
         "type.installation": "Installation",
         "type.maintenance": "Maintenance",
         "type.filter_change": "Filter Change",
-        "type.general": "General Reminder"
+        "type.general": "General Reminder",
+        "btn.save_event": "Save Event",
+        "placeholder.technician": "e.g., John D.",
+        "placeholder.notes": "Add any relevant details...",
+        "label.none": "None"
     },
     fr: {
         "nav.calendar": "Calendrier",
@@ -267,6 +271,10 @@ export const translations = {
         "type.installation": "Installation",
         "type.maintenance": "Maintenance",
         "type.filter_change": "Changement Filtre",
-        "type.general": "Rappel Général"
+        "type.general": "Rappel Général",
+        "btn.save_event": "Enregistrer le RDV",
+        "placeholder.technician": "ex: Jean D.",
+        "placeholder.notes": "Ajouter des détails pertinents...",
+        "label.none": "Aucun"
     }
 };

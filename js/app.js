@@ -33,6 +33,7 @@ try {
     renderDashboard();
     renderCalendar();
     renderInventoryList();
+    populateInventoryDropdowns(); // Populate dropdowns initially
     checkReminders();
 
     // Responsive Calendar Resize
@@ -64,6 +65,7 @@ try {
 
 // --- Reminder Logic ---
 function checkReminders() {
+    // ... (existing reminder logic)
     // 1. Expiring Filters (Calculated from history)
     const expiring = checkFilterStatus(store.clients, store.events);
 
@@ -82,6 +84,46 @@ function checkReminders() {
     const totalCount = expiring.length + upcomingScheduled.length;
     updateNotificationBadge(totalCount);
     sendSystemNotification(totalCount);
+}
+
+// --- Helper: Populate Inventory Dropdowns ---
+export function populateInventoryDropdowns() {
+    const filterSelects = [
+        document.getElementById('event-filter-used'),
+        document.getElementById('client-filter-type')
+    ];
+
+    filterSelects.forEach(select => {
+        if (!select) return;
+
+        // Preserve current value if any
+        const currentValue = select.value;
+
+        // Clear existing options (except first "None" option)
+        // Actually, safer to rebuild.
+        select.innerHTML = '';
+
+        // Add "None" option
+        const noneOption = document.createElement('option');
+        noneOption.value = "";
+        noneOption.textContent = getText('label.none'); // Use translated "None"
+        select.appendChild(noneOption);
+
+        // Add Inventory Items
+        store.inventory.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name; // Use name as ID for simplicity in this app
+            option.textContent = `${item.name} (Stock: ${item.quantity})`;
+            select.appendChild(option);
+        });
+
+        // Restore value if it still exists
+        if (currentValue) {
+            // Check if option exists
+            const exists = Array.from(select.options).some(opt => opt.value === currentValue);
+            if (exists) select.value = currentValue;
+        }
+    });
 }
 
 // --- View Navigation ---
@@ -648,6 +690,7 @@ async function savedInventoryItem(id) {
         await saveInventory();
         editingInventoryId = null;
         renderInventoryList();
+        populateInventoryDropdowns(); // Refresh dropdowns
         showToast(getText('msg.inventory_updated'), "success");
     }
 }
@@ -663,6 +706,7 @@ function deleteInventoryItem(id, name) {
             store.inventory = store.inventory.filter(i => i.id !== id);
             await saveInventory();
             renderInventoryList();
+            populateInventoryDropdowns(); // Refresh dropdowns
             showToast(getText('msg.item_deleted'), "success");
             closeModal(document.getElementById('confirmation-modal'));
         } catch (error) {
@@ -678,7 +722,9 @@ async function handleNewFilterForm(e) {
     const qty = parseInt(document.getElementById('new-filter-quantity').value) || 0;
     store.inventory.push({ id: generateId(), name, quantity: qty });
     await saveInventory();
+    await saveInventory();
     renderInventoryList();
+    populateInventoryDropdowns(); // Refresh dropdowns
     e.target.reset();
 }
 
