@@ -119,7 +119,10 @@ export const translations = {
         "billing.not_invoiced": "Not Invoiced",
         "billing.invoiced": "Invoiced",
         "billing.paid": "Paid",
-        "text.units": "units"
+        "text.units": "units",
+        "btn.sync_calendar": "Sync to Device Calendar",
+        "msg.sync_success": "Calendar file downloaded! Open it to add events.",
+        "msg.no_future_events": "No future events to sync."
     },
     fr: {
         "nav.calendar": "Calendrier",
@@ -241,6 +244,9 @@ export const translations = {
         "billing.not_invoiced": "Non Facturé",
         "billing.invoiced": "Facturé",
         "billing.paid": "Payé",
-        "text.units": "unités"
+        "text.units": "unités",
+        "btn.sync_calendar": "Synchroniser le Calendrier",
+        "msg.sync_success": "Fichier calendrier téléchargé ! Ouvrez-le pour ajouter les événements.",
+        "msg.no_future_events": "Aucun événement futur à synchroniser."
     }
 };

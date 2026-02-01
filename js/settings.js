@@ -29,6 +29,10 @@ export function initSettings() {
     const btnExport = document.getElementById('btn-export-excel');
     if (btnExport) btnExport.onclick = exportToExcel;
 
+    // Bind Sync Calendar Button
+    const btnSync = document.getElementById('btn-sync-calendar');
+    if (btnSync) btnSync.onclick = exportToICS;
+
     // --- PWA Install Logic ---
     const installContainer = document.getElementById('install-container');
     const installBtn = document.getElementById('btn-install-app');
@@ -217,4 +221,57 @@ function exportToExcel() {
             alert("Export failed: " + error.message);
         }
     }
+}
+
+// --- ICS Calendar Export ---
+export function exportToICS() {
+    // 1. Filter Future Events
+    const today = new Date().toISOString().split('T')[0];
+    const futureEvents = store.events.filter(e => e.date >= today);
+
+    if (futureEvents.length === 0) {
+        if (window.showToast) showToast(getText('msg.no_future_events'), 'info');
+        else alert(getText('msg.no_future_events'));
+        return;
+    }
+
+    // 2. Build ICS Content
+    let icsContent = "BEGIN:VCALENDAR\nversion:2.0\nPRODID:-//Speedyex//Filtre Manager//EN\n";
+
+    futureEvents.forEach(event => {
+        const client = store.clients.find(c => c.id === event.clientId);
+        const clientName = client ? client.name : (event.clientName || "Client Inconnu");
+
+        // Date formatting for ICS (YYYYMMDD)
+        const dateStr = event.date.replace(/-/g, '');
+
+        icsContent += "BEGIN:VEVENT\n";
+        icsContent += `DTSTART;VALUE=DATE:${dateStr}\n`;
+        // All day event, so no DTEND needed or DTEND=next day
+        // Let's just set DTSTART. Some calendars prefer DTEND.
+        // DTEND is next day
+        const nextDay = new Date(event.date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const nextDayStr = nextDay.toISOString().split('T')[0].replace(/-/g, '');
+        icsContent += `DTEND;VALUE=DATE:${nextDayStr}\n`;
+
+        icsContent += `SUMMARY:SpeedyEx: ${event.type} - ${clientName}\n`;
+        icsContent += `DESCRIPTION:Type: ${event.type}\\nStatus: ${event.status}\\nNotes: ${event.notes || ''}\n`;
+        icsContent += "END:VEVENT\n";
+    });
+
+    icsContent += "END:VCALENDAR";
+
+    // 3. Download File
+    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `speedyex_calendar_${today}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    if (window.showToast) showToast(getText('msg.sync_success'), 'success');
 }
