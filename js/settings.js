@@ -13,6 +13,7 @@ export function initSettings() {
 
     // Bind Settings Button
     const settingsBtn = document.getElementById('btn-settings');
+
     if (settingsBtn) {
         settingsBtn.onclick = () => openModal(document.getElementById('settings-modal'));
     }
@@ -95,6 +96,23 @@ export function setLanguage(lang) {
     // Update active button state in modal
     updateLangButtonState();
 }
+
+/**
+ * Helper to get translated string by key.
+ * Falls back to English if key/lang missing.
+ */
+export function getText(key) {
+    const t = translations[currentLang] || translations['en'];
+    return t[key] || translations['en'][key] || key;
+}
+
+export function getCurrentLang() {
+    return currentLang;
+}
+
+
+// Global exposure for legacy scripts/HTML oneliners if needed
+window.getText = getText;
 
 function updateLangButtonState() {
     const btnEn = document.getElementById('btn-lang-en');
@@ -184,9 +202,9 @@ function exportToExcel() {
         XLSX.writeFile(wb, fileName);
 
         if (window.showToast) {
-            showToast("Rapport Excel téléchargé avec succès !", "success");
+            showToast(getText('msg.export_success'), "success");
         } else {
-            alert("Rapport downloaded successfully!");
+            alert(getText('msg.export_success'));
         }
 
         closeModal(document.getElementById('settings-modal'));

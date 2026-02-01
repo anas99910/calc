@@ -2,6 +2,7 @@ import { store } from './store.js';
 import { getEventTypeColors } from './utils.js';
 import { openEventModal, openDayViewModal } from './modals.js';
 import { saveEvents } from './api.js';
+import { getCurrentLang } from './settings.js';
 
 let draggedEventId = null;
 
@@ -27,7 +28,8 @@ export function renderCalendar() {
     // Update header
     const header = document.getElementById('month-year-header');
     if (header) {
-        header.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+        const langCode = getCurrentLang() === 'fr' ? 'fr-FR' : 'en-US';
+        header.textContent = `${currentDate.toLocaleString(langCode, { month: 'long' })} ${year}`;
     }
 
     // Get calendar days
@@ -85,16 +87,16 @@ export function renderCalendar() {
             const eventPill = document.createElement('div');
             // Add Draggable
             eventPill.draggable = true;
-            eventPill.className = 'event-pill text-xs font-medium px-0.5 md:px-2 py-0.5 rounded-md cursor-pointer truncate flex items-center shadow-sm hover:opacity-80 transition-opacity';
+            eventPill.className = 'event-pill text-xs font-medium px-[1px] md:px-2 py-0.5 rounded-md cursor-pointer truncate flex items-center shadow-sm hover:opacity-80 transition-opacity';
 
             // Status icons
             let statusIcon = '';
             if (event.paymentStatus === 'Paid') {
-                statusIcon = `<i data-lucide="dollar-sign" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-0.5 md:mr-1"></i>`;
+                statusIcon = `<i data-lucide="dollar-sign" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-0 md:mr-1 hidden md:block"></i>`;
             } else if (event.status === 'Completed') {
-                statusIcon = `<i data-lucide="check-circle" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-0.5 md:mr-1"></i>`;
+                statusIcon = `<i data-lucide="check-circle" class="status-icon w-3 h-3 text-green-600 dark:text-green-400 mr-0 md:mr-1 hidden md:block"></i>`;
             } else if (event.status === 'Cancelled') {
-                statusIcon = `<i data-lucide="x-circle" class="status-icon w-3 h-3 text-red-500 mr-0.5 md:mr-1"></i>`;
+                statusIcon = `<i data-lucide="x-circle" class="status-icon w-3 h-3 text-red-500 mr-0 md:mr-1 hidden md:block"></i>`;
             }
 
             // Resolve Name dynamically to avoid empty pills
@@ -107,9 +109,9 @@ export function renderCalendar() {
 
             eventPill.innerHTML = `
                 ${statusIcon}
-                <div class="truncate flex items-center gap-0.5 md:gap-1 w-full">
+                <div class="truncate flex items-center gap-0 md:gap-1 w-full pl-0.5 md:pl-0">
                     <span class="hidden md:inline text-[10px] opacity-80 whitespace-nowrap">${event.time} •</span>
-                    <span class="text-[10px] md:text-xs font-medium whitespace-nowrap overflow-hidden" style="text-overflow: clip;">${displayName}</span>
+                    <span class="text-[9px] md:text-xs font-medium whitespace-nowrap overflow-hidden leading-tight" style="text-overflow: clip;">${displayName}</span>
                     <span class="hidden md:inline text-[10px] opacity-80 whitespace-nowrap">• ${event.status}</span>
                 </div>
             `;
@@ -119,8 +121,13 @@ export function renderCalendar() {
             eventPill.className += ` ${colors.bg} ${colors.text}`;
 
             eventPill.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent day click
-                openEventModal(event);
+                // Mobile: Let bubble to cell -> Opens Day View (Easier selection)
+                // Desktop: Direct Edit
+                if (window.innerWidth >= 768) {
+                    e.stopPropagation(); // Stop bubbling on desktop to edit directly
+                    openEventModal(event);
+                }
+                // On mobile, do nothing here. The click hits the cell, which calls openDayViewModal()
             });
 
             // NEW: Drag Start

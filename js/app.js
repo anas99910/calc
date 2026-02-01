@@ -7,7 +7,7 @@ import { renderDashboard } from './dashboard.js';
 import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields } from './modals.js';
 import { getEventTypeColors, generateId } from './utils.js';
 import { generateInvoice } from './invoice.js';
-import { initSettings } from './settings.js';
+import { initSettings, getText } from './settings.js';
 import { checkFilterStatus, updateNotificationBadge, sendSystemNotification } from './reminders.js';
 
 // --- Global Scope Exposure (for HTML buttons) ---
@@ -353,7 +353,7 @@ async function handleEventFormSubmit(e) {
         await saveEvents();
         closeModal(document.getElementById('event-modal'));
         renderCalendar(); // Refresh view
-        showToast('Event saved successfully!', 'success');
+        showToast(getText('msg.event_saved'), 'success');
     } catch (error) {
         console.error("Error saving event:", error);
         showToast("Failed to save event: " + error.message, "error");
@@ -362,12 +362,12 @@ async function handleEventFormSubmit(e) {
 
 async function deleteSelectedEvent() {
     if (!store.selectedEventId) return;
-    openConfirmationModal("Are you sure you want to delete this event?", async () => {
+    openConfirmationModal(getText('modal.confirm.title'), async () => {
         try {
             store.events = store.events.filter(e => e.id !== store.selectedEventId);
             await saveEvents();
             closeModal(document.getElementById('event-modal'));
-            showToast('Event deleted successfully', 'success');
+            showToast(getText('msg.event_deleted'), 'success');
         } catch (error) {
             console.error("Error deleting event:", error);
             showToast("Failed to delete event: " + error.message, "error");
@@ -413,7 +413,7 @@ async function handleClientFormSubmit(e) {
 
 async function deleteSelectedClient() {
     if (!store.selectedClientId) return;
-    openConfirmationModal("Delete this client?", async () => {
+    openConfirmationModal(getText('modal.confirm.title'), async () => {
         try {
             store.clients = store.clients.filter(c => c.id !== store.selectedClientId);
             await saveClients();
@@ -466,7 +466,7 @@ function populateRemindersModal() {
         if (expiringFilters.length > 0) {
             const expiringHeader = document.createElement('h4');
             expiringHeader.className = "text-red-500 font-bold mb-2 uppercase text-xs tracking-wider border-b border-red-500/30 pb-1 mt-4";
-            expiringHeader.innerHTML = `<i data-lucide="bell-ring" class="w-3 h-3 inline mr-1"></i> Filters Expiring Soon (Action Needed)`;
+            expiringHeader.innerHTML = `<i data-lucide="bell-ring" class="w-3 h-3 inline mr-1"></i> ${getText('text.expiring_filters')}`;
             list.appendChild(expiringHeader);
 
             expiringFilters.forEach(item => {
@@ -477,7 +477,7 @@ function populateRemindersModal() {
                     <div class="font-bold text-red-300">${item.client.name}</div>
                     <div class="text-xs text-red-400">Due: ${item.dueDate} (${item.daysRemaining} days left)</div>
                 </div>
-                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full btn-schedule-filter" data-client-id="${item.client.id}">Schedule</button>
+                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full btn-schedule-filter" data-client-id="${item.client.id}">${getText('btn.schedule')}</button>
             `;
                 // Bind schedule button
                 div.querySelector('.btn-schedule-filter').onclick = () => {
@@ -499,7 +499,7 @@ function populateRemindersModal() {
         if (dueSoon.length > 0) {
             const dueHeader = document.createElement('h4');
             dueHeader.className = "text-red-400 font-bold mb-2 uppercase text-xs tracking-wider";
-            dueHeader.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i> Due Next 30 Days`;
+            dueHeader.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i> ${getText('text.due_soon')}`;
             list.appendChild(dueHeader);
 
             dueSoon.forEach(event => {
@@ -511,7 +511,7 @@ function populateRemindersModal() {
                     <div class="font-bold text-red-200">${event.clientName || event.title}</div>
                     <div class="text-xs text-red-300">Due: ${event.date}</div>
                 </div>
-                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">Book</button>
+                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">${getText('btn.book')}</button>
             `;
                 div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
                 list.appendChild(div);
@@ -524,11 +524,11 @@ function populateRemindersModal() {
         // --- Render Upcoming Section ---
         const upcomingHeader = document.createElement('h4');
         upcomingHeader.className = "text-gray-400 font-bold mb-2 uppercase text-xs tracking-wider";
-        upcomingHeader.innerText = "Upcoming Events";
+        upcomingHeader.innerText = getText('text.upcoming');
         list.appendChild(upcomingHeader);
 
         if (upcoming.length === 0 && dueSoon.length === 0) {
-            list.innerHTML = '<p class="text-gray-400">No upcoming events or due maintenance.</p>';
+            list.innerHTML = `<p class="text-gray-400">${getText('text.no_reminders')}</p>`;
             return;
         }
 
@@ -569,7 +569,7 @@ function renderInventoryList() {
     list.innerHTML = '';
 
     if (store.inventory.length === 0) {
-        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">No inventory items found.</p>';
+        list.innerHTML = `<p class="text-sm text-gray-400 text-center py-4">${getText('text.no_inventory')}</p>`;
         return;
     }
 
@@ -637,7 +637,7 @@ async function savedInventoryItem(id) {
     const newQty = parseInt(qtyInput.value);
 
     if (!newName) {
-        showToast("Name cannot be empty", "error");
+        showToast(getText('msg.error_name_required') || "Name cannot be empty", "error");
         return;
     }
 
@@ -648,7 +648,7 @@ async function savedInventoryItem(id) {
         await saveInventory();
         editingInventoryId = null;
         renderInventoryList();
-        showToast("Inventory updated", "success");
+        showToast(getText('msg.inventory_updated'), "success");
     }
 }
 
@@ -658,12 +658,12 @@ async function saveInventoryItem(id) {
 }
 
 function deleteInventoryItem(id, name) {
-    openConfirmationModal(`Delete "${name}" from inventory?`, async () => {
+    openConfirmationModal(getText('modal.confirm.title'), async () => {
         try {
             store.inventory = store.inventory.filter(i => i.id !== id);
             await saveInventory();
             renderInventoryList();
-            showToast("Item deleted", "success");
+            showToast(getText('msg.item_deleted'), "success");
             closeModal(document.getElementById('confirmation-modal'));
         } catch (error) {
             console.error("Error deleting item:", error);
@@ -709,7 +709,7 @@ function renderClientListModal() {
         deleteBtn.title = "Delete Client";
         deleteBtn.onclick = (e) => {
             e.stopPropagation();
-            openConfirmationModal(`Are you sure you want to delete ${c.name}?`, async () => {
+            openConfirmationModal(getText('modal.confirm.title'), async () => {
                 try {
                     store.clients = store.clients.filter(client => client.id !== c.id);
                     await saveClients();

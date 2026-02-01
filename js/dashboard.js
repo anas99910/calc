@@ -1,4 +1,5 @@
 import { store } from './store.js';
+import { getCurrentLang, getText } from './settings.js';
 
 let revenueChart = null;
 let servicesChart = null;
@@ -35,16 +36,18 @@ function renderCharts() {
     // Group by Month
     const months = {};
     const today = new Date();
+    const langCode = getCurrentLang() === 'fr' ? 'fr-FR' : 'en-US';
+
     for (let i = 5; i >= 0; i--) {
         const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const key = d.toLocaleString('default', { month: 'short' });
+        const key = d.toLocaleString(langCode, { month: 'short' });
         months[key] = 0;
     }
 
     store.events.forEach(e => {
         if (e.paymentStatus === 'Paid' && e.date) {
             const d = new Date(e.date);
-            const key = d.toLocaleString('default', { month: 'short' });
+            const key = d.toLocaleString(langCode, { month: 'short' });
             if (months.hasOwnProperty(key)) {
                 months[key] += (parseFloat(e.cost) || 0);
             }
@@ -57,7 +60,7 @@ function renderCharts() {
         data: {
             labels: Object.keys(months),
             datasets: [{
-                label: 'Revenue (MAD)',
+                label: `${getText('dashboard.total_revenue')} (MAD)`,
                 data: Object.values(months),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -89,11 +92,20 @@ function renderCharts() {
         }
     });
 
+    // Translate keys for display
+    const translatedLabels = Object.keys(serviceCounts).map(key => {
+        if (key === 'Installation') return getText('legend.installation');
+        if (key === 'Maintenance') return getText('legend.maintenance');
+        if (key === 'Filter Change') return getText('legend.filter_change');
+        if (key === 'General') return getText('legend.general');
+        return key;
+    });
+
     if (servicesChart) servicesChart.destroy();
     servicesChart = new Chart(ctxServices, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(serviceCounts),
+            labels: translatedLabels,
             datasets: [{
                 data: Object.values(serviceCounts),
                 backgroundColor: ['#3b82f6', '#22c55e', '#eab308', '#a855f7'],
@@ -126,7 +138,7 @@ function renderInventoryStatus() {
 
         div.innerHTML = `
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${item.name}</span>
-            <span class="text-sm font-bold ${colorClass}">${item.quantity} units</span>
+            <span class="text-sm font-bold ${colorClass}">${item.quantity} ${getText('text.units')}</span>
         `;
         container.appendChild(div);
     });
