@@ -136,7 +136,9 @@ export const translations = {
         "btn.save_event": "Save Event",
         "placeholder.technician": "e.g., John D.",
         "placeholder.notes": "Add any relevant details...",
-        "label.none": "None"
+        "label.none": "None",
+        "btn.6_months": "6 Months",
+        "btn.1_year": "1 Year"
     },
     fr: {
         "nav.calendar": "Calendrier",
@@ -275,6 +277,8 @@ export const translations = {
         "btn.save_event": "Enregistrer le RDV",
         "placeholder.technician": "ex: Jean D.",
         "placeholder.notes": "Ajouter des détails pertinents...",
-        "label.none": "Aucun"
+        "label.none": "Aucun",
+        "btn.6_months": "6 Mois",
+        "btn.1_year": "1 An"
     }
 };

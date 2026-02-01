@@ -453,11 +453,19 @@
                     <p class="text-xs text-gray-400" data-i18n="text.smart_reminder_desc">This is an installation. Do
                         you want to automatically schedule a
                         filter change reminder based on the client's default filter lifespan?</p>
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-wrap items-center gap-3">
                         <label for="filter-lifespan" class="text-sm text-gray-300" data-i18n="label.lifespan">Lifespan
                             (days):</label>
                         <input type="number" id="filter-lifespan" value="180"
                             class="w-24 bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <div class="flex gap-2">
+                            <button type="button" id="btn-lifespan-6m"
+                                class="px-3 py-1.5 text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded border border-gray-600 transition-colors"
+                                data-i18n="btn.6_months">6 Months</button>
+                            <button type="button" id="btn-lifespan-1y"
+                                class="px-3 py-1.5 text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded border border-gray-600 transition-colors"
+                                data-i18n="btn.1_year">1 Year</button>
+                        </div>
                     </div>
                     <div class="flex items-center">
                         <input id="create-smart-reminder" type="checkbox" checked

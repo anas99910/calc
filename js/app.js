@@ -284,6 +284,10 @@ function setupEventListeners() {
     document.getElementById('btn-date-today')?.addEventListener('click', () => setQuickDate(0));
     document.getElementById('btn-date-tomorrow')?.addEventListener('click', () => setQuickDate(1));
     document.getElementById('btn-date-next-week')?.addEventListener('click', () => setQuickDate(7));
+
+    // QoL: Quick Filter Lifespan
+    document.getElementById('btn-lifespan-6m')?.addEventListener('click', () => document.getElementById('filter-lifespan').value = 180);
+    document.getElementById('btn-lifespan-1y')?.addEventListener('click', () => document.getElementById('filter-lifespan').value = 365);
 }
 
 function setQuickDate(daysToAdd) {
