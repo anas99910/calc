@@ -119,16 +119,14 @@ export function openEventModal(event = null, date = null) {
 
     store.selectedEventId = null;
 
-    // Populate Client Dropdown
+    // Populate Client Dropdown efficiently
     const clientSelect = document.getElementById('event-client-id');
     if (clientSelect) {
-        clientSelect.innerHTML = '<option value="">Select an existing client</option>';
-        store.clients.forEach(client => {
-            const option = document.createElement('option');
-            option.value = client.id;
-            option.textContent = client.name;
-            clientSelect.appendChild(option);
-        });
+        // Use map/join for performance with large lists
+        const optionsHtml = store.clients.map(client =>
+            `<option value="${client.id}">${client.name}</option>`
+        ).join('');
+        clientSelect.innerHTML = '<option value="">Select an existing client</option>' + optionsHtml;
     }
 
     if (event) {

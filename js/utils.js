@@ -13,6 +13,18 @@ export function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
+export function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 export function getEventTypeColors(type, status = 'Scheduled') {
     // If cancelled, always return grey
     if (status === 'Cancelled') {

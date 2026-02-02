@@ -5,7 +5,7 @@ import { initTheme, toggleDarkMode } from './theme.js';
 import { renderCalendar, changeMonth } from './calendar.js';
 import { renderDashboard } from './dashboard.js';
 import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields } from './modals.js';
-import { getEventTypeColors, generateId } from './utils.js';
+import { getEventTypeColors, generateId, debounce } from './utils.js';
 import { generateInvoice } from './invoice.js';
 import { initSettings, getText } from './settings.js';
 import { checkFilterStatus, updateNotificationBadge, sendSystemNotification } from './reminders.js';
@@ -255,7 +255,10 @@ function setupEventListeners() {
         openClientModal(null, true);
     });
 
-    document.getElementById('client-list-search')?.addEventListener('input', renderClientListModal);
+    // Search
+    const debouncedSearch = debounce(renderClientListModal, 300);
+    document.getElementById('client-list-search')?.addEventListener('input', debouncedSearch);
+
     document.getElementById('btn-new-client-from-list')?.addEventListener('click', () => {
         closeModal(document.getElementById('client-list-modal'));
         openClientModal(null);
@@ -741,7 +744,12 @@ function renderClientListModal() {
     const searchTerm = document.getElementById('client-list-search')?.value.toLowerCase() || "";
     const filteredClients = store.clients.filter(c => c.name.toLowerCase().includes(searchTerm));
 
-    filteredClients.forEach(c => {
+    // Performance: Limit to 50 items and use Fragment
+    const fragment = document.createDocumentFragment();
+    const limit = 50;
+    const clientsToShow = filteredClients.slice(0, limit);
+
+    clientsToShow.forEach(c => {
         const div = document.createElement('div');
         div.className = "flex justify-between items-center p-3 border-b border-gray-700 hover:bg-gray-700 transition-colors";
 
@@ -774,8 +782,17 @@ function renderClientListModal() {
 
         div.appendChild(nameSpan);
         div.appendChild(deleteBtn);
-        list.appendChild(div);
+        fragment.appendChild(div);
     });
+
+    list.appendChild(fragment);
+
+    if (filteredClients.length > limit) {
+        const moreDiv = document.createElement('div');
+        moreDiv.className = "p-3 text-center text-gray-400 text-sm italic";
+        moreDiv.textContent = `Showing ${limit} of ${filteredClients.length} clients. search to see more.`;
+        list.appendChild(moreDiv);
+    }
 
     if (window.lucide) lucide.createIcons();
     document.getElementById('client-list-modal').classList.add('visible');
