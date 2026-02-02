@@ -430,25 +430,49 @@ async function deleteSelectedEvent() {
 async function handleClientFormSubmit(e) {
     e.preventDefault();
     try {
-        const id = document.getElementById('client-id').value || generateId();
-        const newClient = {
-            id,
-            name: document.getElementById('client-name').value,
-            phone: document.getElementById('client-phone').value,
-            address: document.getElementById('client-address').value,
-            defaultFilterType: document.getElementById('client-filter-type').value,
-            filterLifespanDays: parseInt(document.getElementById('client-filter-lifespan').value) || 180,
-            notes: document.getElementById('client-notes').value
-        };
+        const name = document.getElementById('client-name').value;
+        const phone = document.getElementById('client-phone').value;
+        const address = document.getElementById('client-address').value;
+        const notes = document.getElementById('client-notes').value;
+        const defaultFilterType = document.getElementById('client-filter-type').value;
+        const filterLifespanDays = parseInt(document.getElementById('client-filter-lifespan').value) || 180;
+        const installDate = document.getElementById('client-install-date').value;
+        const nextFilterDate = document.getElementById('client-next-filter-date').value;
 
-        if (store.selectedClientId) {
-            const index = store.clients.findIndex(c => c.id === store.selectedClientId);
-            if (index !== -1) store.clients[index] = newClient;
-        } else {
-            store.clients.push(newClient);
+        if (!name) {
+            showToast("Please enter a name.", "error");
+            return;
         }
 
-        await saveClients();
+        if (store.selectedClientId) {
+            const client = store.clients.find(c => c.id === store.selectedClientId);
+            if (client) {
+                client.name = name;
+                client.phone = phone;
+                client.address = address;
+                client.notes = notes;
+                client.defaultFilterType = defaultFilterType;
+                client.filterLifespanDays = filterLifespanDays;
+                client.installDate = installDate;
+                client.nextFilterDate = nextFilterDate;
+                await saveClients();
+                showToast(getText('msg.client_saved'), "success");
+            }
+        } else {
+            store.clients.push({
+                id: generateId(),
+                name,
+                phone,
+                address,
+                notes,
+                defaultFilterType,
+                filterLifespanDays,
+                installDate,
+                nextFilterDate
+            });
+            await saveClients();
+            showToast(getText('msg.client_saved'), "success");
+        }
 
         const modal = document.getElementById('client-modal');
         closeModal(modal);

@@ -138,7 +138,12 @@ export const translations = {
         "placeholder.notes": "Add any relevant details...",
         "label.none": "None",
         "btn.6_months": "6 Months",
-        "btn.1_year": "1 Year"
+        "btn.6_months": "6 Months",
+        "btn.1_year": "1 Year",
+        "label.first_install": "First Installation",
+        "label.next_service": "Next Service",
+        "text.not_recorded": "Not Recorded",
+        "text.none_scheduled": "None Scheduled"
     },
     fr: {
         "nav.calendar": "Calendrier",
@@ -279,6 +284,10 @@ export const translations = {
         "placeholder.notes": "Ajouter des détails pertinents...",
         "label.none": "Aucun",
         "btn.6_months": "6 Mois",
-        "btn.1_year": "1 An"
+        "btn.1_year": "1 An",
+        "label.first_install": "Première Installation",
+        "label.next_service": "Prochain Service",
+        "text.not_recorded": "Non Enregistré",
+        "text.none_scheduled": "Non Programmé"
     }
 };

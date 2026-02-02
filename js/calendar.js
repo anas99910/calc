@@ -207,8 +207,46 @@ async function handleDrop(e, newDate) {
  * Gets sorted, filtered events for a specific date string.
  */
 function getEventsForDay(dateStr) {
-    return store.events
-        .filter(event => event.date === dateStr)
+    // 1. Regular Events
+    const regularEvents = store.events.filter(event => event.date === dateStr);
+
+    // 2. Ghost Events from Client "Next Service" Dates
+    const nextServiceGhosts = store.clients
+        .filter(c => c.nextFilterDate === dateStr)
+        .map(c => ({
+            id: `ghost-next-${c.id}`, // Virtual ID
+            clientId: c.id,
+            clientName: c.name,
+            title: 'Planned Service',
+            date: c.nextFilterDate,
+            time: '09:00',
+            type: 'Maintenance',
+            status: 'Planned',
+            notes: 'Manually scheduled via Client Card',
+            isGhost: true
+        }));
+
+    // 3. Ghost Events from Client "First Installation" Dates
+    const installGhosts = store.clients
+        .filter(c => c.installDate === dateStr)
+        .map(c => ({
+            id: `ghost-install-${c.id}`, // Virtual ID
+            clientId: c.id,
+            clientName: c.name,
+            title: 'First Installation',
+            date: c.installDate,
+            time: '09:00',
+            type: 'Installation',
+            status: 'Completed', // Assume past installations are completed
+            notes: 'Recorded via Client Card',
+            isGhost: true
+        }));
+
+    // Merge
+    let allEvents = [...regularEvents, ...nextServiceGhosts, ...installGhosts];
+
+    // Filter
+    return allEvents
         .filter(event => {
             if (!store.searchFilter) return true;
             const title = (event.title || '').toLowerCase();

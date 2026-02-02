@@ -8,36 +8,46 @@ export function checkFilterStatus(clients, events) {
     const expiringClients = [];
 
     clients.forEach(client => {
-        // 1. Get client lifespan preference (default 180 days / 6 months)
-        const lifespanDays = client.filterLifespanDays || 180;
+        let dueDateVal = null;
 
-        // 2. Find last "Filter Change" or "Installation" event for this client
-        const clientEvents = events.filter(e =>
-            e.clientId === client.id &&
-            (e.type === 'Filter Change' || e.type === 'Installation') &&
-            e.status === 'Completed' // Only count completed events as a base
-        );
+        // 1. Check for Manual "Next Service" Date first (Priority)
+        if (client.nextFilterDate) {
+            dueDateVal = new Date(client.nextFilterDate);
+            // Verify date is valid
+            if (isNaN(dueDateVal.getTime())) dueDateVal = null;
+        }
 
-        if (clientEvents.length === 0) return; // No history, can't calc
+        // 2. If no manual date, calculate from history
+        let lastChangeDateStr = null;
+        if (!dueDateVal) {
+            const lifespanDays = client.filterLifespanDays || 180;
+            const clientEvents = events.filter(e =>
+                e.clientId === client.id &&
+                (e.type === 'Filter Change' || e.type === 'Installation') &&
+                e.status === 'Completed'
+            );
 
-        // Sort by date descending
-        clientEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const lastChange = clientEvents[0];
-        const lastDate = new Date(lastChange.date);
+            if (clientEvents.length > 0) {
+                clientEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+                const lastChange = clientEvents[0];
+                lastChangeDateStr = lastChange.date;
+                const lastDate = new Date(lastChange.date);
+                dueDateVal = new Date(lastDate);
+                dueDateVal.setDate(dueDateVal.getDate() + lifespanDays);
+            }
+        }
 
-        // 3. Calculate Due Date
-        const dueDate = new Date(lastDate);
-        dueDate.setDate(dueDate.getDate() + lifespanDays);
+        if (!dueDateVal) return;
 
-        // 4. Check if Due Soon (within 7 days) or Overdue
-        const diffTime = dueDate - today;
+        // 3. Check if Due Soon (within 7 days) or Overdue
+        const diffTime = dueDateVal - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays <= 7) {
             expiringClients.push({
                 client: client,
-                lastDate: lastChange.date,
-                dueDate: dueDate.toISOString().split('T')[0],
+                lastDate: lastChangeDateStr || 'Manual Schedule', // Indicate source
+                dueDate: dueDateVal.toISOString().split('T')[0],
                 daysRemaining: diffDays
             });
         }

@@ -251,7 +251,11 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-address').value = client.address || "";
         document.getElementById('client-filter-type').value = client.defaultFilterType || "";
         document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
+        document.getElementById('client-filter-type').value = client.defaultFilterType || "";
+        document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
         document.getElementById('client-notes').value = client.notes || "";
+        document.getElementById('client-install-date').value = client.installDate || "";
+        document.getElementById('client-next-filter-date').value = client.nextFilterDate || "";
 
         store.selectedClientId = client.id;
         document.getElementById('btn-delete-client').style.display = 'block';
@@ -263,6 +267,8 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-modal-title').textContent = getText('modal.new_client.title');
         document.getElementById('client-id').value = '';
         document.getElementById('client-filter-lifespan').value = 180;
+        document.getElementById('client-install-date').value = '';
+        document.getElementById('client-next-filter-date').value = '';
         document.getElementById('btn-delete-client').style.display = 'none';
         historySection.style.display = 'none';
     }
@@ -284,7 +290,47 @@ function renderClientHistory(clientId) {
         return;
     }
 
+    // --- Stats Calculation ---
+    // 1. First Installation
+    const installEvent = historyEvents.slice().reverse().find(e => e.type === 'Installation');
+    const firstInstallDate = installEvent ? installEvent.date : getText('text.not_recorded');
+
+    // 2. Next Service (Filter Change or Maintenance)
+    const todayStr = new Date().toISOString().split('T')[0];
+    // Find future events of type Filter Change or Maintenance
+    // Note: store.events includes all events, but historyEvents is already filtered by client.
+    // However, historyEvents is sorted Descending (b - a).
+    // We want the *earliest* future event.
+    // So we look for events where date >= today.
+    // Since it's desc, we can look from end? Or just filter and sort asc.
+    const futureEvents = historyEvents
+        .filter(e => e.date >= todayStr && (e.type === 'Filter Change' || e.type === 'Maintenance') && e.status !== 'Cancelled')
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ascending
+
+    const nextServiceDate = futureEvents.length > 0 ? futureEvents[0].date : getText('text.none_scheduled');
+
+    // --- Render Summary Block ---
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = "mb-4 p-3 bg-gray-800 rounded-lg border border-gray-700 grid grid-cols-2 gap-2 text-center";
+    summaryDiv.innerHTML = `
+        <div>
+            <div class="text-xs text-gray-400 uppercase tracking-wide" data-i18n="label.first_install">${getText('label.first_install')}</div>
+            <div class="text-sm font-bold text-white mt-1">${firstInstallDate}</div>
+        </div>
+        <div>
+            <div class="text-xs text-gray-400 uppercase tracking-wide" data-i18n="label.next_service">${getText('label.next_service')}</div>
+            <div class="text-sm font-bold text-blue-400 mt-1">${nextServiceDate}</div>
+        </div>
+    `;
     historyList.innerHTML = '';
+    historyList.appendChild(summaryDiv);
+
+    if (historyEvents.length === 0) {
+        historyList.innerHTML += `<p class="text-sm text-gray-400 text-center mt-2">${getText('text.no_history')}</p>`;
+        return;
+    }
+
+    // Render List (Appended after summary)
     historyEvents.forEach(event => {
         const colors = getEventTypeColors(event.type, event.status);
         let statusText = event.status || 'Scheduled';

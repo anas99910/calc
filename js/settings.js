@@ -142,67 +142,89 @@ function updateLangButtonState() {
 
 function exportToExcel() {
     try {
-        // 1. Prepare Data (Custom "Rapport" Structure)
-        const exportData = store.events.map(e => {
-            const client = store.clients.find(c => c.id === e.clientId);
-            let ville = "CASABLANCA"; // Default
-            let address = "";
-            let clientName = e.clientName || (client ? client.name : "Inconnu");
-            let formattedDate = "";
+        // --- Sheet 1: Clients (Detailed) ---
+        const clientsData = store.clients.map(c => {
+            // Stats
+            const clientEvents = store.events.filter(e => e.clientId === c.id);
+            const totalRevenue = clientEvents.reduce((sum, e) => sum + (e.cost || 0), 0);
+            const completedJobs = clientEvents.filter(e => e.status === 'Completed').length;
 
-            // Format Date (YYYY-MM-DD -> DD/MM/YYYY)
+            return {
+                "ID": c.id,
+                "Nom Complet": c.name,
+                "Téléphone": c.phone || "",
+                "Adresse": c.address ? c.address.replace(/\n/g, ", ") : "",
+                "Ville": inferCity(c.address),
+                "Installé Le": c.installDate || "N/A",
+                "Prochain Service": c.nextFilterDate || "N/A",
+                "Type Filtre": c.defaultFilterType || "",
+                "Durée (Jours)": c.filterLifespanDays || 180,
+                "Notes": c.notes || "",
+                "Total Revenu (MAD)": totalRevenue,
+                "Interventions": completedJobs
+            };
+        });
+
+        // --- Sheet 2: Events (Enriched) ---
+        const eventsData = store.events.map(e => {
+            const client = store.clients.find(c => c.id === e.clientId);
+            let clientName = e.clientName || (client ? client.name : "Inconnu");
+
+            // Format Date
+            let formattedDate = e.date;
             if (e.date) {
                 const parts = e.date.split('-');
                 if (parts.length === 3) formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
             }
 
-            // Address & City Logic
-            if (client && client.address) {
-                address = client.address.replace(/\n/g, ", ");
-                const addrUpper = address.toUpperCase();
-
-                // Simple City Heurisitc
-                if (addrUpper.includes("BOUSKOURA")) ville = "BOUSKOURA";
-                else if (addrUpper.includes("DAR BOUAAZA")) ville = "DAR BOUAAZA";
-                else if (addrUpper.includes("MOHAMMEDIA")) ville = "MOHAMMEDIA";
-                else if (addrUpper.includes("BERRECHID")) ville = "BERRECHID";
-                else if (addrUpper.includes("TIT MELLIL")) ville = "TIT MELLIL";
-                else if (addrUpper.includes("NOUACEUR")) ville = "NOUACEUR";
-                else if (addrUpper.includes("SIDI RAHAL")) ville = "SIDI RAHAL";
-                // Add more as needed or rely on address splitting
-            }
-
             return {
-                "NOM DE CLIENT": clientName.toUpperCase(),
-                "ADRESSE": address.toUpperCase(),
-                "DATE DE CHANGEMENT": formattedDate,
-                "PRIX": e.cost ? `${e.cost} MAD` : "",
-                "VILLE": ville,
-                "TYPE DE FILTRE": (e.filterUsed || e.type || "").toUpperCase()
+                "Date": formattedDate,
+                "Heure": e.time || "",
+                "Client": clientName,
+                "Téléphone": client ? client.phone : "",
+                "Type": e.type,
+                "Statut": e.status,
+                "Coût (MAD)": e.cost || 0,
+                "Technicien": e.assignedTechnician || "",
+                "Notes": e.notes || "",
+                "Ville": client ? inferCity(client.address) : ""
             };
         });
 
-        // 2. Create Workbook
+        // --- Sheet 3: Inventory ---
+        const inventoryData = store.inventory.map(i => ({
+            "Article": i.name,
+            "Quantité en Stock": i.quantity
+        }));
+
+        // Create Workbook
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(exportData);
 
-        // Column Widths
-        ws['!cols'] = [
-            { wch: 30 }, // Name
-            { wch: 40 }, // Address
-            { wch: 20 }, // Date
-            { wch: 15 }, // Prix
-            { wch: 20 }, // Ville
-            { wch: 25 }  // Type
-        ];
+        // Add Sheets
+        if (clientsData.length > 0) {
+            const wsClients = XLSX.utils.json_to_sheet(clientsData);
+            // Auto-width (basic)
+            wsClients['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 20 }, { wch: 10 }, { wch: 30 }, { wch: 15 }, { wch: 10 }];
+            XLSX.utils.book_append_sheet(wb, wsClients, "Clients");
+        }
 
-        XLSX.utils.book_append_sheet(wb, ws, "Rapport Speedyex");
+        if (eventsData.length > 0) {
+            const wsEvents = XLSX.utils.json_to_sheet(eventsData);
+            wsEvents['!cols'] = [{ wch: 12 }, { wch: 8 }, { wch: 30 }, { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 10 }, { wch: 20 }, { wch: 30 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, wsEvents, "Historique");
+        }
 
-        // 3. Generate File Name
+        if (inventoryData.length > 0) {
+            const wsInv = XLSX.utils.json_to_sheet(inventoryData);
+            wsInv['!cols'] = [{ wch: 40 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, wsInv, "Stock");
+        }
+
+        // Generate File Name
         const dateStr = new Date().toISOString().split('T')[0];
-        const fileName = `Rapport_Speedyex_${dateStr}.xlsx`;
+        const fileName = `Export_Complet_Speedyex_${dateStr}.xlsx`;
 
-        // 4. Download
+        // Download
         XLSX.writeFile(wb, fileName);
 
         if (window.showToast) {
@@ -211,16 +233,27 @@ function exportToExcel() {
             alert(getText('msg.export_success'));
         }
 
-        closeModal(document.getElementById('settings-modal'));
+        const modal = document.getElementById('settings-modal');
+        if (modal) closeModal(modal);
 
     } catch (error) {
         console.error("Export failed:", error);
-        if (window.showToast) {
-            showToast("Erreur lors de l'export: " + error.message, "error");
-        } else {
-            alert("Export failed: " + error.message);
-        }
+        alert("Export failed: " + error.message);
     }
+}
+
+function inferCity(address) {
+    if (!address) return "CASABLANCA"; // Default
+    const addrUpper = address.toUpperCase();
+    if (addrUpper.includes("BOUSKOURA")) return "BOUSKOURA";
+    if (addrUpper.includes("DAR BOUAAZA")) return "DAR BOUAAZA";
+    if (addrUpper.includes("MOHAMMEDIA")) return "MOHAMMEDIA";
+    if (addrUpper.includes("BERRECHID")) return "BERRECHID";
+    if (addrUpper.includes("TIT MELLIL")) return "TIT MELLIL";
+    if (addrUpper.includes("NOUACEUR")) return "NOUACEUR";
+    if (addrUpper.includes("SIDI RAHAL")) return "SIDI RAHAL";
+    if (addrUpper.includes("FÈS") || addrUpper.includes("FES")) return "FÈS";
+    return "CASABLANCA";
 }
 
 // --- ICS Calendar Export ---
