@@ -37,11 +37,12 @@ try {
     checkReminders();
 
     // Responsive Calendar Resize
-    window.addEventListener('resize', () => {
+    // Responsive Calendar Resize
+    window.addEventListener('resize', debounce(() => {
         if (document.getElementById('calendar-view').classList.contains('active')) {
             renderCalendar();
         }
-    });
+    }, 200));
 
     // Request Notification Permission
     if ("Notification" in window && Notification.permission !== "granted") {
