@@ -76,6 +76,9 @@ self.addEventListener('fetch', (event) => {
     // Try Network -> If fail, return Cache.
     // For CDNs/Libs (immutable-ish), we could prefer Cache, but Network fallback is safer for "latest" tags.
 
+    // Filter out unsupported schemes (like chrome-extension://)
+    if (!event.request.url.startsWith('http')) return;
+
     event.respondWith(
         fetch(event.request)
             .then(networkResponse => {

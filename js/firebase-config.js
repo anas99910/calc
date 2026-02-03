@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC9NyVrmam2_1ABkjeCu057trLBlUMN8L8",
@@ -11,18 +11,13 @@ const firebaseConfig = {
     measurementId: "G-RKEV6XWG7W"
 };
 
-// Initialize Firebase
+// Initialize Firebase with Modern Persistence (cleaner & supports multi-tab)
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+    })
+});
 
-// Enable Offline Persistence
-enableIndexedDbPersistence(db)
-    .catch((err) => {
-        if (err.code == 'failed-precondition') {
-            console.warn('Persistence failed: Multiple tabs open.');
-        } else if (err.code == 'unimplemented') {
-            console.warn('Persistence failed: Browser not supported.');
-        } else {
-            console.error("Persistence error:", err);
-        }
-    });
+// Logs for verification
+console.log("Firestore initialized with persistent cache.");
