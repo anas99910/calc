@@ -95,17 +95,38 @@ export async function sendSystemNotification(expiringCount) {
     if (!("Notification" in window)) return;
 
     if (Notification.permission === "granted") {
-        new Notification("Speedyex Filtre", {
-            body: `${expiringCount} Filtres à changer cette semaine !`,
-            icon: "./favicon.ico"
-        });
+        await triggerNotification(expiringCount);
     } else if (Notification.permission !== "denied") {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
-            new Notification("Speedyex Filtre", {
-                body: `${expiringCount} Filtres à changer cette semaine !`,
-                icon: "./favicon.ico"
-            });
+            await triggerNotification(expiringCount);
         }
+    }
+}
+
+async function triggerNotification(count) {
+    const title = "Speedyex Filtre";
+    const options = {
+        body: `${count} Filtres à changer cette semaine !`,
+        icon: "./favicon.ico",
+        badge: "./pwa-icon.png"
+    };
+
+    // Use Service Worker for Mobile Support
+    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            await registration.showNotification(title, options);
+            return;
+        } catch (e) {
+            console.warn("SW Notification failed, falling back to standard:", e);
+        }
+    }
+
+    // Fallback for Desktop/Non-SW
+    try {
+        new Notification(title, options);
+    } catch (e) {
+        console.error("Notification failed:", e);
     }
 }
