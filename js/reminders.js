@@ -7,29 +7,39 @@ export function checkFilterStatus(clients, events) {
     const today = new Date();
     const expiringClients = [];
 
+    // OPTIMIZATION: Index events by clientId first
+    // Map: clientId -> [events]
+    const eventsByClient = {};
+    events.forEach(e => {
+        if (!eventsByClient[e.clientId]) eventsByClient[e.clientId] = [];
+        eventsByClient[e.clientId].push(e);
+    });
+
     clients.forEach(client => {
         let dueDateVal = null;
 
-        // 1. Check for Manual "Next Service" Date first (Priority)
+        // 1. Manual Date
         if (client.nextFilterDate) {
             dueDateVal = new Date(client.nextFilterDate);
-            // Verify date is valid
             if (isNaN(dueDateVal.getTime())) dueDateVal = null;
         }
 
-        // 2. If no manual date, calculate from history
+        // 2. History
         let lastChangeDateStr = null;
         if (!dueDateVal) {
             const lifespanDays = client.filterLifespanDays || 180;
-            const clientEvents = events.filter(e =>
-                e.clientId === client.id &&
+            // Lookup from map instead of filtering entire array
+            const clientEvents = eventsByClient[client.id] || [];
+
+            // Filter specific types
+            const validEvents = clientEvents.filter(e =>
                 (e.type === 'Filter Change' || e.type === 'Installation') &&
                 e.status === 'Completed'
             );
 
-            if (clientEvents.length > 0) {
-                clientEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
-                const lastChange = clientEvents[0];
+            if (validEvents.length > 0) {
+                validEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+                const lastChange = validEvents[0];
                 lastChangeDateStr = lastChange.date;
                 const lastDate = new Date(lastChange.date);
                 dueDateVal = new Date(lastDate);
@@ -39,14 +49,14 @@ export function checkFilterStatus(clients, events) {
 
         if (!dueDateVal) return;
 
-        // 3. Check if Due Soon (within 7 days) or Overdue
+        // 3. Status
         const diffTime = dueDateVal - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays <= 7) {
             expiringClients.push({
                 client: client,
-                lastDate: lastChangeDateStr || 'Manual Schedule', // Indicate source
+                lastDate: lastChangeDateStr || 'Manual Schedule',
                 dueDate: dueDateVal.toISOString().split('T')[0],
                 daysRemaining: diffDays
             });

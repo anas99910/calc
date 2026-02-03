@@ -141,6 +141,7 @@ export const translations = {
         "btn.6_months": "6 Months",
         "btn.1_year": "1 Year",
         "label.first_install": "First Installation",
+        "label.first_filter_change": "First Filter Change",
         "label.next_service": "Next Service",
         "text.not_recorded": "Not Recorded",
         "text.none_scheduled": "None Scheduled"
@@ -286,6 +287,7 @@ export const translations = {
         "btn.6_months": "6 Mois",
         "btn.1_year": "1 An",
         "label.first_install": "Première Installation",
+        "label.first_filter_change": "Premier Changement de Filtre",
         "label.next_service": "Prochain Service",
         "text.not_recorded": "Non Enregistré",
         "text.none_scheduled": "Non Programmé"

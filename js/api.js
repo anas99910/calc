@@ -15,29 +15,48 @@ const DATA_COLLECTION = 'app_data';
 export async function loadDataFromFirebase() {
     console.log("Loading data from Firestore...");
 
-    const eventsSnap = await getDoc(doc(db, DATA_COLLECTION, EVENTS_DOC));
-    const clientsSnap = await getDoc(doc(db, DATA_COLLECTION, CLIENTS_DOC));
-    const inventorySnap = await getDoc(doc(db, DATA_COLLECTION, INVENTORY_DOC));
+    const timeoutMs = 5000;
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Firestore connection timed out")), timeoutMs)
+    );
 
-    if (eventsSnap.exists()) {
-        store.setEvents(eventsSnap.data().items || []);
-    } else {
-        console.log("No events doc found.");
+    try {
+        const fetchPromise = Promise.all([
+            getDoc(doc(db, DATA_COLLECTION, EVENTS_DOC)),
+            getDoc(doc(db, DATA_COLLECTION, CLIENTS_DOC)),
+            getDoc(doc(db, DATA_COLLECTION, INVENTORY_DOC))
+        ]);
+
+        const [eventsSnap, clientsSnap, inventorySnap] = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (eventsSnap.exists()) {
+            store.setEvents(eventsSnap.data().items || []);
+        } else {
+            console.log("No events doc found.");
+            store.setEvents([]);
+        }
+
+        if (clientsSnap.exists()) {
+            store.setClients(clientsSnap.data().items || []);
+        } else {
+            console.log("No clients doc found.");
+            store.setClients([]);
+        }
+
+        if (inventorySnap.exists()) {
+            store.setInventory(inventorySnap.data().items || []);
+        } else {
+            console.log("No inventory doc found.");
+            store.setInventory([]);
+        }
+
+    } catch (error) {
+        console.warn("Data load failed or timed out:", error);
+        // Fallback to empty/local
         store.setEvents([]);
-    }
-
-    if (clientsSnap.exists()) {
-        store.setClients(clientsSnap.data().items || []);
-    } else {
-        console.log("No clients doc found.");
         store.setClients([]);
-    }
-
-    if (inventorySnap.exists()) {
-        store.setInventory(inventorySnap.data().items || []);
-    } else {
-        console.log("No inventory doc found.");
         store.setInventory([]);
+        // We do NOT re-throw, so app can initialize with empty data
     }
 
     // Sort data

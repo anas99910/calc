@@ -39,6 +39,47 @@ export function renderCalendar() {
 
     const todayStr = new Date().toISOString().split('T')[0];
 
+    // --- OPTIMIZATION START ---
+    // Pre-calculate Ghost Events for ALL clients ONCE
+    // Map: dateString -> [Array of Ghost Events]
+    const ghostEventsCache = {};
+
+    store.clients.forEach(c => {
+        // 1. Next Service
+        if (c.nextFilterDate) {
+            if (!ghostEventsCache[c.nextFilterDate]) ghostEventsCache[c.nextFilterDate] = [];
+            ghostEventsCache[c.nextFilterDate].push({
+                id: `ghost-next-${c.id}`,
+                clientId: c.id,
+                clientName: c.name,
+                title: 'Planned Service',
+                date: c.nextFilterDate,
+                time: '09:00',
+                type: 'Maintenance',
+                status: 'Planned',
+                notes: 'Manually scheduled via Client Card',
+                isGhost: true
+            });
+        }
+        // 2. First Installation
+        if (c.installDate) {
+            if (!ghostEventsCache[c.installDate]) ghostEventsCache[c.installDate] = [];
+            ghostEventsCache[c.installDate].push({
+                id: `ghost-install-${c.id}`,
+                clientId: c.id,
+                clientName: c.name,
+                title: 'First Installation',
+                date: c.installDate,
+                time: '09:00',
+                type: 'Installation',
+                status: 'Completed',
+                notes: 'Recorded via Client Card',
+                isGhost: true
+            });
+        }
+    });
+    // --- OPTIMIZATION END ---
+
     // 42 cells for 6 weeks
     for (let i = 0; i < 42; i++) {
         const cell = document.createElement('div');
@@ -79,7 +120,22 @@ export function renderCalendar() {
         cell.innerHTML = `<span class="day-number text-sm font-medium pointer-events-none">${dayNum}</span>`;
 
         // Find and render events for this day
-        const dayEvents = getEventsForDay(dateStr);
+        // OPTIMIZED: Use cached ghost events
+        const ghostEvents = ghostEventsCache[dateStr] || [];
+        const regularEvents = store.events.filter(event => event.date === dateStr);
+
+        let dayEvents = [...regularEvents, ...ghostEvents];
+
+        // Filter
+        dayEvents = dayEvents
+            .filter(event => {
+                if (!store.searchFilter) return true;
+                const title = (event.title || '').toLowerCase();
+                const client = (event.clientName || '').toLowerCase();
+                return title.includes(store.searchFilter) || client.includes(store.searchFilter);
+            })
+            .sort((a, b) => a.time.localeCompare(b.time));
+
         const eventList = document.createElement('div');
         eventList.className = 'mt-1 space-y-1 overflow-y-auto max-h-[80px]';
 
@@ -119,6 +175,30 @@ export function renderCalendar() {
             const colors = getEventTypeColors(event.type, event.status);
             // apply dynamic colors
             eventPill.className += ` ${colors.bg} ${colors.text}`;
+
+            // --- HIGHLIGHT FILTER LOGIC ---
+            if (store.activeCategoryFilter) {
+                const filter = store.activeCategoryFilter;
+                let match = false;
+                if (filter === 'Paid') {
+                    match = event.paymentStatus === 'Paid';
+                } else if (filter === 'Completed') {
+                    match = event.status === 'Completed';
+                } else if (filter === 'Filter Change') {
+                    match = event.type === 'Filter Change';
+                } else {
+                    // Match type exactly (Installation, Maintenance, General)
+                    match = event.type === filter;
+                }
+
+                if (!match) {
+                    eventPill.style.opacity = '0.1'; // Dim others
+                } else {
+                    eventPill.style.opacity = '1';
+                    eventPill.style.boxShadow = '0 0 4px currentColor'; // Glow effect
+                }
+            }
+            // ------------------------------
 
             eventPill.addEventListener('click', (e) => {
                 // Mobile: Let bubble to cell -> Opens Day View (Easier selection)

@@ -255,6 +255,7 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
         document.getElementById('client-notes').value = client.notes || "";
         document.getElementById('client-install-date').value = client.installDate || "";
+        document.getElementById('client-first-filter-change-date').value = client.firstFilterChangeDate || "";
         document.getElementById('client-next-filter-date').value = client.nextFilterDate || "";
 
         store.selectedClientId = client.id;
@@ -268,6 +269,7 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-id').value = '';
         document.getElementById('client-filter-lifespan').value = 180;
         document.getElementById('client-install-date').value = '';
+        document.getElementById('client-first-filter-change-date').value = '';
         document.getElementById('client-next-filter-date').value = '';
         document.getElementById('btn-delete-client').style.display = 'none';
         historySection.style.display = 'none';

@@ -7,6 +7,7 @@ export const store = {
     selectedEventId: null,
     selectedClientId: null,
     searchFilter: '',
+    activeCategoryFilter: null, // New: Tracks active legend filter
     toastTimer: null,
     confirmCallback: null,
 

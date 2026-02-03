@@ -199,6 +199,33 @@ function setupEventListeners() {
         renderCalendar();
     });
 
+    // --- Legend Highlighting ---
+    const legendItems = [
+        { id: 'legend-installation', filter: 'Installation' },
+        { id: 'legend-maintenance', filter: 'Maintenance' },
+        { id: 'legend-filter', filter: 'Filter Change' },
+        { id: 'legend-general', filter: 'General' },
+        { id: 'legend-paid', filter: 'Paid' },
+        { id: 'legend-completed', filter: 'Completed' }
+    ];
+
+    legendItems.forEach(item => {
+        const el = document.getElementById(item.id);
+        if (el) {
+            el.addEventListener('click', () => {
+                // Toggle
+                if (store.activeCategoryFilter === item.filter) {
+                    store.activeCategoryFilter = null; // Reset
+                    el.style.opacity = '1';
+                } else {
+                    store.activeCategoryFilter = item.filter;
+                    // Visual feedback: dim others? For now we just rely on calendar rendering
+                }
+                renderCalendar();
+            });
+        }
+    });
+
     // Header
     document.getElementById('btn-new-event')?.addEventListener('click', () => openEventModal(null, new Date()));
     document.getElementById('btn-new-client')?.addEventListener('click', () => openClientModal(null));
@@ -437,6 +464,7 @@ async function handleClientFormSubmit(e) {
         const defaultFilterType = document.getElementById('client-filter-type').value;
         const filterLifespanDays = parseInt(document.getElementById('client-filter-lifespan').value) || 180;
         const installDate = document.getElementById('client-install-date').value;
+        const firstFilterChangeDate = document.getElementById('client-first-filter-change-date').value;
         const nextFilterDate = document.getElementById('client-next-filter-date').value;
 
         if (!name) {
@@ -454,6 +482,7 @@ async function handleClientFormSubmit(e) {
                 client.defaultFilterType = defaultFilterType;
                 client.filterLifespanDays = filterLifespanDays;
                 client.installDate = installDate;
+                client.firstFilterChangeDate = firstFilterChangeDate;
                 client.nextFilterDate = nextFilterDate;
                 await saveClients();
                 showToast(getText('msg.client_saved'), "success");
@@ -468,6 +497,7 @@ async function handleClientFormSubmit(e) {
                 defaultFilterType,
                 filterLifespanDays,
                 installDate,
+                firstFilterChangeDate,
                 nextFilterDate
             });
             await saveClients();
@@ -601,27 +631,29 @@ function populateRemindersModal() {
         upcomingHeader.innerText = getText('text.upcoming');
         list.appendChild(upcomingHeader);
 
-        if (upcoming.length === 0 && dueSoon.length === 0) {
-            list.innerHTML = `<p class="text-gray-400">${getText('text.no_reminders')}</p>`;
-            return;
+        if (upcoming.length === 0 && dueSoon.length === 0 && expiringFilters.length === 0) {
+            list.innerHTML = `<p class="text-gray-400 text-center py-4">${getText('text.no_reminders')}</p>`;
+            // Fall through to open modal
         }
 
-        upcoming.forEach(event => {
-            const div = document.createElement('div');
-            div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
-            div.innerHTML = `
+        if (upcoming.length > 0) {
+            upcoming.forEach(event => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
+                div.innerHTML = `
             <div class="flex justify-between">
                 <span class="font-medium text-gray-900 dark:text-gray-200">${event.clientName || event.title}</span>
                 <span class="text-xs text-blue-400 font-mono">${event.date}</span>
             </div>
             <div class="text-xs text-gray-500">${event.type}</div>
         `;
-            div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
-            list.appendChild(div);
-        });
+                div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
+                list.appendChild(div);
+            });
+        }
 
         if (window.lucide) lucide.createIcons();
-        document.getElementById('reminders-modal').classList.add('visible');
+        openModal(document.getElementById('reminders-modal'));
     } catch (error) {
         console.error("Error in populateRemindersModal:", error);
         showToast("Error opening reminders: " + error.message, "error");
@@ -768,6 +800,12 @@ function renderClientListModal() {
     // Filter if search
     const searchTerm = document.getElementById('client-list-search')?.value.toLowerCase() || "";
     const filteredClients = store.clients.filter(c => c.name.toLowerCase().includes(searchTerm));
+
+    // Update Title with Count
+    const titleEl = document.getElementById('client-list-title');
+    if (titleEl) {
+        titleEl.textContent = `${getText('modal.client_list.title')} (${filteredClients.length})`;
+    }
 
     // Performance: Limit to 50 items and use Fragment
     const fragment = document.createDocumentFragment();
