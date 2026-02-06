@@ -35,29 +35,62 @@ try {
     renderInventoryList();
     populateInventoryDropdowns(); // Populate dropdowns initially
     checkReminders();
+    setupNetworkListeners();
+} catch (error) {
+    console.error("App initialization failed:", error);
+}
 
-    // Responsive Calendar Resize
-    // Responsive Calendar Resize
-    window.addEventListener('resize', debounce(() => {
-        if (document.getElementById('calendar-view').classList.contains('active')) {
-            renderCalendar();
+function setupNetworkListeners() {
+    const btn = document.getElementById('btn-network-status');
+    const icon = btn.querySelector('i');
+
+    function updateStatus() {
+        if (navigator.onLine) {
+            btn.classList.remove('text-red-500');
+            btn.classList.add('text-green-500');
+            btn.title = "Online";
+            icon.setAttribute('data-lucide', 'wifi');
+        } else {
+            btn.classList.remove('text-green-500');
+            btn.classList.add('text-red-500');
+            btn.title = "Offline";
+            icon.setAttribute('data-lucide', 'wifi-off');
         }
-    }, 200));
-
-    // Request Notification Permission
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
+        // Re-render icon
+        lucide.createIcons();
     }
-    const loader = document.getElementById('loading-overlay');
-    if (loader) loader.style.display = 'none';
 
-    checkReminders();
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
 
-    // Icons
-    if (window.lucide) lucide.createIcons();
+    // Initial check
+    updateStatus();
+}
 
-    // Initial View
-    showView('calendar');
+/**
+ * Switch between Views (Calendar <-> Dashboard)
+ */
+// Responsive Calendar Resize
+window.addEventListener('resize', debounce(() => {
+    if (document.getElementById('calendar-view').classList.contains('active')) {
+        renderCalendar();
+    }
+}, 200));
+
+// Request Notification Permission
+if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+const loader = document.getElementById('loading-overlay');
+if (loader) loader.style.display = 'none';
+
+checkReminders();
+
+// Icons
+if (window.lucide) lucide.createIcons();
+
+// Initial View
+showView('calendar');
 
 } catch (error) {
     console.error("Failed to initialize app:", error);
