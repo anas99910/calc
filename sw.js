@@ -1,4 +1,4 @@
-const CACHE_NAME = 'speedyex-v5';
+const CACHE_NAME = 'speedyex-v6';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -84,7 +84,16 @@ self.addEventListener('fetch', (event) => {
             .then(networkResponse => {
                 // Clone response to put in cache (Stale-While-Revalidate logic)
                 // Only cache valid responses
-                if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                // Clone response to put in cache (Stale-While-Revalidate logic)
+                // Cache valid responses (Basic and CORS for CDNs)
+                // We also allow Opaque (type 'opaque', status 0) for no-cors scripts if needed, 
+                // though explicit CORS is better. For now, we accept them to ensure Tailwind loads.
+                if (networkResponse && (
+                    networkResponse.status === 200 ||
+                    networkResponse.status === 0 ||
+                    networkResponse.type === 'cors' ||
+                    networkResponse.type === 'opaque'
+                )) {
                     const responseToCache = networkResponse.clone();
                     caches.open(CACHE_NAME).then(cache => {
                         cache.put(event.request, responseToCache);

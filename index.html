@@ -134,6 +134,8 @@
 
 
 
+
+
                     <!-- Settings Button -->
                     <button id="btn-settings" title="Settings"
                         class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -597,6 +599,20 @@
                                 class="text-sm font-medium text-gray-300 mb-2 block">Lifespan (Days)</label>
                             <input type="number" id="client-filter-lifespan" value="180"
                                 class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Secondary Filters Section -->
+                    <div class="border-t border-gray-700 pt-4 mt-4">
+                        <label class="text-sm font-medium text-gray-300 mb-2 block flex justify-between items-center">
+                            <span>Additional Filters</span>
+                            <button type="button" id="btn-add-secondary-filter"
+                                class="text-xs bg-blue-600 hover:bg-blue-500 text-white py-1 px-2 rounded transition-colors">
+                                + Add Filter
+                            </button>
+                        </label>
+                        <div id="secondary-filters-container" class="space-y-3">
+                            <!-- Dynamic rows will be added here -->
                         </div>
                     </div>
 

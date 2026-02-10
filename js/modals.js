@@ -228,6 +228,40 @@ export function toggleEventFormFields() {
     }
 }
 
+
+
+export function addSecondaryFilterRow(filterData = {}) {
+    const container = document.getElementById('secondary-filters-container');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = "grid grid-cols-12 gap-2 items-end bg-gray-700/50 p-2 rounded-lg border border-gray-600 secondary-filter-row";
+    div.innerHTML = `
+        <div class="col-span-5">
+            <label class="text-xs text-gray-400 block mb-1">Type</label>
+            <input type="text" class="secondary-filter-type w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
+                placeholder="Type" value="${filterData.type || ''}">
+        </div>
+        <div class="col-span-3">
+             <label class="text-xs text-gray-400 block mb-1">Next Date</label>
+            <input type="date" class="secondary-filter-date w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
+                value="${filterData.nextDate || ''}">
+        </div>
+        <div class="col-span-3">
+             <label class="text-xs text-gray-400 block mb-1">Lifespan</label>
+            <input type="number" class="secondary-filter-lifespan w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
+                placeholder="180" value="${filterData.lifespan || 180}">
+        </div>
+        <div class="col-span-1 flex justify-center pb-1">
+            <button type="button" class="text-red-400 hover:text-red-300" onclick="this.closest('.grid').remove()">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
+    if (window.lucide) lucide.createIcons();
+}
+
 /**
  * Opens Client Modal.
  */
@@ -238,10 +272,8 @@ export function openClientModal(client = null, fromEventModal = false) {
 
     store.selectedClientId = null;
     const historySection = document.getElementById('client-history-section');
-
-    // Populate filter dropdowns handled by logic elsewhere, or call helper?
-    // Ideally we export populateInventoryDropdowns from somewhere accessbile. 
-    // For now assuming it's called or handled.
+    const secondaryContainer = document.getElementById('secondary-filters-container');
+    if (secondaryContainer) secondaryContainer.innerHTML = '';
 
     if (client) {
         document.getElementById('client-modal-title').textContent = getText('modal.edit_client.title');
@@ -251,12 +283,15 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-address').value = client.address || "";
         document.getElementById('client-filter-type').value = client.defaultFilterType || "";
         document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
-        document.getElementById('client-filter-type').value = client.defaultFilterType || "";
-        document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
         document.getElementById('client-notes').value = client.notes || "";
         document.getElementById('client-install-date').value = client.installDate || "";
         document.getElementById('client-first-filter-change-date').value = client.firstFilterChangeDate || "";
         document.getElementById('client-next-filter-date').value = client.nextFilterDate || "";
+
+        // Populate Secondary Filters
+        if (client.secondaryFilters && Array.isArray(client.secondaryFilters)) {
+            client.secondaryFilters.forEach(filter => addSecondaryFilterRow(filter));
+        }
 
         store.selectedClientId = client.id;
         document.getElementById('btn-delete-client').style.display = 'block';

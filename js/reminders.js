@@ -61,6 +61,27 @@ export function checkFilterStatus(clients, events) {
                 daysRemaining: diffDays
             });
         }
+
+        // 4. Secondary Filters
+        if (client.secondaryFilters && Array.isArray(client.secondaryFilters)) {
+            client.secondaryFilters.forEach(filter => {
+                if (!filter.nextDate) return;
+                const fDue = new Date(filter.nextDate);
+                if (isNaN(fDue.getTime())) return;
+
+                const fDiffTime = fDue - today;
+                const fDiffDays = Math.ceil(fDiffTime / (1000 * 60 * 60 * 24));
+
+                if (fDiffDays <= 7) {
+                    expiringClients.push({
+                        client: { ...client, name: `${client.name} (${filter.type})` }, // Hack to show filter name
+                        lastDate: 'Secondary Filter',
+                        dueDate: fDue.toISOString().split('T')[0],
+                        daysRemaining: fDiffDays
+                    });
+                }
+            });
+        }
     });
 
     return expiringClients.sort((a, b) => a.daysRemaining - b.daysRemaining);

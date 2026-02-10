@@ -4,7 +4,7 @@ import { loadDataFromFirebase, saveEvents, saveClients, saveInventory } from './
 import { initTheme, toggleDarkMode } from './theme.js';
 import { renderCalendar, changeMonth } from './calendar.js';
 import { renderDashboard } from './dashboard.js';
-import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields } from './modals.js';
+import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields, addSecondaryFilterRow } from './modals.js';
 import { getEventTypeColors, generateId, debounce } from './utils.js';
 import { generateInvoice } from './invoice.js';
 import { initSettings, getText } from './settings.js';
@@ -89,6 +89,12 @@ function checkReminders() {
     updateNotificationBadge(totalCount);
     sendSystemNotification(totalCount);
 }
+
+
+document.getElementById('btn-add-secondary-filter')?.addEventListener('click', () => {
+    addSecondaryFilterRow();
+});
+
 
 // --- Helper: Populate Inventory Dropdowns ---
 export function populateInventoryDropdowns() {
@@ -470,6 +476,17 @@ async function handleClientFormSubmit(e) {
         const firstFilterChangeDate = document.getElementById('client-first-filter-change-date').value;
         const nextFilterDate = document.getElementById('client-next-filter-date').value;
 
+        // Scrape Secondary Filters
+        const secondaryFilters = [];
+        document.querySelectorAll('#secondary-filters-container .secondary-filter-row').forEach(row => {
+            const type = row.querySelector('.secondary-filter-type').value;
+            const nextDate = row.querySelector('.secondary-filter-date').value;
+            const lifespan = parseInt(row.querySelector('.secondary-filter-lifespan').value) || 180;
+            if (type && nextDate) {
+                secondaryFilters.push({ id: generateId(), type, nextDate, lifespan });
+            }
+        });
+
         if (!name) {
             showToast("Please enter a name.", "error");
             return;
@@ -487,6 +504,7 @@ async function handleClientFormSubmit(e) {
                 client.installDate = installDate;
                 client.firstFilterChangeDate = firstFilterChangeDate;
                 client.nextFilterDate = nextFilterDate;
+                client.secondaryFilters = secondaryFilters;
                 await saveClients();
                 showToast(getText('msg.client_saved'), "success");
             }
@@ -501,7 +519,8 @@ async function handleClientFormSubmit(e) {
                 filterLifespanDays,
                 installDate,
                 firstFilterChangeDate,
-                nextFilterDate
+                nextFilterDate,
+                secondaryFilters
             });
             await saveClients();
             showToast(getText('msg.client_saved'), "success");
