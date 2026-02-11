@@ -287,6 +287,7 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-install-date').value = client.installDate || "";
         document.getElementById('client-first-filter-change-date').value = client.firstFilterChangeDate || "";
         document.getElementById('client-next-filter-date').value = client.nextFilterDate || "";
+        document.getElementById('client-next-service-price').value = client.nextServicePrice || "";
 
         // Populate Secondary Filters
         if (client.secondaryFilters && Array.isArray(client.secondaryFilters)) {
@@ -383,8 +384,18 @@ function renderClientHistory(clientId) {
                 <span class="text-xs font-medium px-2 py-0.5 rounded-md ${colors.bg} ${colors.text}">${event.type}</span>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">${event.notes || 'No notes.'}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Status: ${statusText}</p>
+            <div class="flex justify-between items-center mt-2">
+                 <p class="text-xs text-gray-500 dark:text-gray-400">Status: ${statusText}</p>
+                 <span class="text-xs font-bold text-gray-700 dark:text-gray-200">${event.cost ? event.cost + ' MAD' : '-'}</span>
+            </div>
         `;
         historyList.appendChild(item);
     });
 }
+// --- Global Escape Key Listener ---
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const visibleModals = document.querySelectorAll('.modal-backdrop.visible');
+        visibleModals.forEach(modal => closeModal(modal));
+    }
+});

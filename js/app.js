@@ -248,6 +248,24 @@ function setupEventListeners() {
     document.getElementById('card-dash-clients')?.addEventListener('click', renderClientListModal);
     document.getElementById('card-dash-inventory')?.addEventListener('click', openInventoryModal);
 
+    // --- Auto-Fill Event Data on Client Select ---
+    document.getElementById('event-client-id')?.addEventListener('change', (e) => {
+        const clientId = e.target.value;
+        if (clientId) {
+            const client = store.clients.find(c => c.id === clientId);
+            if (client) {
+                // Auto-fill price if set
+                if (client.nextServicePrice) {
+                    document.getElementById('event-cost').value = client.nextServicePrice;
+                }
+                // Auto-fill technician logic (optional, but good for UX)
+                if (client.assignedTechnician) {
+                    document.getElementById('event-technician').value = client.assignedTechnician;
+                }
+            }
+        }
+    });
+
     // Search (Desktop & Mobile)
     const handleSearch = (e) => {
         const query = e.target.value.toLowerCase();
@@ -475,6 +493,7 @@ async function handleClientFormSubmit(e) {
         const installDate = document.getElementById('client-install-date').value;
         const firstFilterChangeDate = document.getElementById('client-first-filter-change-date').value;
         const nextFilterDate = document.getElementById('client-next-filter-date').value;
+        const nextServicePrice = parseFloat(document.getElementById('client-next-service-price').value) || 0;
 
         // Scrape Secondary Filters
         const secondaryFilters = [];
@@ -504,6 +523,7 @@ async function handleClientFormSubmit(e) {
                 client.installDate = installDate;
                 client.firstFilterChangeDate = firstFilterChangeDate;
                 client.nextFilterDate = nextFilterDate;
+                client.nextServicePrice = nextServicePrice;
                 client.secondaryFilters = secondaryFilters;
                 await saveClients();
                 showToast(getText('msg.client_saved'), "success");
@@ -520,6 +540,7 @@ async function handleClientFormSubmit(e) {
                 installDate,
                 firstFilterChangeDate,
                 nextFilterDate,
+                nextServicePrice,
                 secondaryFilters
             });
             await saveClients();
@@ -829,12 +850,8 @@ function renderClientListModal() {
         titleEl.textContent = `${getText('modal.client_list.title')} (${filteredClients.length})`;
     }
 
-    // Performance: Limit to 50 items and use Fragment
-    const fragment = document.createDocumentFragment();
-    const limit = 50;
-    const clientsToShow = filteredClients.slice(0, limit);
-
-    clientsToShow.forEach(c => {
+    // Render ALL clients (Pagination removed by user request)
+    filteredClients.forEach(c => {
         const div = document.createElement('div');
         div.className = "flex justify-between items-center p-3 border-b border-gray-700 hover:bg-gray-700 transition-colors";
 
@@ -857,7 +874,6 @@ function renderClientListModal() {
                     store.clients = store.clients.filter(client => client.id !== c.id);
                     await saveClients();
                     renderClientListModal(); // Re-render list
-                    // If we were editing this client, close that modal too if open, but this is list view.
                 } catch (error) {
                     console.error("Error deleting client:", error);
                     alert("Failed to delete client: " + error.message);
@@ -867,17 +883,9 @@ function renderClientListModal() {
 
         div.appendChild(nameSpan);
         div.appendChild(deleteBtn);
-        fragment.appendChild(div);
+        // Direct append for simplicity/safety against fragment issues
+        list.appendChild(div);
     });
-
-    list.appendChild(fragment);
-
-    if (filteredClients.length > limit) {
-        const moreDiv = document.createElement('div');
-        moreDiv.className = "p-3 text-center text-gray-400 text-sm italic";
-        moreDiv.textContent = `Showing ${limit} of ${filteredClients.length} clients. search to see more.`;
-        list.appendChild(moreDiv);
-    }
 
     if (window.lucide) lucide.createIcons();
     document.getElementById('client-list-modal').classList.add('visible');
