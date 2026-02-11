@@ -149,6 +149,12 @@ function exportToExcel() {
             const totalRevenue = clientEvents.reduce((sum, e) => sum + (e.cost || 0), 0);
             const completedJobs = clientEvents.filter(e => e.status === 'Completed').length;
 
+            // Format Secondary Filters
+            let secFiltersStr = "";
+            if (c.secondaryFilters && c.secondaryFilters.length > 0) {
+                secFiltersStr = c.secondaryFilters.map(sf => `${sf.type} (${sf.nextDate})`).join("; ");
+            }
+
             return {
                 "ID": c.id,
                 "Nom Complet": c.name,
@@ -156,8 +162,11 @@ function exportToExcel() {
                 "Adresse": c.address ? c.address.replace(/\n/g, ", ") : "",
                 "Ville": inferCity(c.address),
                 "Installé Le": c.installDate || "N/A",
+                "Premier Changement": c.firstFilterChangeDate || "N/A", // NEW
                 "Prochain Service": c.nextFilterDate || "N/A",
+                "Prix Service (MAD)": c.nextServicePrice || 0, // NEW
                 "Type Filtre": c.defaultFilterType || "",
+                "Filtres Secondaires": secFiltersStr, // NEW
                 "Durée (Jours)": c.filterLifespanDays || 180,
                 "Notes": c.notes || "",
                 "Total Revenu (MAD)": totalRevenue,
@@ -180,11 +189,14 @@ function exportToExcel() {
             return {
                 "Date": formattedDate,
                 "Heure": e.time || "",
+                "Titre": e.title || "", // NEW
                 "Client": clientName,
                 "Téléphone": client ? client.phone : "",
                 "Type": e.type,
                 "Statut": e.status,
+                "Statut Paiement": e.paymentStatus || "Not Invoiced", // NEW
                 "Coût (MAD)": e.cost || 0,
+                "Filtre Utilisé": e.filterUsed || "", // NEW
                 "Technicien": e.assignedTechnician || "",
                 "Notes": e.notes || "",
                 "Ville": client ? inferCity(client.address) : ""
