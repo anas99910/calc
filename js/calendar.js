@@ -41,42 +41,13 @@ export function renderCalendar() {
 
     // --- OPTIMIZATION START ---
     // Pre-calculate Ghost Events for ALL clients ONCE
+    const ghostEvents = generateGhostEvents(store.clients);
+
     // Map: dateString -> [Array of Ghost Events]
     const ghostEventsCache = {};
-
-    store.clients.forEach(c => {
-        // 1. Next Service
-        if (c.nextFilterDate) {
-            if (!ghostEventsCache[c.nextFilterDate]) ghostEventsCache[c.nextFilterDate] = [];
-            ghostEventsCache[c.nextFilterDate].push({
-                id: `ghost-next-${c.id}`,
-                clientId: c.id,
-                clientName: c.name,
-                title: 'Planned Service',
-                date: c.nextFilterDate,
-                time: '09:00',
-                type: 'Maintenance',
-                status: 'Planned',
-                notes: 'Manually scheduled via Client Card',
-                isGhost: true
-            });
-        }
-        // 2. First Installation
-        if (c.installDate) {
-            if (!ghostEventsCache[c.installDate]) ghostEventsCache[c.installDate] = [];
-            ghostEventsCache[c.installDate].push({
-                id: `ghost-install-${c.id}`,
-                clientId: c.id,
-                clientName: c.name,
-                title: 'First Installation',
-                date: c.installDate,
-                time: '09:00',
-                type: 'Installation',
-                status: 'Completed',
-                notes: 'Recorded via Client Card',
-                isGhost: true
-            });
-        }
+    ghostEvents.forEach(e => {
+        if (!ghostEventsCache[e.date]) ghostEventsCache[e.date] = [];
+        ghostEventsCache[e.date].push(e);
     });
     // --- OPTIMIZATION END ---
 
@@ -284,46 +255,58 @@ async function handleDrop(e, newDate) {
 }
 
 /**
+ * Generates all ghost events from client profiles.
+ */
+export function generateGhostEvents(clients) {
+    const ghosts = [];
+    clients.forEach(c => {
+        // 1. Next Service
+        if (c.nextFilterDate) {
+            ghosts.push({
+                id: `ghost-next-${c.id}`,
+                clientId: c.id,
+                clientName: c.name,
+                title: 'Planned Service',
+                date: c.nextFilterDate,
+                time: '09:00',
+                type: 'Maintenance',
+                status: 'Planned',
+                notes: 'Manually scheduled via Client Card',
+                isGhost: true
+            });
+        }
+        // 2. First Installation
+        if (c.installDate) {
+            ghosts.push({
+                id: `ghost-install-${c.id}`,
+                clientId: c.id,
+                clientName: c.name,
+                title: 'First Installation',
+                date: c.installDate,
+                time: '09:00',
+                type: 'Installation',
+                status: 'Completed',
+                notes: 'Recorded via Client Card',
+                isGhost: true
+            });
+        }
+    });
+    return ghosts;
+}
+
+/**
  * Gets sorted, filtered events for a specific date string.
  */
 export function getEventsForDay(dateStr) {
     // 1. Regular Events
     const regularEvents = store.events.filter(event => event.date === dateStr);
 
-    // 2. Ghost Events from Client "Next Service" Dates
-    const nextServiceGhosts = store.clients
-        .filter(c => c.nextFilterDate === dateStr)
-        .map(c => ({
-            id: `ghost-next-${c.id}`, // Virtual ID
-            clientId: c.id,
-            clientName: c.name,
-            title: 'Planned Service',
-            date: c.nextFilterDate,
-            time: '09:00',
-            type: 'Maintenance',
-            status: 'Planned',
-            notes: 'Manually scheduled via Client Card',
-            isGhost: true
-        }));
-
-    // 3. Ghost Events from Client "First Installation" Dates
-    const installGhosts = store.clients
-        .filter(c => c.installDate === dateStr)
-        .map(c => ({
-            id: `ghost-install-${c.id}`, // Virtual ID
-            clientId: c.id,
-            clientName: c.name,
-            title: 'First Installation',
-            date: c.installDate,
-            time: '09:00',
-            type: 'Installation',
-            status: 'Completed', // Assume past installations are completed
-            notes: 'Recorded via Client Card',
-            isGhost: true
-        }));
+    // 2. Ghost Events (Optimized)
+    const allGhosts = generateGhostEvents(store.clients);
+    const dayGhosts = allGhosts.filter(g => g.date === dateStr);
 
     // Merge
-    let allEvents = [...regularEvents, ...nextServiceGhosts, ...installGhosts];
+    let allEvents = [...regularEvents, ...dayGhosts];
 
     // Filter
     return allEvents

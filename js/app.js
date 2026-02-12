@@ -2,7 +2,7 @@
 import { store } from './store.js';
 import { loadDataFromFirebase, saveEvents, saveClients, saveInventory } from './api.js';
 import { initTheme, toggleDarkMode } from './theme.js';
-import { renderCalendar, changeMonth } from './calendar.js';
+import { renderCalendar, changeMonth, generateGhostEvents } from './calendar.js';
 import { renderDashboard } from './dashboard.js';
 import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields, addSecondaryFilterRow } from './modals.js';
 import { getEventTypeColors, generateId, debounce } from './utils.js';
@@ -80,7 +80,9 @@ function checkReminders() {
     const todayStr = today.toISOString().split('T')[0];
     const limitStr = threeDaysFromNow.toISOString().split('T')[0];
 
-    const upcomingScheduled = store.events.filter(e => {
+    const allEvents = [...store.events, ...generateGhostEvents(store.clients)];
+
+    const upcomingScheduled = allEvents.filter(e => {
         return e.status !== 'Completed' && e.date >= todayStr && e.date <= limitStr;
     });
 
@@ -590,25 +592,28 @@ function populateRemindersModal() {
     try {
         list.innerHTML = '';
 
+        // Merge Ghost Events
+        const allEvents = [...store.events, ...generateGhostEvents(store.clients)];
+
         const today = new Date(); // now
         const nextMonth = new Date();
         nextMonth.setDate(today.getDate() + 30);
 
         // 1. Find "Due Soon" (Filter Changes in next 30 days)
-        const dueSoon = store.events.filter(e => {
+        const dueSoon = allEvents.filter(e => {
             const d = new Date(e.date);
             return d >= today && d <= nextMonth && e.type === 'Filter Change' && e.status !== 'Completed';
         }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
         // 2. Find other upcoming events
-        const upcoming = store.events.filter(e => {
+        const upcoming = allEvents.filter(e => {
             const d = new Date(e.date);
             return d >= today && !dueSoon.includes(e);
         }).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 10);
 
         // --- Render Due Soon Section (Scheduled Events) ---
         // Merge with "Expiring Filters" (Not scheduled yet)
-        const expiringFilters = checkFilterStatus(store.clients, store.events);
+        const expiringFilters = checkFilterStatus(store.clients, allEvents);
 
         if (expiringFilters.length > 0) {
             const expiringHeader = document.createElement('h4');
