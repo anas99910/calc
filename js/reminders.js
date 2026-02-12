@@ -97,7 +97,8 @@ export function updateNotificationBadge(count) {
 
     if (count > 0) {
         const badge = document.createElement('span');
-        badge.className = "notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-gray-900";
+        // Adjusted positioning: -top-1.5 -right-1.5 and increased size to w-5 h-5 (20px)
+        badge.className = "notification-badge absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-gray-900 z-10";
         badge.textContent = count > 9 ? '9+' : count;
         btn.appendChild(badge);
 

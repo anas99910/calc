@@ -67,23 +67,23 @@
 
         <!-- Header -->
         <header
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 bg-white dark:bg-gray-900 shadow-md rounded-none md:rounded-2xl transition-colors duration-200 px-4 md:px-6 border-b border-gray-200 dark:border-gray-800 md:border-none">
+            class="flex flex-col md:flex-row md:items-center justify-between gap-2 py-2 bg-white dark:bg-gray-900 shadow-md rounded-none md:rounded-2xl transition-colors duration-200 px-3 md:px-4 border-b border-gray-200 dark:border-gray-800 md:border-none">
 
             <!-- Left Section: Logo & View Nav -->
             <div class="flex items-center gap-6 justify-between md:justify-start w-full md:w-auto">
                 <!-- Title -->
                 <div class="flex items-center gap-3">
-                    <img src="logo.png" alt="Speedyex Filtre Logo" class="h-12 w-auto object-contain">
+                    <img src="logo.png" alt="Speedyex Filtre Logo" class="h-9 w-auto object-contain">
                 </div>
 
                 <!-- View Navigation (Pill) -->
                 <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
                     <button id="nav-calendar" data-i18n="nav.calendar"
-                        class="px-5 py-2 rounded-full text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
+                        class="px-4 py-1.5 rounded-full text-sm font-medium bg-blue-600 text-white shadow-sm transition-all">
                         Calendar
                     </button>
                     <button id="nav-dashboard" data-i18n="nav.dashboard"
-                        class="px-5 py-2 rounded-full text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                        class="px-4 py-1.5 rounded-full text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
                         Dashboard
                     </button>
                 </div>
@@ -94,13 +94,13 @@
                 <div class="relative w-full">
                     <input type="text" id="search-input-desktop" data-i18n-placeholder="header.search_placeholder"
                         placeholder="Search clients or events..."
-                        class="w-full bg-gray-100 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-full py-2.5 px-5 pl-11 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                        class="w-full bg-gray-100 dark:bg-gray-800 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-full py-1.5 px-4 pl-10 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
                     <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
                 </div>
             </div>
 
             <!-- Right Section: Actions -->
-            <div class="flex items-center gap-3 justify-end w-full md:w-auto flex-wrap md:flex-nowrap">
+            <div class="flex items-center gap-2 justify-end w-full md:w-auto flex-wrap md:flex-nowrap">
 
                 <!-- Mobile Search (Visible only on small screens) -->
                 <div class="relative w-full md:hidden mb-2">
@@ -114,22 +114,22 @@
                 </div>
 
                 <div
-                    class="flex items-center gap-2 md:gap-3 ml-auto md:ml-0 overflow-x-auto max-w-full no-scrollbar pb-1">
+                    class="flex items-center gap-1 md:gap-2 ml-auto md:ml-0 overflow-x-auto max-w-full no-scrollbar pb-1">
                     <button id="btn-view-reminders" title="View Reminders"
-                        class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        class="relative w-9 h-9 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
                     </button>
                     <button id="btn-view-inventory" title="Manage Inventory"
-                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        <i data-lucide="package" class="w-5 h-5"></i>
+                        class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="package" class="w-4 h-4"></i>
                     </button>
                     <button id="btn-view-clients" title="View All Clients"
-                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        <i data-lucide="users" class="w-5 h-5"></i>
+                        class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
                     </button>
                     <button id="btn-new-client" title="New Client"
-                        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                        class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
                     </button>
 
 
@@ -138,24 +138,24 @@
 
                     <!-- Settings Button -->
                     <button id="btn-settings" title="Settings"
-                        class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        class="w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
                     </button>
 
                     <!-- Dark Mode Toggle -->
                     <button id="btn-toggle-dark-mode"
-                        class="relative w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
+                        class="relative w-12 h-7 bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
                         title="Toggle Theme">
                         <div
-                            class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-200 dark:translate-x-6 flex items-center justify-center pointer-events-none">
-                            <i data-lucide="sun" class="w-4 h-4 text-yellow-500 dark:hidden"></i>
-                            <i data-lucide="moon" class="w-4 h-4 text-blue-500 hidden dark:block"></i>
+                            class="absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 dark:translate-x-5 flex items-center justify-center pointer-events-none">
+                            <i data-lucide="sun" class="w-3 h-3 text-yellow-500 dark:hidden"></i>
+                            <i data-lucide="moon" class="w-3 h-3 text-blue-500 hidden dark:block"></i>
                         </div>
                     </button>
 
                     <button id="btn-new-event"
-                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-6 rounded-full transition-colors whitespace-nowrap shadow-lg shadow-blue-500/30">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-1.5 px-4 rounded-full transition-colors whitespace-nowrap shadow-lg shadow-blue-500/30 text-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
                         <span class="hidden sm:inline" data-i18n="btn.new_event">New Event</span>
                         <span class="sm:hidden">New</span>
                     </button>
