@@ -286,7 +286,7 @@ async function handleDrop(e, newDate) {
 /**
  * Gets sorted, filtered events for a specific date string.
  */
-function getEventsForDay(dateStr) {
+export function getEventsForDay(dateStr) {
     // 1. Regular Events
     const regularEvents = store.events.filter(event => event.date === dateStr);
 

@@ -5,6 +5,7 @@ import { saveEvents, saveClients, saveInventory } from './api.js'; // Imports pu
 // To avoid circular dependencies, we might need a separate 'actions.js' or keep core logic in `app.js` passing callbacks?
 // Let's try to make `modals.js` manage the UI state of modals.
 
+import { getEventsForDay } from './calendar.js';
 import { getEventTypeColors } from './utils.js';
 
 /**
@@ -45,7 +46,7 @@ export function openDayViewModal(dateObj) {
 
     // Filter Events (Use Local Date String to match Calendar)
     const isoDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    const dayEvents = store.events.filter(e => e.date === isoDate).sort((a, b) => a.time.localeCompare(b.time));
+    const dayEvents = getEventsForDay(isoDate);
 
     // Render List
     const list = document.getElementById('day-view-list');
@@ -64,7 +65,7 @@ export function openDayViewModal(dateObj) {
                     <div class="font-bold text-sm">${event.clientName || event.title}</div>
                     <div class="text-xs opacity-80">${event.time} • ${event.type} • ${event.status}</div>
                 </div>
-                <button class="btn-delete-event-day p-2 hover:bg-black/20 rounded-full text-red-400 hover:text-red-300 transition-colors" title="Delete Event">
+                <button class="btn-delete-event-day p-2 hover:bg-black/20 rounded-full text-red-400 hover:text-red-300 transition-colors ${event.isGhost ? 'hidden' : ''}" title="Delete Event">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             `;
