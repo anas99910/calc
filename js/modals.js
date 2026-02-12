@@ -400,3 +400,10 @@ document.addEventListener('keydown', (e) => {
         visibleModals.forEach(modal => closeModal(modal));
     }
 });
+
+// --- Click Outside to Close ---
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop')) {
+        closeModal(e.target);
+    }
+});
