@@ -138,7 +138,7 @@ export const translations = {
         "placeholder.notes": "Add any relevant details...",
         "label.none": "None",
         "btn.6_months": "6 Months",
-        "btn.6_months": "6 Months",
+
         "btn.1_year": "1 Year",
         "label.first_install": "First Installation",
         "label.first_filter_change": "First Filter Change",

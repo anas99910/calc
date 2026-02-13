@@ -7,7 +7,7 @@ const ASSETS_TO_CACHE = [
     './pwa-icon.png',
     './favicon.ico',
     './manifest.json',
-    './check_icon.ps1', // Keeping strictly relevant files, but user had this in dir
+
 
     // JS Modules
     './js/app.js',
