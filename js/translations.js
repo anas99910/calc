@@ -144,7 +144,21 @@ export const translations = {
         "label.first_filter_change": "First Filter Change",
         "label.next_service": "Next Service",
         "text.not_recorded": "Not Recorded",
-        "text.none_scheduled": "None Scheduled"
+        "text.none_scheduled": "None Scheduled",
+        "text.days_overdue": "days overdue",
+        "text.days_left": "days left",
+        "text.due_today": "Due Today",
+        "text.due": "Due",
+        "btn.done": "Done",
+        "btn.modify": "Modify",
+        "btn.defer": "Defer",
+        "title.defer_reminder": "Defer Reminder",
+        "text.defer_desc": "When do you want to be reminded again?",
+        "title.quick_complete": "Mark as Completed",
+        "text.quick_complete_desc": "Job done! When should the <span class='text-blue-400 font-bold'>NEXT</span> reminder be?",
+        "label.specific_date": "Or pick a specific date:",
+        "btn.confirm_save": "Confirm & Save",
+        "msg.quick_complete_success": "Marked as Completed & Scheduled!"
     },
     fr: {
         "nav.calendar": "Calendrier",
@@ -290,6 +304,20 @@ export const translations = {
         "label.first_filter_change": "Premier Changement de Filtre",
         "label.next_service": "Prochain Service",
         "text.not_recorded": "Non Enregistré",
-        "text.none_scheduled": "Non Programmé"
+        "text.none_scheduled": "Non Programmé",
+        "text.days_overdue": "jours de retard",
+        "text.days_left": "jours restants",
+        "text.due_today": "Pour aujourd'hui",
+        "text.due": "Échéance",
+        "btn.done": "Fait",
+        "btn.modify": "Modifier",
+        "btn.defer": "Reporter",
+        "title.defer_reminder": "Reporter le rappel",
+        "text.defer_desc": "Quand voulez-vous être rappelé ?",
+        "title.quick_complete": "Marquer comme terminé",
+        "text.quick_complete_desc": "Travail terminé ! Quand doit être le <span class='text-blue-400 font-bold'>PROchain</span> rappel ?",
+        "label.specific_date": "Ou choisir une date précise :",
+        "btn.confirm_save": "Confirmer & Enregistrer",
+        "msg.quick_complete_success": "Marqué comme terminé & Planifié !"
     }
 };

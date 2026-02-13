@@ -53,9 +53,13 @@ export function checkFilterStatus(clients, events) {
         const diffTime = dueDateVal - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays <= 7) {
+        // Show if due within 7 days OR overdue by less than 30 days
+        // (diffDays <= 7) AND (diffDays >= -30)
+        if (diffDays <= 7 && diffDays >= -30) {
             expiringClients.push({
                 client: client,
+                filterName: client.defaultFilterType || 'Filtre Principal',
+                filterId: 'main',
                 lastDate: lastChangeDateStr || 'Manual Schedule',
                 dueDate: dueDateVal.toISOString().split('T')[0],
                 daysRemaining: diffDays
@@ -72,9 +76,11 @@ export function checkFilterStatus(clients, events) {
                 const fDiffTime = fDue - today;
                 const fDiffDays = Math.ceil(fDiffTime / (1000 * 60 * 60 * 24));
 
-                if (fDiffDays <= 7) {
+                if (fDiffDays <= 7 && fDiffDays >= -30) {
                     expiringClients.push({
-                        client: { ...client, name: `${client.name} (${filter.type})` }, // Hack to show filter name
+                        client: client,
+                        filterName: filter.type,
+                        filterId: filter.id || filter.type, // Fallback if no ID
                         lastDate: 'Secondary Filter',
                         dueDate: fDue.toISOString().split('T')[0],
                         daysRemaining: fDiffDays

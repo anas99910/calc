@@ -348,6 +348,37 @@ function setupEventListeners() {
     // QoL: Quick Filter Lifespan
     document.getElementById('btn-lifespan-6m')?.addEventListener('click', () => document.getElementById('filter-lifespan').value = 180);
     document.getElementById('btn-lifespan-1y')?.addEventListener('click', () => document.getElementById('filter-lifespan').value = 365);
+
+    // --- Quick Complete / Defer Date Buttons (Event Delegation) ---
+    document.addEventListener('click', (e) => {
+        // 6 Months Button
+        if (e.target && (e.target.id === 'btn-quick-6m' || e.target.closest('#btn-quick-6m'))) {
+            const d = new Date();
+            d.setDate(d.getDate() + 180);
+            const input = document.getElementById('quick-next-date');
+            if (input) input.value = d.toISOString().split('T')[0];
+        }
+
+        // 1 Year Button
+        if (e.target && (e.target.id === 'btn-quick-1y' || e.target.closest('#btn-quick-1y'))) {
+            const d = new Date();
+            d.setDate(d.getDate() + 365);
+            const input = document.getElementById('quick-next-date');
+            if (input) input.value = d.toISOString().split('T')[0];
+        }
+    });
+
+    // Save Button
+    document.getElementById('btn-quick-save')?.addEventListener('click', () => {
+        const dateVal = document.getElementById('quick-next-date').value;
+        if (!dateVal) {
+            showToast("Please select a date", "error");
+            return;
+        }
+        handleQuickComplete(dateVal);
+    });
+
+    // Close Button (Delegation handles close buttons generally, but specific logic if needed)
 }
 
 function setQuickDate(daysToAdd) {
@@ -615,39 +646,7 @@ function populateRemindersModal() {
         // Merge with "Expiring Filters" (Not scheduled yet)
         const expiringFilters = checkFilterStatus(store.clients, allEvents);
 
-        if (expiringFilters.length > 0) {
-            const expiringHeader = document.createElement('h4');
-            expiringHeader.className = "text-red-500 font-bold mb-2 uppercase text-xs tracking-wider border-b border-red-500/30 pb-1 mt-4";
-            expiringHeader.innerHTML = `<i data-lucide="bell-ring" class="w-3 h-3 inline mr-1"></i> ${getText('text.expiring_filters')}`;
-            list.appendChild(expiringHeader);
-
-            expiringFilters.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "p-3 bg-red-900/10 border border-red-500/30 rounded mb-3 flex justify-between items-center";
-                div.innerHTML = `
-                <div>
-                    <div class="font-bold text-red-300">${item.client.name}</div>
-                    <div class="text-xs text-red-400">Due: ${item.dueDate} (${item.daysRemaining} days left)</div>
-                </div>
-                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full btn-schedule-filter" data-client-id="${item.client.id}">${getText('btn.schedule')}</button>
-            `;
-                // Bind schedule button
-                div.querySelector('.btn-schedule-filter').onclick = () => {
-                    closeModal(document.getElementById('reminders-modal'));
-                    // Open new event modal pre-filled
-                    openEventModal({
-                        id: null,
-                        clientId: item.client.id,
-                        type: 'Filter Change',
-                        status: 'Scheduled',
-                        clientName: item.client.name,
-                        date: item.dueDate // Suggest the due date
-                    });
-                };
-                list.appendChild(div);
-            });
-        }
-
+        // --- Render Due Soon Section (Scheduled Events) ---
         if (dueSoon.length > 0) {
             const dueHeader = document.createElement('h4');
             dueHeader.className = "text-red-400 font-bold mb-2 uppercase text-xs tracking-wider";
@@ -661,10 +660,18 @@ function populateRemindersModal() {
                 div.innerHTML = `
                 <div>
                     <div class="font-bold text-red-200">${event.clientName || event.title}</div>
-                    <div class="text-xs text-red-300">Due: ${event.date}</div>
+                    <div class="text-xs text-red-300">${getText('text.due')}: ${event.date}</div>
                 </div>
-                <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">${getText('btn.book')}</button>
+                <div class="flex gap-2">
+                    <button class="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-full btn-quick-complete">${getText('btn.done')}</button>
+                    <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">${getText('btn.book')}</button>
+                </div>
             `;
+                div.querySelector('.btn-quick-complete').onclick = (e) => {
+                    e.stopPropagation();
+                    closeModal(document.getElementById('reminders-modal'));
+                    openQuickCompleteModal(null, event);
+                };
                 div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
                 list.appendChild(div);
             });
@@ -696,6 +703,81 @@ function populateRemindersModal() {
             <div class="text-xs text-gray-500">${event.type}</div>
         `;
                 div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
+                list.appendChild(div);
+            });
+        }
+
+        // --- Render Expiring Filters Section (Bottom) ---
+        // Merge with "Expiring Filters" (Not scheduled yet)
+        if (expiringFilters.length > 0) {
+            // Add spacer if there are previous items
+            if (dueSoon.length > 0 || upcoming.length > 0) {
+                const spacer = document.createElement('div'); spacer.className = "h-6 border-t border-gray-700/50 mt-4 mb-4"; list.appendChild(spacer);
+            }
+
+            const expiringHeader = document.createElement('h4');
+            expiringHeader.className = "text-red-500 font-bold mb-2 uppercase text-xs tracking-wider pb-1";
+            expiringHeader.innerHTML = `<i data-lucide="bell-ring" class="w-3 h-3 inline mr-1"></i> ${getText('text.expiring_filters')}`;
+            list.appendChild(expiringHeader);
+
+            expiringFilters.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-red-900/10 border border-red-500/30 rounded mb-3 flex justify-between items-center";
+
+                let timeText;
+                if (item.daysRemaining < 0) {
+                    timeText = `<span class="font-bold">${Math.abs(item.daysRemaining)} ${getText('text.days_overdue')}</span>`;
+                } else if (item.daysRemaining === 0) {
+                    timeText = `<span class="font-bold">${getText('text.due_today')}</span>`;
+                } else {
+                    timeText = `${item.daysRemaining} ${getText('text.days_left')}`;
+                }
+
+                div.innerHTML = `
+                <div>
+                    <div class="font-bold text-red-300 client-name-link cursor-pointer hover:text-red-100 hover:underline transition-colors">${item.client.name}</div>
+                    <div class="text-xs text-blue-300/80 italic mb-0.5">${item.filterName || ''}</div>
+                    <div class="text-xs text-red-400">${getText('text.due')}: ${item.dueDate} (${timeText})</div>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <button class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded-full btn-defer-reminder">${getText('btn.modify')}</button>
+                    <button class="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-full btn-quick-complete flex items-center gap-1">
+                        ${getText('btn.done')} <i data-lucide="check" class="w-3 h-3"></i>
+                    </button>
+                    <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full btn-schedule-filter" data-client-id="${item.client.id}">${getText('btn.schedule')}</button>
+                </div>
+            `;
+                // Bind Client Name Click
+                div.querySelector('.client-name-link').onclick = () => {
+                    closeModal(document.getElementById('reminders-modal'));
+                    openClientModal(item.client);
+                };
+
+                // Bind Defer
+                div.querySelector('.btn-defer-reminder').onclick = () => {
+                    closeModal(document.getElementById('reminders-modal'));
+                    openDeferModal(item.client, item.filterId);
+                };
+
+                // Bind Quick Complete
+                div.querySelector('.btn-quick-complete').onclick = () => {
+                    closeModal(document.getElementById('reminders-modal'));
+                    openQuickCompleteModal(item.client, null, item.filterId);
+                };
+
+                // Bind schedule button
+                div.querySelector('.btn-schedule-filter').onclick = () => {
+                    closeModal(document.getElementById('reminders-modal'));
+                    // Open new event modal pre-filled
+                    openEventModal({
+                        id: null,
+                        clientId: item.client.id,
+                        type: 'Filter Change',
+                        status: 'Scheduled',
+                        clientName: item.client.name,
+                        date: item.dueDate // Suggest the due date
+                    });
+                };
                 list.appendChild(div);
             });
         }
@@ -895,3 +977,128 @@ function renderClientListModal() {
     if (window.lucide) lucide.createIcons();
     document.getElementById('client-list-modal').classList.add('visible');
 }
+
+// --- Quick Complete Logic ---
+
+let quickCompleteClient = null;
+let quickCompleteEvent = null;
+let quickCompleteMode = 'complete'; // 'complete' or 'defer'
+let quickCompleteFilterId = null; // To track specific filter for defer
+
+function openQuickCompleteModal(client, originalEvent, filterId = null) {
+    quickCompleteClient = client;
+    quickCompleteEvent = originalEvent;
+    quickCompleteMode = 'complete';
+    quickCompleteFilterId = filterId || 'main'; // Default to main/auto for completion logic
+
+    // UI Reset
+    document.getElementById('quick-complete-title').textContent = getText('title.quick_complete');
+    document.getElementById('quick-complete-desc').innerHTML = getText('text.quick_complete_desc');
+    document.getElementById('btn-quick-save').textContent = getText('btn.confirm_save');
+    document.getElementById('btn-quick-save').textContent = getText('btn.confirm_save');
+    document.getElementById('quick-next-date').value = '';
+
+
+    // Show modal
+    openModal(document.getElementById('quick-complete-modal'));
+}
+
+function openDeferModal(client, filterId) {
+    quickCompleteClient = client;
+    if (client) {
+        // Find existing date to pre-fill?
+    }
+    quickCompleteEvent = null;
+    quickCompleteMode = 'defer';
+    quickCompleteFilterId = filterId || 'main';
+
+    // UI Update for Defer
+    document.getElementById('quick-complete-title').textContent = getText('title.defer_reminder');
+    document.getElementById('quick-complete-desc').textContent = getText('text.defer_desc'); // Plain text
+    document.getElementById('btn-quick-save').textContent = getText('btn.defer');
+    document.getElementById('quick-next-date').value = '';
+
+
+    openModal(document.getElementById('quick-complete-modal'));
+}
+
+
+
+async function handleQuickComplete(nextDate) {
+    try {
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // MODE: COMPLETE
+        if (quickCompleteMode === 'complete') {
+            // 1. Create Completed Event (Today)
+            const newEvent = {
+                id: generateId(),
+                type: 'Filter Change',
+                status: 'Completed',
+                title: 'Quick Complete',
+                date: todayStr,
+                time: '12:00',
+                technician: 'Self',
+                cost: 0,
+                notes: 'Created via Quick Complete',
+                paymentStatus: 'Paid',
+                filterUsed: quickCompleteFilterId !== 'main' ? quickCompleteFilterId : null,
+                clientName: quickCompleteClient ? quickCompleteClient.name : (quickCompleteEvent ? quickCompleteEvent.clientName : 'Unknown'),
+                clientId: quickCompleteClient ? quickCompleteClient.id : (quickCompleteEvent ? quickCompleteEvent.clientId : null)
+            };
+
+            store.events.push(newEvent);
+            await saveEvents();
+
+            // 2. Update Client's Next Date (Main Logic)
+            let clientToUpdate = quickCompleteClient;
+            if (!clientToUpdate && quickCompleteEvent && quickCompleteEvent.clientId) {
+                clientToUpdate = store.clients.find(c => c.id === quickCompleteEvent.clientId);
+            }
+
+            if (clientToUpdate) {
+                if (quickCompleteFilterId === 'main') {
+                    clientToUpdate.nextFilterDate = nextDate;
+                } else {
+                    // Secondary Filter
+                    if (clientToUpdate.secondaryFilters) {
+                        const filter = clientToUpdate.secondaryFilters.find(f => (f.id === quickCompleteFilterId) || (f.type === quickCompleteFilterId));
+                        if (filter) filter.nextDate = nextDate;
+                    }
+                }
+                await saveClients();
+            }
+            showToast(getText('msg.quick_complete_success'), 'success');
+
+        }
+        // MODE: DEFER
+        else if (quickCompleteMode === 'defer') {
+            let clientToUpdate = quickCompleteClient;
+            if (clientToUpdate) {
+                if (quickCompleteFilterId === 'main') {
+                    clientToUpdate.nextFilterDate = nextDate;
+                } else {
+                    // Update Secondary Filter
+                    if (clientToUpdate.secondaryFilters) {
+                        const filter = clientToUpdate.secondaryFilters.find(f => (f.id === quickCompleteFilterId) || (f.type === quickCompleteFilterId));
+                        if (filter) {
+                            filter.nextDate = nextDate;
+                        }
+                    }
+                }
+                await saveClients();
+                showToast("Reminder updated!", "success");
+            }
+        }
+
+        // 3. Close & Refresh
+        closeModal(document.getElementById('quick-complete-modal'));
+        renderCalendar();
+        renderDashboard();
+
+    } catch (error) {
+        console.error("Quick Complete Error:", error);
+        showToast("Error: " + error.message, "error");
+    }
+}
+

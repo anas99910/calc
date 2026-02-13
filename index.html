@@ -581,6 +581,55 @@
         </div>
     </div>
 
+    <!-- Quick Complete Modal -->
+    <div id="quick-complete-modal"
+        class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div
+            class="modal-content w-full max-w-md bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col">
+            <div class="flex items-center justify-between p-5 border-b border-gray-700">
+                <h3 id="quick-complete-title" class="text-xl font-semibold text-white" data-i18n="title.quick_complete">
+                    Mark as Completed</h3>
+                <button class="btn-close-modal p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p id="quick-complete-desc" class="text-gray-300" data-i18n="text.quick_complete_desc">Job done! When
+                    should the <span class="text-blue-400 font-bold">NEXT</span>
+                    reminder be?</p>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="btn-quick-6m"
+                        class="p-3 bg-gray-700 hover:bg-blue-600 border border-gray-600 hover:border-blue-500 rounded-lg text-white font-medium transition-colors"
+                        data-i18n="btn.6_months">
+                        6 Months
+                    </button>
+                    <button type="button" id="btn-quick-1y"
+                        class="p-3 bg-gray-700 hover:bg-blue-600 border border-gray-600 hover:border-blue-500 rounded-lg text-white font-medium transition-colors"
+                        data-i18n="btn.1_year">
+                        1 Year
+                    </button>
+                </div>
+
+                <!-- Date Preview Field -->
+
+
+                <div class="border-t border-gray-700 pt-4">
+                    <label class="text-sm font-medium text-gray-400 mb-2 block" data-i18n="label.specific_date">Or pick
+                        a specific date:</label>
+                    <input type="date" id="quick-next-date"
+                        class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <button type="button" id="btn-quick-save"
+                    class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-green-900/20 mt-2"
+                    data-i18n="btn.confirm_save">
+                    Confirm & Save
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Client Modal (Add/Edit) -->
     <div id="client-modal" class="modal-backdrop fixed inset-0 backdrop-blur-md flex items-center justify-center p-4">
         <div
