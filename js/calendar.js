@@ -290,6 +290,27 @@ export function generateGhostEvents(clients) {
                 isGhost: true
             });
         }
+
+        // 3. Secondary Filters (Additional Filters)
+        if (c.secondaryFilters && Array.isArray(c.secondaryFilters)) {
+            c.secondaryFilters.forEach(filter => {
+                if (filter.nextDate) {
+                    ghosts.push({
+                        id: `ghost-filter-${c.id}-${filter.id || filter.type}`, // Ensure unique ID
+                        clientId: c.id,
+                        clientName: c.name,
+                        title: `${filter.type} Change`, // e.g. "RO Membrane Change"
+                        date: filter.nextDate,
+                        time: '09:00',
+                        type: 'Filter Change', // Keep generic type for color coding, or use specific if you have specific colors
+                        status: 'Planned',
+                        notes: `Secondary Filter: ${filter.type}`,
+                        isGhost: true,
+                        filterId: filter.id // Useful for quick complete if needed
+                    });
+                }
+            });
+        }
     });
     return ghosts;
 }
