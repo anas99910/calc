@@ -636,8 +636,17 @@
             class="modal-content w-[95%] md:w-full max-w-3xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-5 border-b border-gray-700">
-                <h3 id="client-modal-title" class="text-xl font-semibold text-white">New Client</h3>
-                <button class="btn-close-modal p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700">
+                <div class="flex flex-col gap-1 w-full max-w-[80%]">
+                    <h3 id="client-modal-title" class="text-xl font-semibold text-white truncate w-full">New Client</h3>
+                    <div id="client-modal-id-container" class="hidden">
+                        <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mr-1">ID:</span>
+                        <code id="client-modal-id-display"
+                            class="text-xs text-blue-400 bg-blue-900/20 px-1.5 py-0.5 rounded cursor-copy select-all"
+                            title="Double click to copy"></code>
+                    </div>
+                </div>
+                <button
+                    class="btn-close-modal p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700 flex-shrink-0">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -856,10 +865,14 @@
 
             <!-- Search / Add -->
             <div class="p-5 border-b border-gray-700 flex items-center gap-3">
-                <div class="relative flex-1">
+                <div class="relative flex-1 flex items-center">
+                    <i data-lucide="search" class="absolute left-3 w-5 h-5 text-gray-400"></i>
                     <input type="text" id="client-list-search" placeholder="Search clients..."
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 pl-10 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-3 pl-10 pr-10 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <button type="button" id="client-list-clear-search"
+                        class="absolute right-3 text-gray-400 hover:text-white hidden">
+                        <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    </button>
                 </div>
                 <button id="btn-new-client-from-list"
                     class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">

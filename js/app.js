@@ -5,7 +5,7 @@ import { initTheme, toggleDarkMode } from './theme.js';
 import { renderCalendar, changeMonth, generateGhostEvents } from './calendar.js';
 import { renderDashboard } from './dashboard.js';
 import { openEventModal, openClientModal, openConfirmationModal, openModal, closeModal, toggleEventFormFields, addSecondaryFilterRow } from './modals.js';
-import { getEventTypeColors, generateId, debounce } from './utils.js';
+import { getEventTypeColors, generateId, generateShortId, debounce } from './utils.js';
 import { generateInvoice } from './invoice.js';
 import { initSettings, getText } from './settings.js';
 import { checkFilterStatus, updateNotificationBadge, sendSystemNotification } from './reminders.js';
@@ -282,6 +282,42 @@ function setupEventListeners() {
     };
     document.getElementById('search-input-desktop')?.addEventListener('input', handleSearch);
     document.getElementById('search-input-mobile')?.addEventListener('input', handleSearch);
+
+    // Close Modals on Outer Click - DISABLED BY USER REQUEST
+    // const modals = document.querySelectorAll('.modal-backdrop');
+    // modals.forEach(modal => {
+    //     modal.addEventListener('click', function(e) {
+    //         if (e.target === this) closeModal(this);
+    //     });
+    // });
+
+    // Client List Search Clear Button Logic
+    document.addEventListener('input', (e) => {
+        if (e.target.id === 'client-list-search') {
+            const clearBtn = document.getElementById('client-list-clear-search');
+            if (clearBtn) {
+                if (e.target.value.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const clearBtn = e.target.closest('#client-list-clear-search');
+        if (clearBtn) {
+            const searchInput = document.getElementById('client-list-search');
+            if (searchInput) {
+                searchInput.value = '';
+                clearBtn.classList.add('hidden');
+                renderClientListModal(); // Re-render full list
+                searchInput.focus(); // keep focus on input
+            }
+        }
+    });
+
 
     // Modals Close
     document.querySelectorAll('.btn-close-modal').forEach(btn => {
@@ -564,6 +600,7 @@ async function handleClientFormSubmit(e) {
         } else {
             store.clients.push({
                 id: generateId(),
+                shortId: generateShortId(),
                 name,
                 phone,
                 address,
@@ -929,7 +966,14 @@ function renderClientListModal() {
 
     // Filter if search
     const searchTerm = document.getElementById('client-list-search')?.value.toLowerCase() || "";
-    const filteredClients = store.clients.filter(c => c.name.toLowerCase().includes(searchTerm));
+    const searchDigitsOnly = searchTerm.replace(/\D/g, '');
+    const hasLetters = /[a-zA-Z]/.test(searchTerm);
+    const filteredClients = store.clients.filter(c => {
+        const nameMatch = c.name.toLowerCase().includes(searchTerm);
+        const idMatch = c.shortId && c.shortId.toLowerCase().includes(searchTerm);
+        const phoneMatch = !hasLetters && searchDigitsOnly && c.phone && c.phone.replace(/\D/g, '').includes(searchDigitsOnly);
+        return nameMatch || idMatch || phoneMatch;
+    });
 
     // Update Title with Count
     const titleEl = document.getElementById('client-list-title');
@@ -942,17 +986,39 @@ function renderClientListModal() {
         const div = document.createElement('div');
         div.className = "flex justify-between items-center p-3 border-b border-gray-700 hover:bg-gray-700 transition-colors";
 
+        const contentDiv = document.createElement('div');
+        contentDiv.className = "flex items-center gap-2 flex-grow min-w-0"; // Container for name and ID
+
         const nameSpan = document.createElement('span');
         nameSpan.textContent = c.name;
-        nameSpan.className = "cursor-pointer flex-grow font-medium text-gray-200 hover:text-white";
+        nameSpan.className = "cursor-pointer font-medium text-gray-200 hover:text-white truncate";
         nameSpan.onclick = () => {
             closeModal(document.getElementById('client-list-modal'));
             openClientModal(c);
         };
 
+        const idSpan = document.createElement('span');
+        idSpan.textContent = c.shortId || '';
+        idSpan.className = "text-xs text-gray-500 font-mono tracking-wider px-1.5 py-0.5 rounded hover:bg-gray-600 transition-colors cursor-pointer flex-shrink-0";
+        idSpan.title = "Click to copy ID";
+        idSpan.onclick = async (e) => {
+            e.stopPropagation(); // Prevent opening the client modal
+            if (c.shortId) {
+                try {
+                    await navigator.clipboard.writeText(c.shortId);
+                    showToast("ID copied to clipboard!", "success");
+                } catch (err) {
+                    showToast("Failed to copy", "error");
+                }
+            }
+        };
+
+        contentDiv.appendChild(nameSpan);
+        if (c.shortId) contentDiv.appendChild(idSpan);
+
         const deleteBtn = document.createElement('button');
         deleteBtn.innerHTML = `<i data-lucide="x" class="w-4 h-4 text-red-400 hover:text-red-300"></i>`;
-        deleteBtn.className = "p-2 rounded-full hover:bg-red-900/20 transition-colors ml-2";
+        deleteBtn.className = "p-2 rounded-full hover:bg-red-900/20 transition-colors ml-2 flex-shrink-0";
         deleteBtn.title = "Delete Client";
         deleteBtn.onclick = (e) => {
             e.stopPropagation();
@@ -968,7 +1034,7 @@ function renderClientListModal() {
             });
         };
 
-        div.appendChild(nameSpan);
+        div.appendChild(contentDiv);
         div.appendChild(deleteBtn);
         // Direct append for simplicity/safety against fragment issues
         list.appendChild(div);

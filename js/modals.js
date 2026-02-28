@@ -279,6 +279,24 @@ export function openClientModal(client = null, fromEventModal = false) {
     if (client) {
         document.getElementById('client-modal-title').textContent = getText('modal.edit_client.title');
         document.getElementById('client-id').value = client.id;
+        document.getElementById('client-modal-id-container').classList.remove('hidden');
+
+        const idDisplay = document.getElementById('client-modal-id-display');
+        idDisplay.textContent = client.shortId || '';
+        idDisplay.onclick = async () => {
+            if (client.shortId) {
+                try {
+                    await navigator.clipboard.writeText(client.shortId);
+                    // Temporarily change text to show feedback
+                    const originalText = idDisplay.textContent;
+                    idDisplay.textContent = "COPIED!";
+                    setTimeout(() => { idDisplay.textContent = originalText; }, 1500);
+                } catch (err) {
+                    console.error("Failed to copy", err);
+                }
+            }
+        };
+
         document.getElementById('client-name').value = client.name;
         document.getElementById('client-phone').value = client.phone || "";
         document.getElementById('client-address').value = client.address || "";
@@ -304,6 +322,8 @@ export function openClientModal(client = null, fromEventModal = false) {
     } else {
         document.getElementById('client-modal-title').textContent = getText('modal.new_client.title');
         document.getElementById('client-id').value = '';
+        document.getElementById('client-modal-id-container').classList.add('hidden');
+        document.getElementById('client-modal-id-display').textContent = '';
         document.getElementById('client-filter-lifespan').value = 180;
         document.getElementById('client-install-date').value = '';
         document.getElementById('client-first-filter-change-date').value = '';
@@ -401,9 +421,9 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// --- Click Outside to Close ---
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-backdrop')) {
-        closeModal(e.target);
-    }
-});
+// --- Click Outside to Close (Disabled by user request) ---
+// document.addEventListener('click', (e) => {
+//     if (e.target.classList.contains('modal-backdrop')) {
+//         closeModal(e.target);
+//     }
+// });

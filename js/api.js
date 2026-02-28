@@ -1,6 +1,11 @@
 import { db } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 import { store } from './store.js';
+import { generateShortId } from './utils.js';
+
+// Expose generateShortId to window temporarily for the map function below to access it
+// without risking import loop issues if utils isn't fully ready.
+window.utils_generateShortId = generateShortId;
 
 // Collection Document IDs (Using single docs to match legacy localStorage structure)
 const EVENTS_DOC = 'events_list';
@@ -37,7 +42,26 @@ export async function loadDataFromFirebase() {
         }
 
         if (clientsSnap.exists()) {
-            store.setClients(clientsSnap.data().items || []);
+            let loadedClients = clientsSnap.data().items || [];
+            let clientsUpdated = false;
+
+            // Retroactively add shortId to existing clients
+            loadedClients = loadedClients.map(c => {
+                if (!c.shortId) {
+                    c.shortId = window.utils_generateShortId ? window.utils_generateShortId() : Math.random().toString(36).substring(2, 7).toUpperCase();
+                    clientsUpdated = true;
+                }
+                return c;
+            });
+
+            store.setClients(loadedClients);
+
+            // If we generated new shortIds, save back to database silently
+            if (clientsUpdated) {
+                // We use setDoc directly to avoid cyclic dependencies with saveClients if needed,
+                // or just call saveClients() if it's safe. It's safer to just setDoc here.
+                setDoc(doc(db, DATA_COLLECTION, CLIENTS_DOC), { items: loadedClients }).catch(e => console.error("Failed to retro-save shortIds:", e));
+            }
         } else {
             console.log("No clients doc found.");
             store.setClients([]);

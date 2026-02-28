@@ -13,6 +13,16 @@ export function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
+// Generate a 5-character human-readable ID (alphanumeric uppercase, excluding 0, O, 1, I, L)
+export function generateShortId() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 export function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {

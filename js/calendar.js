@@ -103,7 +103,26 @@ export function renderCalendar() {
                 if (!store.searchFilter) return true;
                 const title = (event.title || '').toLowerCase();
                 const client = (event.clientName || '').toLowerCase();
-                return title.includes(store.searchFilter) || client.includes(store.searchFilter);
+
+                // Look up the client's shortId and phone for searching
+                let clientShortId = '';
+                let clientPhone = '';
+                if (event.clientId) {
+                    const c = store.clients.find(cl => cl.id === event.clientId);
+                    if (c) {
+                        if (c.shortId) clientShortId = c.shortId.toLowerCase();
+                        if (c.phone) clientPhone = c.phone.replace(/\D/g, '');
+                    }
+                }
+
+                const searchDigitsOnly = store.searchFilter.replace(/\D/g, '');
+                const hasLetters = /[a-zA-Z]/.test(store.searchFilter);
+
+                const nameMatch = title.includes(store.searchFilter) || client.includes(store.searchFilter);
+                const idMatch = clientShortId.includes(store.searchFilter);
+                const phoneMatch = !hasLetters && searchDigitsOnly && clientPhone.includes(searchDigitsOnly);
+
+                return nameMatch || idMatch || phoneMatch;
             })
             .sort((a, b) => a.time.localeCompare(b.time));
 
@@ -335,7 +354,26 @@ export function getEventsForDay(dateStr) {
             if (!store.searchFilter) return true;
             const title = (event.title || '').toLowerCase();
             const client = (event.clientName || '').toLowerCase();
-            return title.includes(store.searchFilter) || client.includes(store.searchFilter);
+
+            // Look up the client's shortId and phone for searching
+            let clientShortId = '';
+            let clientPhone = '';
+            if (event.clientId) {
+                const c = store.clients.find(cl => cl.id === event.clientId);
+                if (c) {
+                    if (c.shortId) clientShortId = c.shortId.toLowerCase();
+                    if (c.phone) clientPhone = c.phone.replace(/\D/g, '');
+                }
+            }
+
+            const searchDigitsOnly = store.searchFilter.replace(/\D/g, '');
+            const hasLetters = /[a-zA-Z]/.test(store.searchFilter);
+
+            const nameMatch = title.includes(store.searchFilter) || client.includes(store.searchFilter);
+            const idMatch = clientShortId.includes(store.searchFilter);
+            const phoneMatch = !hasLetters && searchDigitsOnly && clientPhone.includes(searchDigitsOnly);
+
+            return nameMatch || idMatch || phoneMatch;
         })
         .sort((a, b) => a.time.localeCompare(b.time));
 }
