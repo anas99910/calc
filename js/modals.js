@@ -300,6 +300,7 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-name').value = client.name;
         document.getElementById('client-phone').value = client.phone || "";
         document.getElementById('client-address').value = client.address || "";
+        document.getElementById('client-ville').value = client.ville || "";
         document.getElementById('client-filter-type').value = client.defaultFilterType || "";
         document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
         document.getElementById('client-notes').value = client.notes || "";

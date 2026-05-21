@@ -160,7 +160,7 @@ function exportToExcel() {
                 "Nom Complet": c.name,
                 "Téléphone": c.phone || "",
                 "Adresse": c.address ? c.address.replace(/\n/g, ", ") : "",
-                "Ville": inferCity(c.address),
+                "Ville": c.ville || inferCity(c.address),
                 "Installé Le": c.installDate || "N/A",
                 "Premier Changement": c.firstFilterChangeDate || "N/A", // NEW
                 "Prochain Service": c.nextFilterDate || "N/A",
@@ -199,7 +199,7 @@ function exportToExcel() {
                 "Filtre Utilisé": e.filterUsed || "", // NEW
                 "Technicien": e.assignedTechnician || "",
                 "Notes": e.notes || "",
-                "Ville": client ? inferCity(client.address) : ""
+                "Ville": client ? (client.ville || inferCity(client.address)) : ""
             };
         });
 

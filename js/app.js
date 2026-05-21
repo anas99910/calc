@@ -351,6 +351,7 @@ function setupEventListeners() {
     // Search
     const debouncedSearch = debounce(renderClientListModal, 300);
     document.getElementById('client-list-search')?.addEventListener('input', debouncedSearch);
+    document.getElementById('client-list-town-filter')?.addEventListener('change', renderClientListModal);
 
     document.getElementById('btn-new-client-from-list')?.addEventListener('click', () => {
         closeModal(document.getElementById('client-list-modal'));
@@ -556,6 +557,7 @@ async function handleClientFormSubmit(e) {
         const name = document.getElementById('client-name').value;
         const phone = document.getElementById('client-phone').value;
         const address = document.getElementById('client-address').value;
+        const ville = document.getElementById('client-ville').value;
         const notes = document.getElementById('client-notes').value;
         const defaultFilterType = document.getElementById('client-filter-type').value;
         const filterLifespanDays = parseInt(document.getElementById('client-filter-lifespan').value) || 180;
@@ -586,6 +588,7 @@ async function handleClientFormSubmit(e) {
                 client.name = name;
                 client.phone = phone;
                 client.address = address;
+                client.ville = ville;
                 client.notes = notes;
                 client.defaultFilterType = defaultFilterType;
                 client.filterLifespanDays = filterLifespanDays;
@@ -604,6 +607,7 @@ async function handleClientFormSubmit(e) {
                 name,
                 phone,
                 address,
+                ville,
                 notes,
                 defaultFilterType,
                 filterLifespanDays,
@@ -964,15 +968,44 @@ function renderClientListModal() {
     if (!list) return;
     list.innerHTML = '';
 
+    // Update Town Filter Dropdown
+    const townFilter = document.getElementById('client-list-town-filter');
+    if (townFilter) {
+        const currentTown = townFilter.value;
+        // Get unique towns, exclude empty
+        const uniqueTowns = [...new Set(store.clients.map(c => c.ville).filter(v => v && v.trim() !== ''))].sort();
+        
+        // Populate options but keep first 'All Towns'
+        const allTownsText = getText('label.all_towns') || 'All Towns';
+        townFilter.innerHTML = `<option value="" data-i18n="label.all_towns">${allTownsText}</option>`;
+        uniqueTowns.forEach(t => {
+            const option = document.createElement('option');
+            option.value = t;
+            option.textContent = t;
+            townFilter.appendChild(option);
+        });
+        
+        // Restore value if exists
+        if (uniqueTowns.includes(currentTown)) {
+            townFilter.value = currentTown;
+        }
+    }
+
     // Filter if search
     const searchTerm = document.getElementById('client-list-search')?.value.toLowerCase() || "";
     const searchDigitsOnly = searchTerm.replace(/\D/g, '');
     const hasLetters = /[a-zA-Z]/.test(searchTerm);
+    const selectedTown = townFilter?.value || "";
+
     const filteredClients = store.clients.filter(c => {
         const nameMatch = c.name.toLowerCase().includes(searchTerm);
         const idMatch = c.shortId && c.shortId.toLowerCase().includes(searchTerm);
         const phoneMatch = !hasLetters && searchDigitsOnly && c.phone && c.phone.replace(/\D/g, '').includes(searchDigitsOnly);
-        return nameMatch || idMatch || phoneMatch;
+        
+        const matchesSearch = nameMatch || idMatch || phoneMatch;
+        const matchesTown = !selectedTown || c.ville === selectedTown;
+        
+        return matchesSearch && matchesTown;
     });
 
     // Update Title with Count
