@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "dev": "node server.js"
+  },
   "dependencies": {
     "puppeteer-core": "^24.36.1"
   }

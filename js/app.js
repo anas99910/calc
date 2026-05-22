@@ -9,6 +9,7 @@ import { getEventTypeColors, generateId, generateShortId, debounce } from './uti
 import { generateInvoice } from './invoice.js';
 import { initSettings, getText } from './settings.js';
 import { checkFilterStatus, updateNotificationBadge, sendSystemNotification } from './reminders.js';
+import { checkLoginState, initAuth } from './auth.js';
 
 // --- Global Scope Exposure (for HTML buttons) ---
 window.toggleDarkMode = toggleDarkMode;
@@ -16,9 +17,50 @@ window.toggleDarkMode = toggleDarkMode;
 // --- App Initialization ---
 let editingInventoryId = null;
 
-try {
-    console.log("App Initializing locally for appId:", store.appId);
+async function startApplication() {
+    try {
+        console.log("App Initializing locally for appId:", store.appId);
 
+        // Load Data
+        await loadDataFromFirebase();
+        renderDashboard();
+        renderCalendar();
+        renderInventoryList();
+        populateInventoryDropdowns(); // Populate dropdowns initially
+        checkReminders();
+
+        /**
+         * Switch between Views (Calendar <-> Dashboard)
+         */
+        // Responsive Calendar Resize
+        window.addEventListener('resize', debounce(() => {
+            if (document.getElementById('calendar-view').classList.contains('active')) {
+                renderCalendar();
+            }
+        }, 200));
+
+        // Request Notification Permission
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+        const loader = document.getElementById('loading-overlay');
+        if (loader) loader.style.display = 'none';
+
+        checkReminders();
+
+        // Icons
+        if (window.lucide) lucide.createIcons();
+
+        // Initial View
+        showView('calendar');
+
+    } catch (error) {
+        console.error("Failed to initialize app:", error);
+        showLoadingError("Failed to initialize application: " + error.message);
+    }
+}
+
+try {
     // Initialize Theme
     initTheme();
 
@@ -28,43 +70,33 @@ try {
     // Setup Listeners
     setupEventListeners();
 
-    // Load Data
-    await loadDataFromFirebase();
-    renderDashboard();
-    renderCalendar();
-    renderInventoryList();
-    populateInventoryDropdowns(); // Populate dropdowns initially
-    checkReminders();
-
-
-    /**
-     * Switch between Views (Calendar <-> Dashboard)
-     */
-    // Responsive Calendar Resize
-    window.addEventListener('resize', debounce(() => {
-        if (document.getElementById('calendar-view').classList.contains('active')) {
-            renderCalendar();
+    // Authentication Guard
+    if (checkLoginState()) {
+        console.log("User is authenticated. Launching application...");
+        await startApplication();
+    } else {
+        console.log("User is not authenticated. Showing login screen...");
+        
+        // Hide loading spinner and show login overlay
+        const loader = document.getElementById('loading-overlay');
+        if (loader) loader.style.display = 'none';
+        
+        const loginOverlay = document.getElementById('login-overlay');
+        if (loginOverlay) {
+            loginOverlay.classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
         }
-    }, 200));
 
-    // Request Notification Permission
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
+        // Initialize Authentication Handlers
+        initAuth(async () => {
+            console.log("Authentication successful! Loading main application...");
+            await startApplication();
+        });
     }
-    const loader = document.getElementById('loading-overlay');
-    if (loader) loader.style.display = 'none';
-
-    checkReminders();
-
-    // Icons
-    if (window.lucide) lucide.createIcons();
-
-    // Initial View
-    showView('calendar');
 
 } catch (error) {
-    console.error("Failed to initialize app:", error);
-    showLoadingError("Failed to initialize application: " + error.message);
+    console.error("Failed to initialize system:", error);
+    showLoadingError("Failed to initialize system: " + error.message);
 }
 
 // --- Reminder Logic ---
@@ -557,7 +589,7 @@ async function handleClientFormSubmit(e) {
         const name = document.getElementById('client-name').value;
         const phone = document.getElementById('client-phone').value;
         const address = document.getElementById('client-address').value;
-        const ville = document.getElementById('client-ville').value;
+        const ville = document.getElementById('client-ville').value.trim();
         const notes = document.getElementById('client-notes').value;
         const defaultFilterType = document.getElementById('client-filter-type').value;
         const filterLifespanDays = parseInt(document.getElementById('client-filter-lifespan').value) || 180;
@@ -971,9 +1003,9 @@ function renderClientListModal() {
     // Update Town Filter Dropdown
     const townFilter = document.getElementById('client-list-town-filter');
     if (townFilter) {
-        const currentTown = townFilter.value;
-        // Get unique towns, exclude empty
-        const uniqueTowns = [...new Set(store.clients.map(c => c.ville).filter(v => v && v.trim() !== ''))].sort();
+        const currentTown = townFilter.value ? townFilter.value.trim() : "";
+        // Get unique towns, exclude empty and trim whitespaces to avoid duplicates
+        const uniqueTowns = [...new Set(store.clients.map(c => c.ville ? c.ville.trim() : '').filter(v => v !== ''))].sort();
         
         // Populate options but keep first 'All Towns'
         const allTownsText = getText('label.all_towns') || 'All Towns';
@@ -995,7 +1027,7 @@ function renderClientListModal() {
     const searchTerm = document.getElementById('client-list-search')?.value.toLowerCase() || "";
     const searchDigitsOnly = searchTerm.replace(/\D/g, '');
     const hasLetters = /[a-zA-Z]/.test(searchTerm);
-    const selectedTown = townFilter?.value || "";
+    const selectedTown = townFilter?.value ? townFilter.value.trim() : "";
 
     const filteredClients = store.clients.filter(c => {
         const nameMatch = c.name.toLowerCase().includes(searchTerm);
@@ -1003,7 +1035,7 @@ function renderClientListModal() {
         const phoneMatch = !hasLetters && searchDigitsOnly && c.phone && c.phone.replace(/\D/g, '').includes(searchDigitsOnly);
         
         const matchesSearch = nameMatch || idMatch || phoneMatch;
-        const matchesTown = !selectedTown || c.ville === selectedTown;
+        const matchesTown = !selectedTown || (c.ville && c.ville.trim() === selectedTown);
         
         return matchesSearch && matchesTown;
     });

@@ -33,6 +33,15 @@ export function initSettings() {
     const btnSync = document.getElementById('btn-sync-calendar');
     if (btnSync) btnSync.onclick = exportToICS;
 
+    // Bind Logout Button
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.onclick = async () => {
+            const { logout } = await import('./auth.js');
+            logout();
+        };
+    }
+
     // --- PWA Install Logic ---
     const installContainer = document.getElementById('install-container');
     const installBtn = document.getElementById('btn-install-app');
