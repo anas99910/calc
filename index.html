@@ -1132,6 +1132,14 @@
                         console.error('ServiceWorker registration failed: ', err);
                     });
             });
+
+            // Auto-reload the page when a new service worker version activates
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
         } else {
             console.warn("Service Worker not supported in this browser.");
         }

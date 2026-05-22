@@ -1,4 +1,4 @@
-const CACHE_NAME = 'speedyex-v16';
+const CACHE_NAME = 'speedyex-v17';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
