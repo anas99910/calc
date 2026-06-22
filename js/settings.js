@@ -33,6 +33,12 @@ export function initSettings() {
     const btnSync = document.getElementById('btn-sync-calendar');
     if (btnSync) btnSync.onclick = exportToICS;
 
+    // Bind Backup JSON Button
+    const btnBackupJson = document.getElementById('btn-backup-json');
+    if (btnBackupJson) btnBackupJson.onclick = exportToJSON;
+
+
+
     // Bind Logout Button
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
@@ -328,4 +334,37 @@ export function exportToICS() {
     window.URL.revokeObjectURL(url);
 
     if (window.showToast) showToast(getText('msg.sync_success'), 'success');
+}
+
+// --- JSON Backup ---
+
+function exportToJSON() {
+    try {
+        const backupData = {
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            events: store.events || [],
+            clients: store.clients || [],
+            inventory: store.inventory || []
+        };
+
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        
+        const dateStr = new Date().toISOString().split('T')[0];
+        const fileName = `speedyex_backup_${dateStr}.json`;
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error("Backup failed:", error);
+        alert("Backup failed: " + error.message);
+    }
 }

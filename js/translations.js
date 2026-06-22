@@ -34,6 +34,7 @@ export const translations = {
         "settings.install_btn": "Install App",
         "btn.export_data": "Export Data to Excel",
         "settings.export_desc": "Download a backup of all clients, events, and inventory.",
+        "btn.backup_json": "Backup Database (JSON)",
         "btn.close": "Close",
 
         "modal.new_event.title": "New Appointment",
@@ -197,6 +198,7 @@ export const translations = {
         "settings.install_btn": "Installer l'App",
         "btn.export_data": "Exporter vers Excel",
         "settings.export_desc": "Télécharger une sauvegarde de tous les clients, événements et stocks.",
+        "btn.backup_json": "Sauvegarder la Base de Données (JSON)",
         "btn.close": "Fermer",
 
         "modal.new_event.title": "Nouveau Rendez-vous",
