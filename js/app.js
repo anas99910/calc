@@ -729,17 +729,27 @@ function populateRemindersModal() {
             dueSoon.forEach(event => {
                 const div = document.createElement('div');
                 // Highlighting red border for urgency
-                div.className = "p-3 bg-red-900/20 border border-red-500/50 rounded mb-3 flex justify-between items-center cursor-pointer hover:bg-red-900/30 transition-colors";
+                div.className = "p-3 bg-red-900/20 border border-red-500/50 rounded mb-3 flex flex-col md:flex-row gap-3 justify-between items-start md:items-center cursor-pointer hover:bg-red-900/30 transition-colors";
                 div.innerHTML = `
                 <div>
                     <div class="font-bold text-red-200">${event.clientName || event.title}</div>
                     <div class="text-xs text-red-300">${getText('text.due')}: ${event.date}</div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 flex-wrap">
+                    ${event.clientId ? `<button class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-full btn-client-detail">Client Detail</button>` : ''}
                     <button class="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-full btn-quick-complete">${getText('btn.done')}</button>
                     <button class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full">${getText('btn.book')}</button>
                 </div>
             `;
+                const detailBtn = div.querySelector('.btn-client-detail');
+                if (detailBtn) {
+                    detailBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        closeModal(document.getElementById('reminders-modal'));
+                        const client = store.clients.find(c => c.id === event.clientId);
+                        if (client) openClientModal(client);
+                    };
+                }
                 div.querySelector('.btn-quick-complete').onclick = (e) => {
                     e.stopPropagation();
                     closeModal(document.getElementById('reminders-modal'));
@@ -767,14 +777,26 @@ function populateRemindersModal() {
         if (upcoming.length > 0) {
             upcoming.forEach(event => {
                 const div = document.createElement('div');
-                div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
+                div.className = "p-3 bg-gray-100 dark:bg-gray-800 rounded mb-2 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex justify-between items-center";
                 div.innerHTML = `
-            <div class="flex justify-between">
-                <span class="font-medium text-gray-900 dark:text-gray-200">${event.clientName || event.title}</span>
-                <span class="text-xs text-blue-400 font-mono">${event.date}</span>
+            <div>
+                <div class="font-medium text-gray-900 dark:text-gray-200">${event.clientName || event.title}</div>
+                <div class="text-xs text-gray-500 mt-1">${event.type}</div>
             </div>
-            <div class="text-xs text-gray-500">${event.type}</div>
+            <div class="flex flex-col items-end gap-2">
+                <span class="text-xs text-blue-400 font-mono">${event.date}</span>
+                ${event.clientId ? `<button class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded btn-client-detail">Client Detail</button>` : ''}
+            </div>
         `;
+                const detailBtn = div.querySelector('.btn-client-detail');
+                if (detailBtn) {
+                    detailBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        closeModal(document.getElementById('reminders-modal'));
+                        const client = store.clients.find(c => c.id === event.clientId);
+                        if (client) openClientModal(client);
+                    };
+                }
                 div.onclick = () => { closeModal(document.getElementById('reminders-modal')); openEventModal(event); };
                 list.appendChild(div);
             });

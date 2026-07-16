@@ -250,8 +250,11 @@ export function addSecondaryFilterRow(filterData = {}) {
         </div>
         <div class="col-span-3">
              <label class="text-xs text-gray-400 block mb-1">Lifespan</label>
-            <input type="number" class="secondary-filter-lifespan w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
-                placeholder="180" value="${filterData.lifespan || 180}">
+            <select class="secondary-filter-lifespan w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white">
+                <option value="180" ${filterData.lifespan == 180 || !filterData.lifespan ? 'selected' : ''}>6 Months</option>
+                <option value="365" ${filterData.lifespan == 365 ? 'selected' : ''}>1 Year</option>
+                ${(filterData.lifespan && filterData.lifespan != 180 && filterData.lifespan != 365) ? `<option value="${filterData.lifespan}" selected>${filterData.lifespan} Days (Custom)</option>` : ''}
+            </select>
         </div>
         <div class="col-span-1 flex justify-center pb-1">
             <button type="button" class="text-red-400 hover:text-red-300" onclick="this.closest('.grid').remove()">
@@ -302,7 +305,15 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-address').value = client.address || "";
         document.getElementById('client-ville').value = (client.ville || "").trim();
         document.getElementById('client-filter-type').value = client.defaultFilterType || "";
-        document.getElementById('client-filter-lifespan').value = client.filterLifespanDays || 180;
+        const lifespanSelect = document.getElementById('client-filter-lifespan');
+        const targetLifespan = client.filterLifespanDays || 180;
+        if (!Array.from(lifespanSelect.options).some(opt => opt.value == targetLifespan)) {
+            const newOpt = document.createElement('option');
+            newOpt.value = targetLifespan;
+            newOpt.text = targetLifespan + ' Days (Custom)';
+            lifespanSelect.add(newOpt);
+        }
+        lifespanSelect.value = targetLifespan;
         document.getElementById('client-notes').value = client.notes || "";
         document.getElementById('client-install-date').value = client.installDate || "";
         document.getElementById('client-first-filter-change-date').value = client.firstFilterChangeDate || "";
