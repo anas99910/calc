@@ -236,32 +236,68 @@ export function addSecondaryFilterRow(filterData = {}) {
     if (!container) return;
 
     const div = document.createElement('div');
-    div.className = "grid grid-cols-12 gap-2 items-end bg-gray-700/50 p-2 rounded-lg border border-gray-600 secondary-filter-row";
+    div.className = "flex flex-col gap-2 items-start bg-gray-700/50 p-2 rounded-lg border border-gray-600 secondary-filter-row mb-2";
     div.innerHTML = `
-        <div class="col-span-5">
-            <label class="text-xs text-gray-400 block mb-1">Type</label>
-            <input type="text" class="secondary-filter-type w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
-                placeholder="Type" value="${filterData.type || ''}">
-        </div>
-        <div class="col-span-3">
-             <label class="text-xs text-gray-400 block mb-1">Next Date</label>
-            <input type="date" class="secondary-filter-date w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
-                value="${filterData.nextDate || ''}">
-        </div>
-        <div class="col-span-3">
-             <label class="text-xs text-gray-400 block mb-1">Lifespan</label>
-            <select class="secondary-filter-lifespan w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white">
-                <option value="180" ${filterData.lifespan == 180 || !filterData.lifespan ? 'selected' : ''}>6 Months</option>
-                <option value="365" ${filterData.lifespan == 365 ? 'selected' : ''}>1 Year</option>
-                ${(filterData.lifespan && filterData.lifespan != 180 && filterData.lifespan != 365) ? `<option value="${filterData.lifespan}" selected>${filterData.lifespan} Days (Custom)</option>` : ''}
-            </select>
-        </div>
-        <div class="col-span-1 flex justify-center pb-1">
-            <button type="button" class="text-red-400 hover:text-red-300" onclick="this.closest('.grid').remove()">
+        <div class="w-full flex justify-end pb-1 border-b border-gray-600 mb-1">
+            <button type="button" class="text-red-400 hover:text-red-300" onclick="this.closest('.secondary-filter-row').remove()">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
         </div>
+        <div class="w-full grid grid-cols-2 gap-2 mb-1">
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Type</label>
+                <select class="secondary-filter-type w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white">
+                    <option value="">None</option>
+                    ${store.inventory.map(item => `<option value="${item.name}" ${filterData.type === item.name ? 'selected' : ''}>${item.name} (Stock: ${item.quantity})</option>`).join('')}
+                    ${(filterData.type && !store.inventory.find(i => i.name === filterData.type)) ? `<option value="${filterData.type}" selected>${filterData.type} (Legacy)</option>` : ''}
+                </select>
+            </div>
+            <div>
+                 <label class="text-xs text-gray-400 block mb-1">Lifespan (Days)</label>
+                <select class="secondary-filter-lifespan w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white">
+                    <option value="180" ${filterData.lifespan == 180 || !filterData.lifespan ? 'selected' : ''}>6 Months (180 Days)</option>
+                    <option value="365" ${filterData.lifespan == 365 ? 'selected' : ''}>1 Year (365 Days)</option>
+                    ${(filterData.lifespan && filterData.lifespan != 180 && filterData.lifespan != 365) ? `<option value="${filterData.lifespan}" selected>${filterData.lifespan} Days (Custom)</option>` : ''}
+                </select>
+            </div>
+        </div>
+        <div class="w-full grid grid-cols-2 gap-2">
+            <div>
+                 <label class="text-xs text-gray-400 block mb-1">First Service</label>
+                <input type="date" class="secondary-filter-first-date w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
+                    value="${filterData.firstDate || ''}">
+            </div>
+            <div>
+                 <label class="text-xs text-gray-400 block mb-1">Next Service</label>
+                <input type="date" class="secondary-filter-date w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
+                    value="${filterData.nextDate || ''}">
+            </div>
+        </div>
     `;
+
+    const firstDateInput = div.querySelector('.secondary-filter-first-date');
+    const lifespanSel = div.querySelector('.secondary-filter-lifespan');
+    const nextDateInput = div.querySelector('.secondary-filter-date');
+    
+    const updateSecondaryNextDate = () => {
+        if (firstDateInput.value && lifespanSel.value) {
+            const parts = firstDateInput.value.split('-');
+            if (parts.length === 3) {
+                const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                const days = parseInt(lifespanSel.value);
+                date.setDate(date.getDate() + days);
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                nextDateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+        }
+    };
+    
+    firstDateInput.addEventListener('input', updateSecondaryNextDate);
+    firstDateInput.addEventListener('change', updateSecondaryNextDate);
+    lifespanSel.addEventListener('change', updateSecondaryNextDate);
+
     container.appendChild(div);
     if (window.lucide) lucide.createIcons();
 }
@@ -316,7 +352,6 @@ export function openClientModal(client = null, fromEventModal = false) {
         lifespanSelect.value = targetLifespan;
         document.getElementById('client-notes').value = client.notes || "";
         document.getElementById('client-install-date').value = client.installDate || "";
-        document.getElementById('client-first-filter-change-date').value = client.firstFilterChangeDate || "";
         document.getElementById('client-next-filter-date').value = client.nextFilterDate || "";
         document.getElementById('client-next-service-price').value = client.nextServicePrice || "";
 
@@ -338,7 +373,6 @@ export function openClientModal(client = null, fromEventModal = false) {
         document.getElementById('client-modal-id-display').textContent = '';
         document.getElementById('client-filter-lifespan').value = 180;
         document.getElementById('client-install-date').value = '';
-        document.getElementById('client-first-filter-change-date').value = '';
         document.getElementById('client-next-filter-date').value = '';
         document.getElementById('btn-delete-client').style.display = 'none';
         historySection.style.display = 'none';

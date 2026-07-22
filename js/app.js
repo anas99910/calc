@@ -374,6 +374,33 @@ function setupEventListeners() {
     document.getElementById('event-client-id')?.addEventListener('change', handleClientSelectChange);
 
     document.getElementById('client-form')?.addEventListener('submit', handleClientFormSubmit);
+    
+    // Auto-Calc next service date for main form
+    const firstServiceInput = document.getElementById('client-install-date');
+    const nextServiceInput = document.getElementById('client-next-filter-date');
+    const lifespanSelect = document.getElementById('client-filter-lifespan');
+
+    const updateNextServiceDate = () => {
+        if (firstServiceInput && nextServiceInput && lifespanSelect) {
+            if (firstServiceInput.value && lifespanSelect.value) {
+                const parts = firstServiceInput.value.split('-');
+                if (parts.length === 3) {
+                    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                    const days = parseInt(lifespanSelect.value);
+                    date.setDate(date.getDate() + days);
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                    const dd = String(date.getDate()).padStart(2, '0');
+                    nextServiceInput.value = `${yyyy}-${mm}-${dd}`;
+                }
+            }
+        }
+    };
+
+    firstServiceInput?.addEventListener('input', updateNextServiceDate);
+    firstServiceInput?.addEventListener('change', updateNextServiceDate);
+    lifespanSelect?.addEventListener('change', updateNextServiceDate);
+
     document.getElementById('btn-delete-client')?.addEventListener('click', deleteSelectedClient);
     document.getElementById('btn-create-new-client-inline')?.addEventListener('click', () => {
         closeModal(document.getElementById('event-modal'));
@@ -594,7 +621,6 @@ async function handleClientFormSubmit(e) {
         const defaultFilterType = document.getElementById('client-filter-type').value;
         const filterLifespanDays = parseInt(document.getElementById('client-filter-lifespan').value) || 180;
         const installDate = document.getElementById('client-install-date').value;
-        const firstFilterChangeDate = document.getElementById('client-first-filter-change-date').value;
         const nextFilterDate = document.getElementById('client-next-filter-date').value;
         const nextServicePrice = parseFloat(document.getElementById('client-next-service-price').value) || 0;
 
@@ -602,10 +628,11 @@ async function handleClientFormSubmit(e) {
         const secondaryFilters = [];
         document.querySelectorAll('#secondary-filters-container .secondary-filter-row').forEach(row => {
             const type = row.querySelector('.secondary-filter-type').value;
+            const firstDate = row.querySelector('.secondary-filter-first-date').value;
             const nextDate = row.querySelector('.secondary-filter-date').value;
             const lifespan = parseInt(row.querySelector('.secondary-filter-lifespan').value) || 180;
             if (type && nextDate) {
-                secondaryFilters.push({ id: generateId(), type, nextDate, lifespan });
+                secondaryFilters.push({ id: generateId(), type, firstDate, nextDate, lifespan });
             }
         });
 
@@ -625,11 +652,11 @@ async function handleClientFormSubmit(e) {
                 client.defaultFilterType = defaultFilterType;
                 client.filterLifespanDays = filterLifespanDays;
                 client.installDate = installDate;
-                client.firstFilterChangeDate = firstFilterChangeDate;
                 client.nextFilterDate = nextFilterDate;
                 client.nextServicePrice = nextServicePrice;
                 client.secondaryFilters = secondaryFilters;
                 await saveClients();
+                renderCalendar();
                 showToast(getText('msg.client_saved'), "success");
             }
         } else {
@@ -644,12 +671,12 @@ async function handleClientFormSubmit(e) {
                 defaultFilterType,
                 filterLifespanDays,
                 installDate,
-                firstFilterChangeDate,
                 nextFilterDate,
                 nextServicePrice,
                 secondaryFilters
             });
             await saveClients();
+            renderCalendar();
             showToast(getText('msg.client_saved'), "success");
         }
 

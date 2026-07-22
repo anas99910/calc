@@ -313,6 +313,21 @@ export function generateGhostEvents(clients) {
         // 3. Secondary Filters (Additional Filters)
         if (c.secondaryFilters && Array.isArray(c.secondaryFilters)) {
             c.secondaryFilters.forEach(filter => {
+                if (filter.firstDate) {
+                    ghosts.push({
+                        id: `ghost-filter-first-${c.id}-${filter.id || filter.type}`,
+                        clientId: c.id,
+                        clientName: c.name,
+                        title: `${filter.type} Install`,
+                        date: filter.firstDate,
+                        time: '09:00',
+                        type: 'Installation',
+                        status: 'Completed',
+                        notes: `Secondary Filter Install: ${filter.type}`,
+                        isGhost: true,
+                        filterId: filter.id
+                    });
+                }
                 if (filter.nextDate) {
                     ghosts.push({
                         id: `ghost-filter-${c.id}-${filter.id || filter.type}`, // Ensure unique ID
