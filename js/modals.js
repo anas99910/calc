@@ -245,30 +245,30 @@ export function addSecondaryFilterRow(filterData = {}) {
         </div>
         <div class="w-full grid grid-cols-2 gap-2 mb-1">
             <div>
-                <label class="text-xs text-gray-400 block mb-1">Type</label>
+                <label class="text-xs text-gray-400 block mb-1">${getText('label.type')}</label>
                 <select class="secondary-filter-type w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white">
-                    <option value="">None</option>
+                    <option value="">${getText('label.none')}</option>
                     ${store.inventory.map(item => `<option value="${item.name}" ${filterData.type === item.name ? 'selected' : ''}>${item.name} (Stock: ${item.quantity})</option>`).join('')}
                     ${(filterData.type && !store.inventory.find(i => i.name === filterData.type)) ? `<option value="${filterData.type}" selected>${filterData.type} (Legacy)</option>` : ''}
                 </select>
             </div>
             <div>
-                 <label class="text-xs text-gray-400 block mb-1">Lifespan (Days)</label>
+                 <label class="text-xs text-gray-400 block mb-1">${getText('label.lifespan')}</label>
                 <select class="secondary-filter-lifespan w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white">
-                    <option value="180" ${filterData.lifespan == 180 || !filterData.lifespan ? 'selected' : ''}>6 Months (180 Days)</option>
-                    <option value="365" ${filterData.lifespan == 365 ? 'selected' : ''}>1 Year (365 Days)</option>
+                    <option value="180" ${filterData.lifespan == 180 || !filterData.lifespan ? 'selected' : ''}>${getText('btn.6_months')} (180 Days)</option>
+                    <option value="365" ${filterData.lifespan == 365 ? 'selected' : ''}>${getText('btn.1_year')} (365 Days)</option>
                     ${(filterData.lifespan && filterData.lifespan != 180 && filterData.lifespan != 365) ? `<option value="${filterData.lifespan}" selected>${filterData.lifespan} Days (Custom)</option>` : ''}
                 </select>
             </div>
         </div>
         <div class="w-full grid grid-cols-2 gap-2">
             <div>
-                 <label class="text-xs text-gray-400 block mb-1">First Service</label>
+                 <label class="text-xs text-gray-400 block mb-1">${getText('label.first_service')}</label>
                 <input type="date" class="secondary-filter-first-date w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
                     value="${filterData.firstDate || ''}">
             </div>
             <div>
-                 <label class="text-xs text-gray-400 block mb-1">Next Service</label>
+                 <label class="text-xs text-gray-400 block mb-1">${getText('label.next_service')}</label>
                 <input type="date" class="secondary-filter-date w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-xs text-white" 
                     value="${filterData.nextDate || ''}">
             </div>
